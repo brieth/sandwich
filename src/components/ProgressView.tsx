@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../store';
 import { exerciseHistory, overallSeries, rollingMean } from '../lib/stats';
-import { isCurrentExercise, UPPER_BODY_EXERCISE_IDS } from '../seed';
+import { CURRENT_EXERCISE_IDS, isCurrentExercise, UPPER_BODY_EXERCISE_IDS } from '../seed';
 import { exercisesForMuscle, MUSCLE_GROUPS, type MuscleGroup } from '../lib/muscles';
 import { LineChart } from './LineChart';
 import { WeeklyMuscles } from './WeeklyMuscles';
@@ -11,6 +11,13 @@ export type Metric = 'best1RM' | 'volume';
 // Sentinel id for the aggregate series: one strength/volume index summed across
 // every chest, back, delt, bicep, and tricep lift.
 const UPPER_BODY = '__upper_body__';
+
+/**
+ * Everything currently in the routine, legs and abs included. Upper Body stays
+ * below it and remains the default, since it's the index built to track the
+ * muscles the program is actually aimed at.
+ */
+const FULL_BODY = '__full_body__';
 
 /**
  * Per-muscle-group indexes, selectable like any other series. Prefixed so a
@@ -70,8 +77,8 @@ export function ProgressView({
     return [...ids].sort((a, b) => exerciseName(a).localeCompare(exerciseName(b)));
   }, [data.sessions, exerciseName]);
 
-  // Upper Body first, then the muscle groups, then individual exercises.
-  const options = [UPPER_BODY, ...MUSCLE_GROUPS.map(groupKey), ...tracked];
+  // Full Body, then Upper Body, then the muscle groups, then the exercises.
+  const options = [FULL_BODY, UPPER_BODY, ...MUSCLE_GROUPS.map(groupKey), ...tracked];
   const current = selected ?? UPPER_BODY;
   // The chart needs finished-session history; the weekly muscle panel below
   // works off the active session too, so it always renders (even mid-first-workout).
@@ -82,11 +89,13 @@ export function ProgressView({
   // UPPER_BODY_EXERCISE_IDS for why legs and abs sit out of the aggregate.
   const group = groupOf(current);
   const history =
-    current === UPPER_BODY
-      ? overallSeries(forceSessions, [...UPPER_BODY_EXERCISE_IDS])
-      : group
-        ? overallSeries(forceSessions, exercisesForMuscle(group))
-        : exerciseHistory(forceSessions, current);
+    current === FULL_BODY
+      ? overallSeries(forceSessions, [...CURRENT_EXERCISE_IDS])
+      : current === UPPER_BODY
+        ? overallSeries(forceSessions, [...UPPER_BODY_EXERCISE_IDS])
+        : group
+          ? overallSeries(forceSessions, exercisesForMuscle(group))
+          : exerciseHistory(forceSessions, current);
   const values = history.map((p) => p[metric]);
   const labels = history.map((p) => new Date(p.date).toLocaleDateString());
   // Rolling mean over the trailing window: a gettable "floor" reference that
@@ -104,7 +113,11 @@ export function ProgressView({
           <select className="select" value={current} onChange={(e) => setSelected(e.target.value)}>
             {options.map((id) => (
               <option key={id} value={id}>
-                {id === UPPER_BODY ? 'Upper Body' : (groupOf(id) ?? exerciseName(id))}
+                {id === FULL_BODY
+                  ? 'Full Body'
+                  : id === UPPER_BODY
+                    ? 'Upper Body'
+                    : (groupOf(id) ?? exerciseName(id))}
               </option>
             ))}
           </select>
