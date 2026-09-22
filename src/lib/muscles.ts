@@ -82,6 +82,19 @@ export function muscleFor(exerciseId: string): MuscleGroup | null {
 }
 
 /**
+ * Current exercises whose PRIMARY mover is this group, for a per-group
+ * performance index.
+ *
+ * Primary only, unlike the weekly set tally, which also credits secondaries at
+ * half a set. A strength index sums estimated 1RMs, and half a bench press is
+ * heavier than a whole tricep pushdown, so crediting secondaries would leave
+ * the Triceps index tracking your bench rather than your tricep work.
+ */
+export function exercisesForMuscle(group: MuscleGroup): string[] {
+  return Object.keys(MUSCLE).filter((id) => MUSCLE[id] === group && isCurrentExercise(id));
+}
+
+/**
  * Secondary movers, credited at HALF a set each. Presses drive the triceps and
  * front delts; pulls drive the biceps; rows additionally hit the rear delts.
  * (Front/rear delt both roll up into the single Delts group.)
