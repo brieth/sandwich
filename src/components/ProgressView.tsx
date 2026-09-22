@@ -13,9 +13,9 @@ export type Metric = 'best1RM' | 'volume';
 const UPPER_BODY = '__upper_body__';
 
 /**
- * Everything currently in the routine, legs and abs included. Upper Body stays
- * below it and remains the default, since it's the index built to track the
- * muscles the program is actually aimed at.
+ * Everything currently in the routine, legs and abs included, and the default
+ * view. Upper Body sits below it for reading progress without the leg machines,
+ * whose stack numbers can't be force-calibrated.
  */
 const FULL_BODY = '__full_body__';
 
@@ -79,7 +79,7 @@ export function ProgressView({
 
   // Full Body, then Upper Body, then the muscle groups, then the exercises.
   const options = [FULL_BODY, UPPER_BODY, ...MUSCLE_GROUPS.map(groupKey), ...tracked];
-  const current = selected ?? UPPER_BODY;
+  const current = selected ?? FULL_BODY;
   // The chart needs finished-session history; the weekly muscle panel below
   // works off the active session too, so it always renders (even mid-first-workout).
   const hasHistory = tracked.length > 0;
