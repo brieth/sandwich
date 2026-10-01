@@ -1595,3 +1595,13 @@ body {
 .modal-row.in-mean {
   background: rgba(45, 212, 191, 0.14);
 }
+/*
+ * The set chips are opaque, so on a tinted row they read as a cooler patch
+ * sitting on top of the band. Laying the same wash over their own background
+ * composites them into it, and keeps working if the surface colour changes.
+ */
+.modal-row.in-mean .history-set {
+  background:
+    linear-gradient(rgba(45, 212, 191, 0.14), rgba(45, 212, 191, 0.14)),
+    var(--surface-2);
+}
