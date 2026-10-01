@@ -414,7 +414,14 @@ body {
  * no unshaded strip between members.
  */
 .modal-row {
-  border-top: 1px solid var(--border);
+  /*
+   * Translucent white rather than --border, which is a cool grey whose green
+   * channel sits below the mean-window tint and so vanishes against it. A
+   * white alpha lifts whatever is behind it by the same amount, so one colour
+   * reads identically on tinted and plain rows and the band's bottom edge
+   * isn't marked by the separator changing colour mid-list.
+   */
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
   margin: 0 -16px;
   padding: 12px 16px;
 }
@@ -1594,12 +1601,6 @@ body {
  */
 .modal-row.in-mean {
   background: rgba(45, 212, 191, 0.14);
-  /*
-   * --border is a cool grey that all but vanishes against the tint: its green
-   * channel sits below the band's. A teal separator keeps the same weight of
-   * line inside the band as the grey one has outside it.
-   */
-  border-top-color: rgba(45, 212, 191, 0.3);
 }
 /*
  * The set chips are opaque, so on a tinted row they read as a cooler patch
