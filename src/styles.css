@@ -3,6 +3,12 @@
   --surface: #181b22;
   --surface-2: #1f242d;
   --border: #2a3038;
+  /*
+   * Separator that has to read on both plain and tinted backgrounds. A white
+   * alpha lifts whatever sits behind it by the same amount, where a fixed grey
+   * washes out over the mean-window tint.
+   */
+  --hairline: rgba(255, 255, 255, 0.09);
   --text: #e8ebf0;
   --muted: #8a93a3;
   --accent: #2dd4bf;
@@ -414,14 +420,9 @@ body {
  * no unshaded strip between members.
  */
 .modal-row {
-  /*
-   * Translucent white rather than --border, which is a cool grey whose green
-   * channel sits below the mean-window tint and so vanishes against it. A
-   * white alpha lifts whatever is behind it by the same amount, so one colour
-   * reads identically on tinted and plain rows and the band's bottom edge
-   * isn't marked by the separator changing colour mid-list.
-   */
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  /* One colour across the mean-window boundary, so the band's edge is marked
+     only by the tint stopping and not by the separator changing too. */
+  border-top: 1px solid var(--hairline);
   margin: 0 -16px;
   padding: 12px 16px;
 }
@@ -780,7 +781,7 @@ body {
 }
 .history-set {
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: 1px solid var(--hairline);
   border-radius: 6px;
   padding: 3px 8px;
   font-size: 13px;
