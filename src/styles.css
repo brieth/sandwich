@@ -394,10 +394,18 @@ body {
   font-size: 18px;
   font-weight: 700;
 }
+/*
+ * Scrolls, which means it also clips horizontally: overflow-y: auto forces
+ * overflow-x to compute to auto as well. So the list has to reach the modal's
+ * inner edges itself, or the full-bleed rows inside it get cut at its box.
+ * It cancels the modal's side padding and re-adds it as its own.
+ */
 .modal-list {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  margin: 0 -16px;
+  padding: 0 16px;
 }
 /*
  * Rows run edge to edge: they cancel the modal's padding and re-add it inside,
