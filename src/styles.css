@@ -398,11 +398,17 @@ body {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
+/*
+ * Rows run edge to edge: they cancel the modal's padding and re-add it inside,
+ * and carry their own spacing instead of a list gap. That makes the separators
+ * full-bleed and lets the mean-window tint below sit flush against them with
+ * no unshaded strip between members.
+ */
 .modal-row {
   border-top: 1px solid var(--border);
-  padding-top: 10px;
+  margin: 0 -16px;
+  padding: 12px 16px;
 }
 .modal-row-head {
   display: flex;
@@ -1579,10 +1585,5 @@ body {
  * as stripes.
  */
 .modal-row.in-mean {
-  background: rgba(45, 212, 191, 0.07);
-  margin: 0 -16px;
-  padding: 10px 16px 12px;
-}
-.modal-row.in-mean + .modal-row.in-mean {
-  margin-top: -12px;
+  background: rgba(45, 212, 191, 0.14);
 }
