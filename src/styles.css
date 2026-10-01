@@ -1594,6 +1594,12 @@ body {
  */
 .modal-row.in-mean {
   background: rgba(45, 212, 191, 0.14);
+  /*
+   * --border is a cool grey that all but vanishes against the tint: its green
+   * channel sits below the band's. A teal separator keeps the same weight of
+   * line inside the band as the grey one has outside it.
+   */
+  border-top-color: rgba(45, 212, 191, 0.3);
 }
 /*
  * The set chips are opaque, so on a tinted row they read as a cooler patch
