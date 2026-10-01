@@ -1571,3 +1571,18 @@ body {
 .seg-delta.down {
   color: var(--danger);
 }
+
+/*
+ * Sessions inside the rolling window, i.e. the ones the Mean column is
+ * averaging right now. Bleeds to the modal's edges and cancels the list gap
+ * between consecutive members, so the window reads as one band rather than
+ * as stripes.
+ */
+.modal-row.in-mean {
+  background: rgba(45, 212, 191, 0.07);
+  margin: 0 -16px;
+  padding: 10px 16px 12px;
+}
+.modal-row.in-mean + .modal-row.in-mean {
+  margin-top: -12px;
+}

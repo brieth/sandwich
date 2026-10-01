@@ -4,6 +4,7 @@ import type { Emphasis, LoggedExercise, SetEntry, Station, WeightUnit } from '..
 import type { Conversion } from '../lib/stations';
 import {
   bestEstimated1RM,
+  ROLL_WINDOW,
   bestExercisePoint,
   estimated1RM,
   meanExercisePoint,
@@ -330,8 +331,10 @@ function ExerciseHistoryModal({
           <p className="muted small">No history yet for this exercise.</p>
         ) : (
           <div className="modal-list">
+            {/* Rows are newest first, so the leading ROLL_WINDOW of them are
+                exactly the sessions the Mean column is currently averaging. */}
             {rows.map((r, i) => (
-              <div key={i} className="modal-row">
+              <div key={i} className={i < ROLL_WINDOW ? 'modal-row in-mean' : 'modal-row'}>
                 <div className="modal-row-head">
                   <span className="modal-date">
                     {new Date(r.date).toLocaleDateString(undefined, {
