@@ -46,7 +46,7 @@ const MUSCLE: Record<string, MuscleGroup> = {
   // Biceps
   'cable-behind-the-back-bicep-curl': 'Biceps',
   'cable-bicep-curl': 'Biceps',
-  'cable-overhead-bicep-curl-tall-kneeling': 'Biceps',
+  'cable-overhead-bicep-curl': 'Biceps',
   'cable-hammer-curl': 'Biceps',
   'cable-reverse-curl': 'Biceps',
   // Abs (every cable-ab-menu option)
@@ -67,7 +67,6 @@ const MUSCLE: Record<string, MuscleGroup> = {
   'cable-row': 'Back',
   'reverse-grip-pull-down': 'Back',
   'shotgun-row': 'Back',
-  'cable-overhead-bicep-curl': 'Biceps',
   'machine-lying-hamstring-curl': 'Legs',
   'cable-front-raise': 'Delts',
   'dumbbell-lateral-raise': 'Delts',

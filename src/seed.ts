@@ -74,7 +74,7 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['wide-grip-lat-pulldown', 'Wide Grip Lat Pulldown'],
       ['machine-leg-press', 'Machine Leg Press'],
       ['cable-underhand-tricep-pushdown', 'Cable Underhand Tricep Pushdown'],
-      ['cable-overhead-bicep-curl-tall-kneeling', 'Cable Overhead Bicep Curl'],
+      ['cable-overhead-bicep-curl', 'Cable Overhead Bicep Curl'],
     ],
   },
   {
@@ -124,28 +124,12 @@ const AB_OPTIONS: ExRef[] = [
 ];
 export const AB_OPTION_IDS = AB_OPTIONS.map(([id]) => id);
 
-/**
- * Exercises no longer in the routine, kept only so their names still resolve in
- * History. Registering them here does NOT make them current: CURRENT_EXERCISE_IDS
- * is derived from the routines, so these stay out of every tally and index.
- *
- * Names are qualified where a replacement took the plain one, so the two don't
- * read identically in a logged session.
- */
-const RETIRED: ExRef[] = [
-  // Replaced by the tall-kneeling version: both knees down puts you closer to
-  // the stack and sends the bar further behind the head, which is a different
-  // enough bar path to be a different exercise.
-  ['cable-overhead-bicep-curl', 'Cable Overhead Bicep Curl (half kneeling)'],
-];
-
 function buildSeed(): { exercises: Exercise[]; routines: Routine[] } {
   const exerciseMap = new Map<string, Exercise>();
   const routines: Routine[] = [];
 
-  // Register every leg- and ab-menu option so each has a name and its own
-  // history, plus the retired ids so old sessions still read correctly.
-  for (const [id, name] of [...LEG_OPTIONS, ...AB_OPTIONS, ...RETIRED]) {
+  // Register every leg- and ab-menu option so each has a name and its own history.
+  for (const [id, name] of [...LEG_OPTIONS, ...AB_OPTIONS]) {
     if (!exerciseMap.has(id)) exerciseMap.set(id, { id, name });
   }
 
