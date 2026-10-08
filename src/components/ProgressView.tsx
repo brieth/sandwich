@@ -155,6 +155,13 @@ export function ProgressView({
                     </button>
                   )}
                 </div>
+                {/*
+                 * Best here describes the curve above it, so it's the max of
+                 * whatever is plotted. It is deliberately NOT the rolling best
+                 * the workout targets use (see bestExercisePoint): a number
+                 * lower than a visible peak would read as a bug. Once the chart
+                 * can be narrowed to a range, this follows that range for free.
+                 */}
                 <div className="chart-stats">
                   <span>
                     <span className="cs-k">Last</span>{' '}
