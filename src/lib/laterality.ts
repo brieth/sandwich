@@ -21,12 +21,13 @@ const PER_LIMB = new Set<string>([
   'cable-single-arm-low-row',
   'cable-behind-the-back-bicep-curl',
   'cable-behind-the-back-lateral-raise',
+  'cable-rear-delt-fly',
+  'cable-single-arm-underhand-tricep-pushdown',
   // one side at a time (trunk)
   'cable-oblique-crunch',
   'cable-high-woodchopper',
   'cable-low-woodchopper',
   // retired per-limb exercises, kept so older history aggregates consistently
-  'cable-rear-delt-fly',
   'shotgun-row',
 ]);
 
