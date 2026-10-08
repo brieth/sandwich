@@ -20,7 +20,7 @@ export interface ExerciseTag {
 
 export const ONE_ARM: ExerciseTag = {
   id: 'one-arm',
-  label: '1A',
+  label: '\u00BD',
   title: 'One arm at a time',
 };
 
