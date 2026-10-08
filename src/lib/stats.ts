@@ -1,12 +1,14 @@
 import type { Session, ID } from '../types';
 import { limbFactor } from './laterality';
 import { isCurrentExercise } from '../seed';
+import { oneRM, weightAtReps } from './onerm';
 
-/** Epley estimated 1-rep max. */
+/**
+ * Estimated 1-rep max under whichever formula is selected (see onerm.ts).
+ * Re-exported from here so every caller keeps using one entry point.
+ */
 export function estimated1RM(weight: number, reps: number): number {
-  if (weight <= 0 || reps <= 0) return 0;
-  if (reps === 1) return weight;
-  return weight * (1 + reps / 30);
+  return oneRM(weight, reps);
 }
 
 export interface ExercisePoint {
@@ -46,10 +48,9 @@ export function recentEstimated1RM(sessions: Session[], exerciseId: ID): number 
   return history.length ? history[history.length - 1].best1RM : null;
 }
 
-/** Inverse Epley: the weight you'd expect to hit for a given rep count at a 1RM. */
+/** Inverse: the weight you'd expect to hit for a given rep count at a 1RM. */
 export function weightForReps(oneRepMax: number, reps: number): number {
-  if (reps <= 1) return oneRepMax;
-  return oneRepMax / (1 + reps / 30);
+  return weightAtReps(oneRepMax, reps);
 }
 
 /** Most recent prior session's logged volume and est. 1RM for an exercise, or null. */

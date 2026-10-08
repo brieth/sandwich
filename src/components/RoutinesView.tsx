@@ -3,10 +3,17 @@ import { useStore } from '../store';
 import { AB_OPTION_IDS, LEG_OPTION_IDS } from '../seed';
 import { Stations } from './Stations';
 import { ExerciseTags } from './ExerciseTags';
+import {
+  DEFAULT_FORMULA,
+  FORMULAS,
+  formulaFor,
+  type OneRMFormulaId,
+} from '../lib/onerm';
 
 export function RoutinesView() {
-  const { data, exerciseName, resetAll, exportData, importData } = useStore();
+  const { data, exerciseName, setOneRMFormula, resetAll, exportData, importData } = useStore();
   const fileInput = useRef<HTMLInputElement>(null);
+  const formula = data.oneRMFormula ?? DEFAULT_FORMULA;
   const [status, setStatus] = useState<string | null>(null);
 
   async function handleExport() {
@@ -90,6 +97,43 @@ export function RoutinesView() {
       </div>
 
       <Stations />
+
+      <h2 className="section">Strength Formula</h2>
+      <p className="muted small backup-note">
+        How a set's weight and reps become an estimated 1RM, which every strength number is built
+        on. They agree up to about 10 reps and diverge above it, so a flatter one lets a heavy
+        low-rep set compare better against a high-rep one. Nothing logged changes, so switching
+        back restores the old numbers exactly.
+      </p>
+
+      <select
+        className="select"
+        value={formula}
+        onChange={(e) => setOneRMFormula(e.target.value as OneRMFormulaId)}
+      >
+        {FORMULAS.map((f) => (
+          <option key={f.id} value={f.id}>
+            {f.name}
+          </option>
+        ))}
+      </select>
+      {/* The hint sits under the select rather than inside the options, which a
+          native picker truncates at phone width. */}
+      <p className="muted small formula-hint">{formulaFor(formula).hint}</p>
+      <div className="formula-table">
+        <div className="ft-row head">
+          <span>Multiplier</span>
+          <span>6</span>
+          <span>10</span>
+          <span>14</span>
+        </div>
+        <div className="ft-row">
+          <span>{formulaFor(formula).name}</span>
+          {[6, 10, 14].map((r) => (
+            <span key={r}>{formulaFor(formula).factor(r).toFixed(3)}x</span>
+          ))}
+        </div>
+      </div>
 
       <h2 className="section">Backup & Data</h2>
       <p className="muted small backup-note">

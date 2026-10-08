@@ -43,6 +43,10 @@ const groupOf = (key: string): MuscleGroup | null =>
  * with real population data behind it. Cable and machine loads vary too much
  * between gyms for a threshold to mean anything, and volume isn't a physique
  * correlate at all, so no other exercise or metric gets a line.
+ *
+ * It's a true 1RM, so it doesn't move with the selected estimate formula (see
+ * onerm.ts). The distance to it does: a flatter formula reads lower off the same
+ * sets, which pushes the line further away without anything having changed.
  */
 const STRENGTH_GOALS: Record<string, number> = {
   'barbell-bench-press': 285,

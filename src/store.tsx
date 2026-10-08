@@ -11,6 +11,12 @@ import type {
   Station,
 } from './types';
 import { AB_OPTION_IDS, LEG_OPTION_IDS, RETIRED_NAMES, SEED } from './seed';
+import {
+  DEFAULT_FORMULA,
+  isFormulaId,
+  setActiveFormula,
+  type OneRMFormulaId,
+} from './lib/onerm';
 import { BUILTIN_STATIONS, normalizeSessions, snapFit } from './lib/stations';
 
 const STORAGE_KEY = 'lifts.data.v1';
@@ -127,6 +133,7 @@ function load(): AppData {
       sessions,
       activeSession,
       stations: (stored.stations ?? []).map(migrateStation),
+      oneRMFormula: isFormulaId(stored.oneRMFormula) ? stored.oneRMFormula : DEFAULT_FORMULA,
     };
   } catch {
     return fresh;
@@ -170,6 +177,7 @@ interface Store {
   /** Records a new measurement session, or edits one already recorded. */
   saveCalibration: (stationId: string, cal: Omit<Calibration, 'id'> & { id?: string }) => void;
   deleteCalibration: (stationId: string, calibrationId: string) => void;
+  setOneRMFormula: (id: OneRMFormulaId) => void;
   resetAll: () => void;
   exportData: () => string;
   importData: (json: string) => boolean;
@@ -179,6 +187,15 @@ const Ctx = createContext<Store | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData>(load);
+
+  /*
+   * Every strength figure in the app is derived through onerm.ts, which keeps
+   * the chosen formula in module state rather than taking it as an argument.
+   * Publishing it here, in the render body, means the first paint after a change
+   * already uses it; an effect would leave one frame rendered with the old one.
+   * Writing the same value repeatedly is harmless.
+   */
+  setActiveFormula(data.oneRMFormula ?? DEFAULT_FORMULA);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -465,6 +482,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         });
       },
 
+      setOneRMFormula(id) {
+        setData((d) => ({ ...d, oneRMFormula: id }));
+      },
+
       resetAll() {
         setData({
           exercises: SEED.exercises,
@@ -472,6 +493,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           sessions: [],
           activeSession: null,
           stations: [],
+          oneRMFormula: DEFAULT_FORMULA,
         });
       },
 
@@ -492,6 +514,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             sessions: incoming.sessions,
             activeSession: null,
             stations: (incoming.stations ?? []).map(migrateStation),
+            oneRMFormula: isFormulaId(incoming.oneRMFormula)
+              ? incoming.oneRMFormula
+              : DEFAULT_FORMULA,
           });
           return true;
         } catch {

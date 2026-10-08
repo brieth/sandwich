@@ -1,3 +1,5 @@
+import type { OneRMFormulaId } from './lib/onerm';
+
 export type ID = string;
 
 export interface Exercise {
@@ -105,4 +107,6 @@ export interface AppData {
   sessions: Session[];
   activeSession: Session | null;
   stations: Station[];
+  /** Estimated-1RM formula every strength number is derived with. */
+  oneRMFormula?: OneRMFormulaId;
 }
