@@ -23,8 +23,6 @@ export type OneRMFormulaId =
 export interface OneRMFormula {
   id: OneRMFormulaId;
   name: string;
-  /** How it treats high reps, for the picker. */
-  hint: string;
   /** Multiplier on the working weight for a given rep count. */
   factor: (reps: number) => number;
 }
@@ -40,43 +38,36 @@ export const FORMULAS: OneRMFormula[] = [
   {
     id: 'epley',
     name: 'Epley',
-    hint: 'the common default; generous above 12 reps',
     factor: (r) => 1 + r / 30,
   },
   {
     id: 'brzycki',
     name: 'Brzycki',
-    hint: 'matches Epley at 10 reps, steepest above it',
     factor: (r) => 36 / (37 - Math.min(r, MAX_REPS)),
   },
   {
     id: 'lander',
     name: 'Lander',
-    hint: 'close to Brzycki, slightly steeper at low reps',
     factor: (r) => 100 / (101.3 - 2.67123 * Math.min(r, MAX_REPS)),
   },
   {
     id: 'mayhew',
     name: 'Mayhew',
-    hint: 'flattens off; high and low reps score alike',
     factor: (r) => 100 / (52.2 + 41.9 * Math.exp(-0.055 * r)),
   },
   {
     id: 'wathen',
     name: 'Wathen',
-    hint: 'between Epley and Mayhew',
     factor: (r) => 100 / (48.8 + 53.8 * Math.exp(-0.075 * r)),
   },
   {
     id: 'oconner',
     name: "O'Conner",
-    hint: 'linear like Epley but pays a rep less',
     factor: (r) => 1 + 0.025 * r,
   },
   {
     id: 'lombardi',
     name: 'Lombardi',
-    hint: 'flattest; closest to grading on weight alone',
     factor: (r) => Math.pow(r, 0.1),
   },
 ];

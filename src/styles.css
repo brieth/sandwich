@@ -914,37 +914,6 @@ body {
   gap: 6px;
   max-width: 100%;
 }
-/*
- * The selected formula's multipliers at three rep counts, so the choice shows
- * its effect without having to leave the tab.
- */
-.formula-hint {
-  margin: 6px 0 0;
-}
-.formula-table {
-  margin-top: 10px;
-  font-variant-numeric: tabular-nums;
-}
-.ft-row {
-  display: grid;
-  grid-template-columns: 1fr repeat(3, 56px);
-  align-items: center;
-  gap: 8px;
-  padding: 6px 0;
-  font-size: 13px;
-}
-.ft-row + .ft-row {
-  border-top: 1px solid var(--border);
-}
-.ft-row.head {
-  color: var(--muted);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-.ft-row > span:not(:first-child) {
-  text-align: right;
-}
 /* Units the stack is marked in, next to the station's name. */
 .unit-chip {
   background: var(--accent-dim);

@@ -3,12 +3,7 @@ import { useStore } from '../store';
 import { AB_OPTION_IDS, LEG_OPTION_IDS } from '../seed';
 import { Stations } from './Stations';
 import { ExerciseTags } from './ExerciseTags';
-import {
-  DEFAULT_FORMULA,
-  FORMULAS,
-  formulaFor,
-  type OneRMFormulaId,
-} from '../lib/onerm';
+import { DEFAULT_FORMULA, FORMULAS, type OneRMFormulaId } from '../lib/onerm';
 
 export function RoutinesView() {
   const { data, exerciseName, setOneRMFormula, resetAll, exportData, importData } = useStore();
@@ -117,23 +112,6 @@ export function RoutinesView() {
           </option>
         ))}
       </select>
-      {/* The hint sits under the select rather than inside the options, which a
-          native picker truncates at phone width. */}
-      <p className="muted small formula-hint">{formulaFor(formula).hint}</p>
-      <div className="formula-table">
-        <div className="ft-row head">
-          <span>Multiplier</span>
-          <span>6</span>
-          <span>10</span>
-          <span>14</span>
-        </div>
-        <div className="ft-row">
-          <span>{formulaFor(formula).name}</span>
-          {[6, 10, 14].map((r) => (
-            <span key={r}>{formulaFor(formula).factor(r).toFixed(3)}x</span>
-          ))}
-        </div>
-      </div>
 
       <h2 className="section">Backup & Data</h2>
       <p className="muted small backup-note">
