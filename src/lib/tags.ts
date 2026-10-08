@@ -6,6 +6,9 @@
  * "Cable Underhand Tricep Pushdown" with a chip beside it doesn't. Tags are a
  * list per exercise so more kinds can be added later (tempo variants and the
  * like) without touching any of the places that render them.
+ *
+ * Labels are plain text, not emoji: an emoji renders in the system's own colour
+ * font, which is a different weight and palette on every device.
  */
 export interface ExerciseTag {
   id: string;
@@ -17,7 +20,7 @@ export interface ExerciseTag {
 
 export const ONE_ARM: ExerciseTag = {
   id: 'one-arm',
-  label: '1\u{1F4AA}',
+  label: '1A',
   title: 'One arm at a time',
 };
 
