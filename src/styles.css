@@ -892,7 +892,7 @@ body {
   /* Sized to stay just under the shortest line it sits on (the 14px routine
      list), so a tagged row is never taller than an untagged one. */
   line-height: 1.3;
-  font-weight: 600;
+  font-weight: 700;
 }
 /*
  * Groups a name with its chips. The exercise head, the history row and the
