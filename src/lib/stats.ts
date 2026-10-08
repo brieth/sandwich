@@ -136,16 +136,29 @@ export function q3ExercisePoint(
   };
 }
 
-/** Best logged volume and best estimated 1RM for an exercise across all history. */
+/**
+ * Best logged volume and best estimated 1RM over the trailing ROLL_WINDOW
+ * sessions, the same window the mean uses.
+ *
+ * Rolling rather than all-time, so a record can expire. A volume best is as
+ * much a decision as a performance, since another set always raises it, and a
+ * single high-set session shouldn't stand as a target forever. A strength best
+ * falling out of a nine-session window is itself the signal that progress has
+ * stalled or training stopped, which is when the targets should ease rather
+ * than keep pointing at a number set under different circumstances.
+ *
+ * The all-time figures aren't lost; History still shows every session.
+ */
 export function bestExercisePoint(
   sessions: Session[],
   exerciseId: ID,
 ): { volume: number; best1RM: number } | null {
   const history = exerciseHistory(sessions, exerciseId);
   if (!history.length) return null;
+  const w = history.slice(-ROLL_WINDOW);
   return {
-    volume: Math.max(...history.map((p) => p.volume)),
-    best1RM: Math.max(...history.map((p) => p.best1RM)),
+    volume: Math.max(...w.map((p) => p.volume)),
+    best1RM: Math.max(...w.map((p) => p.best1RM)),
   };
 }
 
