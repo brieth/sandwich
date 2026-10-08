@@ -10,7 +10,7 @@ import type {
   SetEntry,
   Station,
 } from './types';
-import { AB_OPTION_IDS, LEG_OPTION_IDS, SEED } from './seed';
+import { AB_OPTION_IDS, LEG_OPTION_IDS, RETIRED_NAMES, SEED } from './seed';
 import { BUILTIN_STATIONS, normalizeSessions, snapFit } from './lib/stations';
 
 const STORAGE_KEY = 'lifts.data.v1';
@@ -65,6 +65,22 @@ function applySnap(cal: Calibration): Calibration {
   return { ...cal, slope: fit.slope, offset: fit.offset, snapped: fit.snapped };
 }
 
+/**
+ * The exercise list for a stored or imported payload. The seed's definition
+ * wins for any id still in the routine, so a rename there propagates without
+ * breaking history; anything else is kept so its logged sessions still resolve
+ * a name; and RETIRED_NAMES relabels a dropped lift where it needs one.
+ */
+function mergeExercises(stored: Exercise[] | undefined): Exercise[] {
+  const relabel = (ex: Exercise): Exercise =>
+    RETIRED_NAMES[ex.id] ? { ...ex, name: RETIRED_NAMES[ex.id] } : ex;
+  const out: Exercise[] = SEED.exercises.map(relabel);
+  for (const ex of stored ?? []) {
+    if (!out.some((e) => e.id === ex.id)) out.push(relabel(ex));
+  }
+  return out;
+}
+
 function load(): AppData {
   const fresh: AppData = {
     exercises: SEED.exercises,
@@ -77,12 +93,9 @@ function load(): AppData {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fresh;
     const stored = JSON.parse(raw) as Partial<AppData>;
-    // Always refresh the routine definitions from the seed (program structure),
-    // while preserving the user's logged sessions and any custom exercises.
-    const exercises: Exercise[] = [...SEED.exercises];
-    for (const ex of stored.exercises ?? []) {
-      if (!exercises.some((e) => e.id === ex.id)) exercises.push(ex);
-    }
+    // Program structure (routines, and the exercise list via mergeExercises)
+    // always comes from the seed; logged sessions are the user's and are kept.
+    const exercises = mergeExercises(stored.exercises);
     // Anything logged before stations existed carries no station, which means
     // its weights are taken as already normalized. Nothing to migrate.
     const sessions = stored.sessions ?? [];
@@ -474,7 +487,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             return false;
           }
           setData({
-            exercises: incoming.exercises,
+            exercises: mergeExercises(incoming.exercises),
             routines: Array.isArray(incoming.routines) ? incoming.routines : SEED.routines,
             sessions: incoming.sessions,
             activeSession: null,

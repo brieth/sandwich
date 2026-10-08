@@ -876,6 +876,44 @@ body {
   font-size: 14px;
   font-weight: 600;
 }
+/*
+ * Short badges beside an exercise's name, for what the name would otherwise
+ * spell out. Muted rather than accent so they read as an attribute of the lift
+ * and don't compete with the station's unit chip, which is the accent colour.
+ */
+.ex-tag {
+  flex: none;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  /* Sized to stay just under the shortest line it sits on (the 14px routine
+     list), so a tagged row is never taller than an untagged one. */
+  line-height: 1.3;
+  font-weight: 600;
+}
+/*
+ * Groups a name with its chips. The exercise head, the history row and the
+ * routine list are all flex, so without a wrapper the chips would become
+ * siblings of the name and get laid out as their own column or pushed to the
+ * far edge.
+ *
+ * Flex, so a name longer than the card wraps and the chip keeps its place
+ * beside the first line instead of being pushed onto a line of its own. The
+ * longest name is a little wider than a phone card on its own, so letting the
+ * chip flow with the text would strand it below every time.
+ *
+ * flex-start rather than center: against a two-line name, centering leaves the
+ * chip floating in the gap between the lines.
+ */
+.ex-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 100%;
+}
 /* Units the stack is marked in, next to the station's name. */
 .unit-chip {
   background: var(--accent-dim);

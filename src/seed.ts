@@ -38,7 +38,7 @@ const ROUTINE_DEFS: RoutineDef[] = [
     name: '1B',
     exercises: [
       ['cable-high-crossover-fly', 'Cable High Crossover Fly'],
-      ['cable-single-arm-high-row', 'Cable Single Arm High Row'],
+      ['cable-single-arm-high-row', 'Cable High Row'],
       ['machine-leg-curl', 'Machine Leg Curl'],
       ['cable-high-overhead-tricep-extension', 'Cable High Overhead Tricep Extension'],
       ['cable-face-pull', 'Cable Face Pull'],
@@ -60,7 +60,7 @@ const ROUTINE_DEFS: RoutineDef[] = [
     name: '2B',
     exercises: [
       ['cable-mid-crossover-fly', 'Cable Mid Crossover Fly'],
-      ['cable-single-arm-mid-row', 'Cable Single Arm Mid Row'],
+      ['cable-single-arm-mid-row', 'Cable Mid Row'],
       ['machine-leg-curl', 'Machine Leg Curl'],
       ['cable-tricep-pushdown', 'Cable Tricep Pushdown'],
       ['cable-hammer-curl', 'Cable Hammer Curl'],
@@ -73,8 +73,8 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['barbell-decline-bench-press', 'Barbell Decline Bench Press'],
       ['wide-grip-lat-pulldown', 'Wide Grip Lat Pulldown'],
       ['machine-leg-press', 'Machine Leg Press'],
-      ['cable-single-arm-underhand-tricep-pushdown', 'Cable Single Arm Underhand Tricep Pushdown'],
-      ['cable-single-arm-rear-delt-fly', 'Cable Single Arm Rear Delt Fly'],
+      ['cable-single-arm-underhand-tricep-pushdown', 'Cable Underhand Tricep Pushdown'],
+      ['cable-single-arm-rear-delt-fly', 'Cable Rear Delt Fly'],
     ],
   },
   {
@@ -82,7 +82,7 @@ const ROUTINE_DEFS: RoutineDef[] = [
     name: '3B',
     exercises: [
       ['cable-low-crossover-fly', 'Cable Low Crossover Fly'],
-      ['cable-single-arm-low-row', 'Cable Single Arm Low Row'],
+      ['cable-single-arm-low-row', 'Cable Low Row'],
       ['machine-leg-curl', 'Machine Leg Curl'],
       ['cable-low-overhead-tricep-extension', 'Cable Low Overhead Tricep Extension'],
       ['cable-reverse-curl', 'Cable Reverse Curl'],
@@ -174,6 +174,21 @@ export const CURRENT_EXERCISE_IDS: ReadonlySet<string> = new Set(
     .flatMap((r) => r.exercises.flatMap((e) => [e.exerciseId, ...(e.options ?? [])]))
     .filter(Boolean),
 );
+
+/**
+ * Display names for ids that have LEFT the routine, preferred over whatever
+ * name was stored with them, the same way the seed's name is preferred for an
+ * exercise still in the program.
+ *
+ * Needed when a current exercise takes over the name a retired one was logged
+ * under: without this they'd be two identically-named entries in History and in
+ * its exercise picker. The suffix says what the retired version was, since the
+ * current one carries a chip instead.
+ */
+export const RETIRED_NAMES: Record<string, string> = {
+  'cable-underhand-tricep-pushdown': 'Cable Underhand Tricep Pushdown (2 Arm)',
+  'cable-rear-delt-fly': 'Cable Rear Delt Fly (2 Arm)',
+};
 
 export function isCurrentExercise(id: string): boolean {
   return CURRENT_EXERCISE_IDS.has(id);

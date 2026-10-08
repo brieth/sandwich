@@ -19,6 +19,7 @@ import { AB_OPTION_IDS } from '../seed';
 import { SvBadge } from './SvBadge';
 import { NumField } from './NumField';
 import { StationPicker } from './Stations';
+import { ExerciseTags } from './ExerciseTags';
 
 export function WorkoutView() {
   const { data, startSession } = useStore();
@@ -322,7 +323,10 @@ function ExerciseHistoryModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
-          <span className="modal-title">{name}</span>
+          <span className="ex-title-row">
+            <span className="modal-title">{name}</span>
+            <ExerciseTags exerciseId={exerciseId} />
+          </span>
           <button className="btn ghost small" onClick={onClose}>
             Close
           </button>
@@ -463,22 +467,25 @@ function ExerciseCard({
   return (
     <div className={selected ? 'exercise-card' : 'exercise-card collapsed'}>
       <div className="exercise-head">
-        {options ? (
-          <select
-            className="ex-menu"
-            value={ex.exerciseId}
-            onChange={(e) => onSelect(e.target.value)}
-          >
-            <option value="">{menuLabel ?? 'Select exercise…'}</option>
-            {options.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.name}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <span className="exercise-name">{name}</span>
-        )}
+        <div className="ex-title-row">
+          {options ? (
+            <select
+              className="ex-menu"
+              value={ex.exerciseId}
+              onChange={(e) => onSelect(e.target.value)}
+            >
+              <option value="">{menuLabel ?? 'Select exercise…'}</option>
+              {options.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="exercise-name">{name}</span>
+          )}
+          <ExerciseTags exerciseId={ex.exerciseId} />
+        </div>
         {selected && (
           <StationPicker
             stations={stations}

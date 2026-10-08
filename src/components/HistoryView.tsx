@@ -6,6 +6,7 @@ import { NumField } from './NumField';
 import { useBackToClose } from '../lib/useBackToClose';
 import { isCurrentExercise } from '../seed';
 import { StationPicker } from './Stations';
+import { ExerciseTags } from './ExerciseTags';
 import { findStation, stationsFor } from '../lib/stations';
 
 /** Stored ISO timestamp -> the YYYY-MM-DD a <input type="date"> expects (local). */
@@ -40,6 +41,7 @@ export function HistoryView() {
     editing &&
     data.sessions.find((s) => s.id === editing.sessionId)?.exercises[editing.exIdx];
   const editSet = editExercise?.sets[editing!.setIdx];
+  const editingExerciseId = editExercise?.exerciseId ?? '';
   // The weight column means whatever the station's stack is marked in.
   const editUnit = findStation(allStations, editExercise?.stationId)?.unit ?? 'lb';
 
@@ -103,17 +105,20 @@ export function HistoryView() {
               <div className="history-body">
                 {s.exercises.map((e, i) => (
                   <div key={i} className="history-exercise">
-                    <select
-                      className="history-exercise-select"
-                      value={e.exerciseId}
-                      onChange={(ev) => updateSessionExercise(s.id, i, ev.target.value)}
-                    >
-                      {exerciseOptions.map((ex) => (
-                        <option key={ex.id} value={ex.id}>
-                          {ex.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="ex-title-row">
+                      <select
+                        className="history-exercise-select"
+                        value={e.exerciseId}
+                        onChange={(ev) => updateSessionExercise(s.id, i, ev.target.value)}
+                      >
+                        {exerciseOptions.map((ex) => (
+                          <option key={ex.id} value={ex.id}>
+                            {ex.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ExerciseTags exerciseId={e.exerciseId} />
+                    </div>
                     {/* Dropped from the routine, so it's shown for the record but
                         excluded from the volume total above and every other metric. */}
                     {!isCurrentExercise(e.exerciseId) && (
@@ -168,11 +173,9 @@ export function HistoryView() {
         <div className="modal-overlay" onClick={() => setEditing(null)}>
           <div className="modal" onClick={(ev) => ev.stopPropagation()}>
             <div className="modal-head">
-              <span className="modal-title">
-                {exerciseName(
-                  data.sessions.find((s) => s.id === editing.sessionId)!.exercises[editing.exIdx]
-                    .exerciseId,
-                )}
+              <span className="ex-title-row">
+                <span className="modal-title">{exerciseName(editingExerciseId)}</span>
+                <ExerciseTags exerciseId={editingExerciseId} />
               </span>
               <button className="btn ghost small" onClick={() => setEditing(null)}>
                 Close

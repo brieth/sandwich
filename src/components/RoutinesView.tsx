@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useStore } from '../store';
 import { AB_OPTION_IDS, LEG_OPTION_IDS } from '../seed';
 import { Stations } from './Stations';
+import { ExerciseTags } from './ExerciseTags';
 
 export function RoutinesView() {
   const { data, exerciseName, resetAll, exportData, importData } = useStore();
@@ -51,7 +52,10 @@ export function RoutinesView() {
                 .filter((re) => !re.options)
                 .map((re, i) => (
                   <li key={`${re.exerciseId}-${i}`}>
-                    <span className="re-name">{exerciseName(re.exerciseId)}</span>
+                    <span className="ex-title-row">
+                      <span className="re-name">{exerciseName(re.exerciseId)}</span>
+                      <ExerciseTags exerciseId={re.exerciseId} />
+                    </span>
                   </li>
                 ))}
             </ol>
@@ -74,7 +78,10 @@ export function RoutinesView() {
                 .sort((a, b) => exerciseName(a).localeCompare(exerciseName(b)))
                 .map((id) => (
                   <li key={id}>
-                    <span className="re-name">{exerciseName(id)}</span>
+                    <span className="ex-title-row">
+                      <span className="re-name">{exerciseName(id)}</span>
+                      <ExerciseTags exerciseId={id} />
+                    </span>
                   </li>
                 ))}
             </ol>
