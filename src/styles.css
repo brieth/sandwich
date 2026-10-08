@@ -914,6 +914,15 @@ body {
   gap: 6px;
   max-width: 100%;
 }
+/*
+ * The select's 14px top margin is sized for sitting under a view's h1. Where it
+ * instead follows an explanatory note, that margin stacks on the note's own
+ * 12px (the view is flex, so margins don't collapse) and the gap comes out at
+ * 26 against the 12 every other note-and-block pair uses.
+ */
+.backup-note + .select {
+  margin-top: 0;
+}
 /* Units the stack is marked in, next to the station's name. */
 .unit-chip {
   background: var(--accent-dim);
