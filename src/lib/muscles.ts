@@ -38,7 +38,7 @@ const MUSCLE: Record<string, MuscleGroup> = {
   'cable-behind-the-back-lateral-raise': 'Delts',
   'cable-upright-row': 'Delts',
   'cable-face-pull': 'Delts',
-  'cable-rear-delt-fly': 'Delts',
+  'cable-single-arm-rear-delt-fly': 'Delts',
   // Triceps (forearm/brachioradialis rolls up into Biceps, matching the curls)
   'cable-high-overhead-tricep-extension': 'Triceps',
   'cable-low-overhead-tricep-extension': 'Triceps',
@@ -70,6 +70,7 @@ const MUSCLE: Record<string, MuscleGroup> = {
   'machine-lying-hamstring-curl': 'Legs',
   'cable-front-raise': 'Delts',
   'dumbbell-lateral-raise': 'Delts',
+  'cable-rear-delt-fly': 'Delts',
   'cable-underhand-tricep-pushdown': 'Triceps',
   'dumbbell-skullcrusher': 'Triceps',
   'dumbbell-kickback': 'Triceps',
