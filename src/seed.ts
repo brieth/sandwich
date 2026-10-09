@@ -73,7 +73,7 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['barbell-decline-bench-press', 'Barbell Decline Bench Press'],
       ['wide-grip-lat-pulldown', 'Wide Grip Lat Pulldown'],
       ['machine-leg-press', 'Machine Leg Press'],
-      ['cable-single-arm-underhand-tricep-pushdown', 'Cable Underhand Tricep Pushdown'],
+      ['cable-cross-body-tricep-extension', 'Cable Cross Body Tricep Extension'],
       ['cable-single-arm-rear-delt-fly', 'Cable Rear Delt Fly'],
     ],
   },
