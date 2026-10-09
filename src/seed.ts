@@ -73,7 +73,9 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['barbell-decline-bench-press', 'Barbell Decline Bench Press'],
       ['wide-grip-lat-pulldown', 'Wide Grip Lat Pulldown'],
       ['machine-leg-press', 'Machine Leg Press'],
-      ['cable-cross-body-tricep-extension', 'Cable Cross Body Tricep Extension'],
+      // Renamed, not re-ided: the single-arm pushdown this slot briefly held was
+      // never logged, and both are the same setup worked one arm at a time.
+      ['cable-single-arm-underhand-tricep-pushdown', 'Cable Cross Body Tricep Extension'],
       ['cable-single-arm-rear-delt-fly', 'Cable Rear Delt Fly'],
     ],
   },

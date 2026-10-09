@@ -43,7 +43,7 @@ const MUSCLE: Record<string, MuscleGroup> = {
   'cable-high-overhead-tricep-extension': 'Triceps',
   'cable-low-overhead-tricep-extension': 'Triceps',
   'cable-tricep-pushdown': 'Triceps',
-  'cable-cross-body-tricep-extension': 'Triceps',
+  'cable-single-arm-underhand-tricep-pushdown': 'Triceps',
   // Biceps
   'cable-behind-the-back-bicep-curl': 'Biceps',
   'cable-bicep-curl': 'Biceps',
@@ -72,7 +72,6 @@ const MUSCLE: Record<string, MuscleGroup> = {
   'dumbbell-lateral-raise': 'Delts',
   'cable-rear-delt-fly': 'Delts',
   'cable-underhand-tricep-pushdown': 'Triceps',
-  'cable-single-arm-underhand-tricep-pushdown': 'Triceps',
   'dumbbell-skullcrusher': 'Triceps',
   'dumbbell-kickback': 'Triceps',
   'cable-overhead-bicep-curl': 'Biceps',
