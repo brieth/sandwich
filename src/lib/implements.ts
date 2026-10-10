@@ -46,6 +46,8 @@ const IMPLEMENT: Record<string, Implement> = {
   'cable-oblique-crunch': 'handle',
   'cable-single-arm-underhand-tricep-pushdown': 'handle', // the cross-body extension
   'cable-single-arm-rear-delt-fly': 'handle',
+  'cable-single-arm-low-overhead-tricep-extension': 'handle',
+  'cable-single-arm-reverse-curl': 'handle',
   // Rope
   'cable-face-pull': 'rope',
   'cable-high-overhead-tricep-extension': 'rope',
@@ -55,10 +57,7 @@ const IMPLEMENT: Record<string, Implement> = {
   // Cambered bar
   'cable-bicep-curl': 'cambered',
   'cable-upright-row': 'cambered',
-  // Straight bar
-  'cable-low-overhead-tricep-extension': 'straight',
-  'cable-reverse-curl': 'straight',
-  // the 4 pair, matched so the attachment never changes between them
+  // Straight bar: the 4C pair, matched so the attachment never changes between them
   'cable-straight-arm-pulldown': 'straight',
   'cable-front-raise': 'straight',
   // Machines: fixed grips
@@ -69,8 +68,8 @@ const IMPLEMENT: Record<string, Implement> = {
   'machine-hip-adductor': 'machine',
   // Retired, so History still shows an icon
   'cable-underhand-tricep-pushdown': 'straight',
-  'cable-single-arm-low-overhead-tricep-extension': 'straight',
-  'cable-single-arm-reverse-curl': 'straight',
+  'cable-low-overhead-tricep-extension': 'straight',
+  'cable-reverse-curl': 'straight',
   'cable-overhead-bicep-curl': 'handle',
   'cable-rear-delt-fly': 'handle',
   'cable-row': 'straight',

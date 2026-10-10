@@ -86,8 +86,11 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['cable-low-crossover-fly', 'Cable Low Crossover Fly'],
       ['cable-single-arm-low-row', 'Cable Low Row'],
       ['machine-leg-curl', 'Machine Leg Curl'],
-      ['cable-low-overhead-tricep-extension', 'Cable Low Overhead Tricep Extension'],
-      ['cable-reverse-curl', 'Cable Reverse Curl'],
+      // Re-ided, not just renamed: one arm at a time logs about half the
+      // weight, so the two-arm numbers belong to a separate exercise rather
+      // than reading as a collapse in this one.
+      ['cable-single-arm-low-overhead-tricep-extension', 'Cable Low Overhead Tricep Extension'],
+      ['cable-single-arm-reverse-curl', 'Cable Reverse Curl'],
     ],
   },
   {
