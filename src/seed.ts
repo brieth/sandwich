@@ -177,23 +177,6 @@ export const CURRENT_EXERCISE_IDS: ReadonlySet<string> = new Set(
     .filter(Boolean),
 );
 
-/**
- * Display names for ids that have LEFT the routine, preferred over whatever
- * name was stored with them, the same way the seed's name is preferred for an
- * exercise still in the program.
- *
- * Needed when a current exercise takes over the name a retired one was logged
- * under: without this they'd be two identically-named entries in History and in
- * its exercise picker. The suffix says what the retired version was, since the
- * current one carries a chip instead.
- */
-export const RETIRED_NAMES: Record<string, string> = {
-  'cable-underhand-tricep-pushdown': 'Cable Underhand Tricep Pushdown (2 Arm)',
-  'cable-rear-delt-fly': 'Cable Rear Delt Fly (2 Arm)',
-  'cable-low-overhead-tricep-extension': 'Cable Low Overhead Tricep Extension (2 Arm)',
-  'cable-reverse-curl': 'Cable Reverse Curl (2 Arm)',
-};
-
 export function isCurrentExercise(id: string): boolean {
   return CURRENT_EXERCISE_IDS.has(id);
 }

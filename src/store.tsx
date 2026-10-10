@@ -10,13 +10,14 @@ import type {
   SetEntry,
   Station,
 } from './types';
-import { AB_OPTION_IDS, LEG_OPTION_IDS, RETIRED_NAMES, SEED } from './seed';
+import { AB_OPTION_IDS, LEG_OPTION_IDS, SEED } from './seed';
 import {
   DEFAULT_FORMULA,
   isFormulaId,
   setActiveFormula,
   type OneRMFormulaId,
 } from './lib/onerm';
+
 import { BUILTIN_STATIONS, normalizeSessions, snapFit } from './lib/stations';
 
 const STORAGE_KEY = 'lifts.data.v1';
@@ -74,15 +75,13 @@ function applySnap(cal: Calibration): Calibration {
 /**
  * The exercise list for a stored or imported payload. The seed's definition
  * wins for any id still in the routine, so a rename there propagates without
- * breaking history; anything else is kept so its logged sessions still resolve
- * a name; and RETIRED_NAMES relabels a dropped lift where it needs one.
+ * breaking history, and anything else is kept so its logged sessions still
+ * resolve a name.
  */
 function mergeExercises(stored: Exercise[] | undefined): Exercise[] {
-  const relabel = (ex: Exercise): Exercise =>
-    RETIRED_NAMES[ex.id] ? { ...ex, name: RETIRED_NAMES[ex.id] } : ex;
-  const out: Exercise[] = SEED.exercises.map(relabel);
+  const out: Exercise[] = [...SEED.exercises];
   for (const ex of stored ?? []) {
-    if (!out.some((e) => e.id === ex.id)) out.push(relabel(ex));
+    if (!out.some((e) => e.id === ex.id)) out.push(ex);
   }
   return out;
 }
