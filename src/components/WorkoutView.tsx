@@ -20,6 +20,7 @@ import { SvBadge } from './SvBadge';
 import { NumField } from './NumField';
 import { StationPicker } from './Stations';
 import { ImplementIcon } from './ImplementIcon';
+import { CloseButton } from './CloseButton';
 
 export function WorkoutView() {
   const { data, startSession } = useStore();
@@ -225,9 +226,7 @@ function ActiveSession() {
             <span className="range-chip">{emphasisLabel(emphasis)} reps</span>
           </p>
         </div>
-        <button className="btn ghost small" onClick={cancelSession}>
-          Cancel
-        </button>
+        <CloseButton onClick={cancelSession} label="Cancel workout" />
       </div>
 
       <div className="exercise-list">
@@ -327,9 +326,7 @@ function ExerciseHistoryModal({
             <ImplementIcon exerciseId={exerciseId} />
             <span className="modal-title">{name}</span>
           </span>
-          <button className="btn ghost small" onClick={onClose}>
-            Close
-          </button>
+          <CloseButton onClick={onClose} label="Close" />
         </div>
         {rows.length === 0 ? (
           <p className="muted small">No history yet for this exercise.</p>

@@ -111,6 +111,24 @@ body {
   font-size: 13px;
   border-radius: 8px;
 }
+/*
+ * An X in place of a word. Square and the same 31px height as the small button
+ * it replaces, so no modal head or session header changes height.
+ */
+.btn.icon-only {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 31px;
+  height: 31px;
+  padding: 0;
+  border-radius: 8px;
+}
+.btn.icon-only svg {
+  width: 15px;
+  height: 15px;
+}
 .btn.danger {
   color: var(--danger);
 }

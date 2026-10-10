@@ -7,6 +7,7 @@ import { useBackToClose } from '../lib/useBackToClose';
 import { isCurrentExercise } from '../seed';
 import { StationPicker } from './Stations';
 import { ImplementIcon } from './ImplementIcon';
+import { CloseButton } from './CloseButton';
 import { findStation, stationsFor } from '../lib/stations';
 
 /** Stored ISO timestamp -> the YYYY-MM-DD a <input type="date"> expects (local). */
@@ -184,9 +185,7 @@ export function HistoryView() {
                 <ImplementIcon exerciseId={editingExerciseId} />
                 <span className="modal-title">{exerciseName(editingExerciseId)}</span>
               </span>
-              <button className="btn ghost small" onClick={() => setEditing(null)}>
-                Close
-              </button>
+              <CloseButton onClick={() => setEditing(null)} label="Close" />
             </div>
             <div className="set-edit">
               <div className="set-header compact">

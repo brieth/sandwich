@@ -3,6 +3,7 @@ import { useStore, todayISODate } from '../store';
 import { calibrationAt, fitCalibration, fitError, latestCalibration, snapFit } from '../lib/stations';
 import { useBackToClose } from '../lib/useBackToClose';
 import type { Calibration, Station, WeightUnit } from '../types';
+import { CloseButton } from './CloseButton';
 
 /** "Jun 4, 2026", or "Undated" for a calibration carried over from before dates. */
 function calDate(date: string): string {
@@ -211,9 +212,7 @@ function StationForm({
       <div className="modal station-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
           <span className="modal-title">{station ? 'Edit station' : 'Add station'}</span>
-          <button className="btn ghost small" onClick={onClose}>
-            Close
-          </button>
+          <CloseButton onClick={onClose} label="Close" />
         </div>
 
         <label className="station-field">

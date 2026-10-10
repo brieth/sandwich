@@ -11,6 +11,7 @@ import {
 } from '../body';
 import { LineChart } from './LineChart';
 import { useBackToClose } from '../lib/useBackToClose';
+import { CloseButton } from './CloseButton';
 
 type Metric =
   | 'weight'
@@ -447,9 +448,7 @@ export function BodyView() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
               <span className="modal-title">{STATS[explain].label}</span>
-              <button className="btn ghost small" onClick={() => setExplain(null)}>
-                Close
-              </button>
+              <CloseButton onClick={() => setExplain(null)} label="Close" />
             </div>
             <p className="stat-explain-value">
               {num(STATS[explain].value(latest), STATS[explain].dp ?? 1)}
