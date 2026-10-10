@@ -45,11 +45,11 @@ const PATHS: Record<Implement, JSX.Element> = {
       <path d="M8 8v12M8 8h3a6 6 0 0 1 0 12H8" />
     </>
   ),
-  // snap hook: tight round nose, straight flanks flaring to a wide round foot,
-  // with the gate's seam and rivet on the near flank
+  // snap hook, built the way the real thing is: the outer hull of a small ring
+  // at the nose and a large one at the foot, joined by their external tangents
   clip: (
     <>
-      <path d="M9.4 4.8C9.1 2.7 10 1.7 11 1.7s1.9 1 1.6 3.1l3.6 7.6c1.5 3.9-1 8.9-5.1 8.9s-6.4-4.8-5.1-8.7Z" />
+      <path d="M8.67 4.61L5.97 15.27A5.4 5.4 0 1 0 16.38 15.09L13.3 4.53A2.4 2.4 0 0 0 8.67 4.61Z" />
     </>
   ),
   // weight stack
