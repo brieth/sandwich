@@ -20,6 +20,7 @@ import { SvBadge } from './SvBadge';
 import { NumField } from './NumField';
 import { StationPicker } from './Stations';
 import { ExerciseTags } from './ExerciseTags';
+import { ImplementIcon } from './ImplementIcon';
 
 export function WorkoutView() {
   const { data, startSession } = useStore();
@@ -324,6 +325,7 @@ function ExerciseHistoryModal({
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
           <span className="ex-title-row">
+            <ImplementIcon exerciseId={exerciseId} />
             <span className="modal-title">{name}</span>
             <ExerciseTags exerciseId={exerciseId} />
           </span>
@@ -468,6 +470,7 @@ function ExerciseCard({
     <div className={selected ? 'exercise-card' : 'exercise-card collapsed'}>
       <div className="exercise-head">
         <div className="ex-title-row">
+          <ImplementIcon exerciseId={ex.exerciseId} />
           {options ? (
             <select
               className="ex-menu"

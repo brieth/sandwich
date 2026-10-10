@@ -7,6 +7,7 @@ import { useBackToClose } from '../lib/useBackToClose';
 import { isCurrentExercise } from '../seed';
 import { StationPicker } from './Stations';
 import { ExerciseTags } from './ExerciseTags';
+import { ImplementIcon } from './ImplementIcon';
 import { findStation, stationsFor } from '../lib/stations';
 
 /** Stored ISO timestamp -> the YYYY-MM-DD a <input type="date"> expects (local). */
@@ -106,6 +107,7 @@ export function HistoryView() {
                 {s.exercises.map((e, i) => (
                   <div key={i} className="history-exercise">
                     <div className="ex-title-row">
+                      <ImplementIcon exerciseId={e.exerciseId} />
                       <select
                         className="history-exercise-select"
                         value={e.exerciseId}
@@ -174,6 +176,7 @@ export function HistoryView() {
           <div className="modal" onClick={(ev) => ev.stopPropagation()}>
             <div className="modal-head">
               <span className="ex-title-row">
+                <ImplementIcon exerciseId={editingExerciseId} />
                 <span className="modal-title">{exerciseName(editingExerciseId)}</span>
                 <ExerciseTags exerciseId={editingExerciseId} />
               </span>

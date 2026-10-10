@@ -3,6 +3,7 @@ import { useStore } from '../store';
 import { AB_OPTION_IDS, LEG_OPTION_IDS } from '../seed';
 import { Stations } from './Stations';
 import { ExerciseTags } from './ExerciseTags';
+import { ImplementIcon } from './ImplementIcon';
 import { DEFAULT_FORMULA, FORMULAS, type OneRMFormulaId } from '../lib/onerm';
 
 export function RoutinesView() {
@@ -55,6 +56,7 @@ export function RoutinesView() {
                 .map((re, i) => (
                   <li key={`${re.exerciseId}-${i}`}>
                     <span className="ex-title-row">
+                      <ImplementIcon exerciseId={re.exerciseId} />
                       <span className="re-name">{exerciseName(re.exerciseId)}</span>
                       <ExerciseTags exerciseId={re.exerciseId} />
                     </span>
@@ -81,6 +83,7 @@ export function RoutinesView() {
                 .map((id) => (
                   <li key={id}>
                     <span className="ex-title-row">
+                      <ImplementIcon exerciseId={id} />
                       <span className="re-name">{exerciseName(id)}</span>
                       <ExerciseTags exerciseId={id} />
                     </span>

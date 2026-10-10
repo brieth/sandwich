@@ -877,6 +877,26 @@ body {
   font-weight: 600;
 }
 /*
+ * What the exercise is performed with, drawn to the left of its name. Sized to
+ * the line it sits on rather than a fixed pixel height, so it never makes a row
+ * taller than an un-iconed one, and muted so the name stays the thing you read.
+ */
+.ex-icon {
+  flex: none;
+  /* Sized to fit under the line box of the text it sits beside, so an iconed
+     row is never taller than one without. Not em-based: the wrapper inherits
+     the view's font size, not the name's, so em would size off the wrong one. */
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+}
+/* Beside a 16px exercise name rather than the 14px lists. */
+.exercise-head .ex-icon,
+.modal-head .ex-icon {
+  width: 18px;
+  height: 18px;
+}
+/*
  * Short badges beside an exercise's name, for what the name would otherwise
  * spell out. Muted rather than accent so they read as an attribute of the lift
  * and don't compete with the station's unit chip, which is the accent colour.
