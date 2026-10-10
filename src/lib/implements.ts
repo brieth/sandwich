@@ -26,10 +26,12 @@ const IMPLEMENT: Record<string, Implement> = {
   'barbell-incline-bench-press': 'barbell',
   'barbell-bench-press': 'barbell',
   'barbell-decline-bench-press': 'barbell',
+  'barbell-close-grip-bench-press': 'barbell',
   // Pulldown bars
   'close-grip-lat-pulldown': 'latbar',
   'lat-pulldown': 'latbar',
   'wide-grip-lat-pulldown': 'latbar',
+  'cable-wide-grip-row': 'latbar',
   // Single D-handle
   'cable-single-arm-high-row': 'handle',
   'cable-single-arm-mid-row': 'handle',
@@ -56,6 +58,9 @@ const IMPLEMENT: Record<string, Implement> = {
   // Straight bar
   'cable-low-overhead-tricep-extension': 'straight',
   'cable-reverse-curl': 'straight',
+  // the 4 pair, matched so the attachment never changes between them
+  'cable-straight-arm-pulldown': 'straight',
+  'cable-front-raise': 'straight',
   // Machines: fixed grips
   'machine-leg-press': 'machine',
   'machine-leg-curl': 'machine',
@@ -68,7 +73,6 @@ const IMPLEMENT: Record<string, Implement> = {
   'cable-single-arm-reverse-curl': 'straight',
   'cable-overhead-bicep-curl': 'handle',
   'cable-rear-delt-fly': 'handle',
-  'cable-front-raise': 'handle',
   'cable-row': 'straight',
   'v-bar-pulldown': 'latbar',
   'reverse-grip-pull-down': 'latbar',

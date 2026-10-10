@@ -90,6 +90,25 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['cable-reverse-curl', 'Cable Reverse Curl'],
     ],
   },
+  {
+    // The odd one out, and named for it: no letter, because it is the only
+    // workout outside the A/B pairing. A barbell press like an A, a horizontal
+    // cable pull like a B. Every slot fills something the other six miss.
+    id: '4',
+    name: '4',
+    exercises: [
+      // the only heavy compound press the triceps get
+      ['barbell-close-grip-bench-press', 'Barbell Close Grip Bench Press'],
+      // elbows wide, so rhomboids and mid traps rather than the lats the three
+      // single-arm rows already drive
+      ['cable-wide-grip-row', 'Cable Wide Grip Row'],
+      ['machine-leg-press', 'Machine Leg Press'],
+      // straight-arm shoulder extension against straight-arm shoulder flexion:
+      // the same lever reversed, off one attachment
+      ['cable-straight-arm-pulldown', 'Cable Straight Arm Pulldown'],
+      ['cable-front-raise', 'Cable Front Raise'],
+    ],
+  },
 ];
 
 const DEFAULT_SETS = 3;
