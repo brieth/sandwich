@@ -28,7 +28,7 @@ export function WorkoutView() {
   if (!data.activeSession) {
     return (
       <div className="view">
-        <h1>Start a workout</h1>
+        <h1>Workout</h1>
         <div className="start-list">
           {data.routines.map((r) => (
             <div key={r.id} className="start-card">
