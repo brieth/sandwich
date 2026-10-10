@@ -13,11 +13,19 @@ const PATHS: Record<Implement, JSX.Element> = {
       <path d="M6 8v8M9 9.5v5M15 9.5v5M18 8v8" />
     </>
   ),
-  // straight bar under its yoke
+  // wide bar under its yoke, ends angled down
+  latbar: (
+    <>
+      <path d="M3 20l3.5-3h11l3.5 3" />
+      <path d="M8.5 17l3.5-6 3.5 6" />
+      <circle cx="12" cy="9" r="2" />
+    </>
+  ),
+  // short straight bar under its yoke
   bar: (
     <>
-      <path d="M3 18h18" />
-      <path d="M8 18l4-7 4 7" />
+      <path d="M5 18h14" />
+      <path d="M8.5 18l3.5-7 3.5 7" />
       <circle cx="12" cy="8" r="2" />
     </>
   ),
@@ -37,11 +45,11 @@ const PATHS: Record<Implement, JSX.Element> = {
       <path d="M8 8v12M8 8h3a6 6 0 0 1 0 12H8" />
     </>
   ),
-  // carabiner: offset-D body, open along the upper right, gate closing it
+  // carabiner: spine curving round, gate as the straight side opposite it
   clip: (
     <>
-      <path d="M13.5 3.5C9.5 3.5 7 6 7 9.5v6c0 3.4 2.4 5.5 5.5 5.5s5-2 5-4.6V12" />
-      <path d="M13.5 3.5 17.5 12" />
+      <path d="M15 4.2C10.6 2.8 6.5 5.4 6.5 9.6v4.8c0 4.2 4.1 6.8 8.5 5.4" />
+      <path d="M16.6 5v14" />
     </>
   ),
   // weight stack

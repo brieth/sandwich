@@ -10,7 +10,8 @@
  */
 export type Implement =
   | 'barbell'
-  | 'bar' // straight or angled cable bar, lat pulldown bar
+  | 'latbar' // wide pulldown bar, ends angled down
+  | 'bar' // short straight cable bar
   | 'rope'
   | 'handle' // single D-handle / stirrup
   | 'clip' // bare carabiner, no attachment
@@ -22,9 +23,9 @@ const IMPLEMENT: Record<string, Implement> = {
   'barbell-bench-press': 'barbell',
   'barbell-decline-bench-press': 'barbell',
   // Pulldown bars
-  'close-grip-lat-pulldown': 'bar',
-  'lat-pulldown': 'bar',
-  'wide-grip-lat-pulldown': 'bar',
+  'close-grip-lat-pulldown': 'latbar',
+  'lat-pulldown': 'latbar',
+  'wide-grip-lat-pulldown': 'latbar',
   // Single D-handle
   'cable-single-arm-high-row': 'handle',
   'cable-single-arm-mid-row': 'handle',
@@ -65,8 +66,8 @@ const IMPLEMENT: Record<string, Implement> = {
   'cable-rear-delt-fly': 'handle',
   'cable-front-raise': 'handle',
   'cable-row': 'bar',
-  'v-bar-pulldown': 'bar',
-  'reverse-grip-pull-down': 'bar',
+  'v-bar-pulldown': 'latbar',
+  'reverse-grip-pull-down': 'latbar',
   'shotgun-row': 'handle',
   'machine-glute-bridge': 'machine',
   'machine-lying-hamstring-curl': 'machine',
@@ -74,6 +75,7 @@ const IMPLEMENT: Record<string, Implement> = {
 
 export const IMPLEMENT_LABELS: Record<Implement, string> = {
   barbell: 'Barbell',
+  latbar: 'Pulldown bar',
   bar: 'Bar',
   rope: 'Rope',
   handle: 'Handle',
