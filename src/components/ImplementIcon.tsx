@@ -73,7 +73,7 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
    * keeps its proportion against the stroke.
    */
   clip: (maskId) => (
-    <g transform="translate(12 12) scale(0.82) translate(-12 -12)">
+    <g transform="translate(12 12) scale(0.75) translate(-12 -12)">
       {HINGE ? (
         <>
           <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
