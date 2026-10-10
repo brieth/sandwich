@@ -23,6 +23,8 @@ const PER_LIMB = new Set<string>([
   'cable-behind-the-back-lateral-raise',
   'cable-single-arm-rear-delt-fly',
   'cable-single-arm-underhand-tricep-pushdown',
+  'cable-single-arm-low-overhead-tricep-extension',
+  'cable-single-arm-reverse-curl',
   // one side at a time (trunk)
   'cable-oblique-crunch',
   'cable-high-woodchopper',

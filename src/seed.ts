@@ -86,8 +86,8 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['cable-low-crossover-fly', 'Cable Low Crossover Fly'],
       ['cable-single-arm-low-row', 'Cable Low Row'],
       ['machine-leg-curl', 'Machine Leg Curl'],
-      ['cable-low-overhead-tricep-extension', 'Cable Low Overhead Tricep Extension'],
-      ['cable-reverse-curl', 'Cable Reverse Curl'],
+      ['cable-single-arm-low-overhead-tricep-extension', 'Cable Low Overhead Tricep Extension'],
+      ['cable-single-arm-reverse-curl', 'Cable Reverse Curl'],
     ],
   },
 ];
@@ -190,6 +190,8 @@ export const CURRENT_EXERCISE_IDS: ReadonlySet<string> = new Set(
 export const RETIRED_NAMES: Record<string, string> = {
   'cable-underhand-tricep-pushdown': 'Cable Underhand Tricep Pushdown (2 Arm)',
   'cable-rear-delt-fly': 'Cable Rear Delt Fly (2 Arm)',
+  'cable-low-overhead-tricep-extension': 'Cable Low Overhead Tricep Extension (2 Arm)',
+  'cable-reverse-curl': 'Cable Reverse Curl (2 Arm)',
 };
 
 export function isCurrentExercise(id: string): boolean {
