@@ -6,7 +6,6 @@ import { NumField } from './NumField';
 import { useBackToClose } from '../lib/useBackToClose';
 import { isCurrentExercise } from '../seed';
 import { StationPicker } from './Stations';
-import { ExerciseTags } from './ExerciseTags';
 import { ImplementIcon } from './ImplementIcon';
 import { findStation, stationsFor } from '../lib/stations';
 
@@ -119,7 +118,6 @@ export function HistoryView() {
                           </option>
                         ))}
                       </select>
-                      <ExerciseTags exerciseId={e.exerciseId} />
                     </div>
                     {/* Dropped from the routine, so it's shown for the record but
                         excluded from the volume total above and every other metric. */}
@@ -178,7 +176,6 @@ export function HistoryView() {
               <span className="ex-title-row">
                 <ImplementIcon exerciseId={editingExerciseId} />
                 <span className="modal-title">{exerciseName(editingExerciseId)}</span>
-                <ExerciseTags exerciseId={editingExerciseId} />
               </span>
               <button className="btn ghost small" onClick={() => setEditing(null)}>
                 Close

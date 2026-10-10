@@ -883,36 +883,28 @@ body {
  */
 .ex-icon {
   flex: none;
-  /* Sized to fit under the line box of the text it sits beside, so an iconed
-     row is never taller than one without. Not em-based: the wrapper inherits
-     the view's font size, not the name's, so em would size off the wrong one. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Sized to the line box of the text beside it, so an iconed row is never
+     taller than one without. Not em-based: the wrapper inherits the view's font
+     size rather than the name's, so em would size off the wrong one. */
   width: 16px;
   height: 16px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface-2);
   color: var(--muted);
+}
+.ex-icon svg {
+  width: 100%;
+  height: 100%;
 }
 /* Beside a 16px exercise name rather than the 14px lists. */
 .exercise-head .ex-icon,
 .modal-head .ex-icon {
   width: 18px;
   height: 18px;
-}
-/*
- * Short badges beside an exercise's name, for what the name would otherwise
- * spell out. Muted rather than accent so they read as an attribute of the lift
- * and don't compete with the station's unit chip, which is the accent colour.
- */
-.ex-tag {
-  flex: none;
-  padding: 0 6px;
-  border-radius: 6px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 11px;
-  /* Sized to stay just under the shortest line it sits on (the 14px routine
-     list), so a tagged row is never taller than an untagged one. */
-  line-height: 1.3;
-  font-weight: 700;
 }
 /*
  * Groups a name with its chips. The exercise head, the history row and the

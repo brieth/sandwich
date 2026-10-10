@@ -56,8 +56,8 @@ export function ImplementIcon({ exerciseId }: { exerciseId: string }) {
   if (!kind) return null;
   const label = IMPLEMENT_LABELS[kind];
   return (
+    <span className="ex-icon" title={label}>
     <svg
-      className="ex-icon"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -70,5 +70,6 @@ export function ImplementIcon({ exerciseId }: { exerciseId: string }) {
       <title>{label}</title>
       {PATHS[kind]}
     </svg>
+    </span>
   );
 }

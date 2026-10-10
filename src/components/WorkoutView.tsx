@@ -19,7 +19,6 @@ import { AB_OPTION_IDS } from '../seed';
 import { SvBadge } from './SvBadge';
 import { NumField } from './NumField';
 import { StationPicker } from './Stations';
-import { ExerciseTags } from './ExerciseTags';
 import { ImplementIcon } from './ImplementIcon';
 
 export function WorkoutView() {
@@ -327,7 +326,6 @@ function ExerciseHistoryModal({
           <span className="ex-title-row">
             <ImplementIcon exerciseId={exerciseId} />
             <span className="modal-title">{name}</span>
-            <ExerciseTags exerciseId={exerciseId} />
           </span>
           <button className="btn ghost small" onClick={onClose}>
             Close
@@ -487,7 +485,6 @@ function ExerciseCard({
           ) : (
             <span className="exercise-name">{name}</span>
           )}
-          <ExerciseTags exerciseId={ex.exerciseId} />
         </div>
         {selected && (
           <StationPicker
