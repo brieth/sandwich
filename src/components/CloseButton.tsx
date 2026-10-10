@@ -12,11 +12,10 @@ export function CloseButton({ onClick, label }: { onClick: () => void; label: st
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
+        strokeWidth="2.2"
         aria-hidden="true"
       >
-        <path d="M7 7l10 10M17 7L7 17" />
+        <path d="M5 5l14 14M19 5L5 19" />
       </svg>
     </button>
   );

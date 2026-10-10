@@ -125,9 +125,13 @@ body {
   padding: 0;
   border-radius: 8px;
 }
+/*
+ * Sized and cut to read like the x that removes a set: flat ends rather than
+ * round, which taper and look lighter, and the same span across.
+ */
 .btn.icon-only svg {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
 }
 .btn.danger {
   color: var(--danger);
