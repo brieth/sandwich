@@ -67,7 +67,7 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
       </mask>
       {/* Scaled as a whole rather than redrawn smaller, so the gate gap, the
           kerf and the rivet keep their proportions against the stroke. */}
-      <g transform="translate(12 12) scale(0.9) translate(-12 -12)">
+      <g transform="translate(12 12) scale(0.82) translate(-12 -12)">
         <path
           d="M7.25 15.44C7.86 12.88 8.95 10.08 9.17 7.47C9.31 5.79 8.16 4.53 9.67 3.1C11.24 1.63 14.15 2 15.18 3.92C15.89 5.24 14.8 6.23 14.99 7.53C15.39 10.35 17.53 15.52 17.04 18.1C16.14 22.9 7.57 23.06 6.98 18.01"
           mask={`url(#${maskId})`}
