@@ -11,7 +11,8 @@
 export type Implement =
   | 'barbell'
   | 'latbar' // wide pulldown bar, ends angled down
-  | 'bar' // short cambered cable bar, the EZ curl bend
+  | 'bar' // short straight cable bar
+  | 'cambered' // the EZ curl bend
   | 'rope'
   | 'handle' // single D-handle / stirrup
   // Bare carabiner, no attachment. Nothing is assigned to it right now, but
@@ -38,8 +39,6 @@ const IMPLEMENT: Record<string, Implement> = {
   'cable-low-crossover-fly': 'handle',
   'cable-behind-the-back-bicep-curl': 'handle',
   'cable-behind-the-back-lateral-raise': 'handle',
-  'cable-single-arm-low-overhead-tricep-extension': 'handle',
-  'cable-single-arm-reverse-curl': 'handle',
   'cable-high-woodchopper': 'handle',
   'cable-low-woodchopper': 'handle',
   'cable-oblique-crunch': 'handle',
@@ -51,9 +50,12 @@ const IMPLEMENT: Record<string, Implement> = {
   'cable-tricep-pushdown': 'rope',
   'cable-crunch': 'rope',
   'cable-hammer-curl': 'rope',
-  // Cable bar
-  'cable-bicep-curl': 'bar',
-  'cable-upright-row': 'bar',
+  // Cambered bar
+  'cable-bicep-curl': 'cambered',
+  'cable-upright-row': 'cambered',
+  // Straight bar
+  'cable-single-arm-low-overhead-tricep-extension': 'bar',
+  'cable-single-arm-reverse-curl': 'bar',
   // Machines: fixed grips
   'machine-leg-press': 'machine',
   'machine-leg-curl': 'machine',
@@ -78,7 +80,8 @@ const IMPLEMENT: Record<string, Implement> = {
 export const IMPLEMENT_LABELS: Record<Implement, string> = {
   barbell: 'Barbell',
   latbar: 'Pulldown bar',
-  bar: 'Cambered',
+  bar: 'Bar',
+  cambered: 'Cambered',
   rope: 'Rope',
   handle: 'Handle',
   clip: 'No attachment',
