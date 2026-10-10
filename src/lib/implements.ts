@@ -76,7 +76,7 @@ const IMPLEMENT: Record<string, Implement> = {
 export const IMPLEMENT_LABELS: Record<Implement, string> = {
   barbell: 'Barbell',
   latbar: 'Pulldown bar',
-  bar: 'Bar',
+  bar: 'Cambered',
   rope: 'Rope',
   handle: 'Handle',
   clip: 'No attachment',
