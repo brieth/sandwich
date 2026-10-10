@@ -400,8 +400,9 @@ body {
   gap: 12px;
   margin-bottom: 12px;
 }
+/* Matches .exercise-name, so an exercise reads at one size wherever it is. */
 .modal-title {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
 }
 /*
@@ -912,7 +913,7 @@ body {
   width: 100%;
   height: 100%;
 }
-/* Beside a 16px exercise name rather than the 14px lists. */
+/* Beside a 15px exercise name rather than the 14px lists. */
 .modal-head .ex-icon {
   width: 18px;
   height: 18px;
