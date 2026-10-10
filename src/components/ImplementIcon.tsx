@@ -35,7 +35,7 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
   barbell: () => (
     <>
       <path d="M2 12h20" />
-      <path d="M6 9.5v5M9 8v8M15 8v8M18 9.5v5" />
+      <path d="M5 9.5v5M8 8v8M16 8v8M19 9.5v5" />
     </>
   ),
   // wide bar under its yoke, ends angled down
