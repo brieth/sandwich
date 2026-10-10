@@ -1,14 +1,9 @@
 import { useId } from 'react';
 import { implementFor, IMPLEMENT_LABELS, type Implement } from '../lib/implements';
 
-/*
- * Drawn as strokes in currentColor so one set works at any size and in any
- * colour. Kept to two or three marks each: at 16px on a phone, anything finer
- * turns to mush.
- *
- * Each takes a mask id, since one of them needs a mask and the id has to be
- * unique per rendered instance.
- */
+/** How much of its frame every icon's artwork fills. */
+const ART = 0.75;
+
 const CARABINER =
   'M7.25 15.44C7.86 12.88 8.95 10.08 9.17 7.47C9.31 5.79 8.16 4.53 9.67 3.1' +
   'C11.24 1.63 14.15 2 15.18 3.92C15.89 5.24 14.8 6.23 14.99 7.53' +
@@ -26,6 +21,14 @@ const CARABINER =
  */
 const HINGE: boolean = false;
 
+/*
+ * Drawn as strokes in currentColor so one set works at any size and in any
+ * colour. Kept to two or three marks each: at 16px on a phone, anything finer
+ * turns to mush.
+ *
+ * Each takes a mask id, since one of them needs a mask and the id has to be
+ * unique per rendered instance.
+ */
 const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
   // sleeve with two plates a side
   barbell: () => (
@@ -69,11 +72,10 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
   /*
    * Carabiner, traced from a reference photo and refitted to six curves. Both
    * flanks run straight between the waist and the gate, which is the gap on
-   * the left. Scaled as a whole rather than redrawn smaller, so the gate gap
-   * keeps its proportion against the stroke.
+   * the left.
    */
   clip: (maskId) => (
-    <g transform="translate(12 12) scale(0.75) translate(-12 -12)">
+    <>
       {HINGE ? (
         <>
           <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
@@ -86,7 +88,7 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
       ) : (
         <path d={CARABINER} />
       )}
-    </g>
+    </>
   ),
   // weight stack
   machine: () => (
@@ -117,7 +119,15 @@ export function ImplementIcon({ exerciseId }: { exerciseId: string }) {
       aria-label={label}
     >
       <title>{label}</title>
-      {PATHS[kind](maskId)}
+      {/*
+        * Every icon sits back off its frame by the same amount. Applied here
+        * rather than per icon, because the transform scales the stroke along
+        * with the geometry: an icon scaled on its own would also be the only
+        * one drawn in a lighter line than the rest of the set.
+        */}
+      <g transform={`translate(12 12) scale(${ART}) translate(-12 -12)`}>
+        {PATHS[kind](maskId)}
+      </g>
     </svg>
     </span>
   );
