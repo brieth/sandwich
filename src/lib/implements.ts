@@ -15,10 +15,7 @@ export type Implement =
   | 'cambered' // the EZ curl bend
   | 'rope'
   | 'handle' // single D-handle / stirrup
-  // Bare carabiner, no attachment. Nothing is assigned to it right now, but
-  // it is kept: it is the most worked-over icon in the set and the pairs that
-  // used it have gone back and forth more than once.
-  | 'clip'
+  | 'clip' // bare carabiner, no attachment
   | 'machine'; // fixed grips, nothing to attach
 
 const IMPLEMENT: Record<string, Implement> = {
@@ -44,10 +41,12 @@ const IMPLEMENT: Record<string, Implement> = {
   'cable-high-woodchopper': 'handle',
   'cable-low-woodchopper': 'handle',
   'cable-oblique-crunch': 'handle',
-  'cable-single-arm-underhand-tricep-pushdown': 'handle', // the cross-body extension
-  'cable-single-arm-rear-delt-fly': 'handle',
   'cable-single-arm-low-overhead-tricep-extension': 'handle',
   'cable-single-arm-reverse-curl': 'handle',
+  // Bare carabiner. 3A is the other single-arm day, and it sits right beside
+  // 3B, so taking the handle off it is what keeps the two from reading the same.
+  'cable-single-arm-underhand-tricep-pushdown': 'clip', // the cross-body extension
+  'cable-single-arm-rear-delt-fly': 'clip',
   // Rope
   'cable-face-pull': 'rope',
   'cable-high-overhead-tricep-extension': 'rope',
