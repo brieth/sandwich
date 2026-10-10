@@ -64,12 +64,13 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
       <circle cx="12" cy="7.25" r="2" />
     </>
   ),
-  // two strands off a ring, knotted ends
+  // two strands off a ring, knotted ends. Dropped 1 from where it was drawn:
+  // the ink ran 3 to 19, centring on 11 rather than 12.
   rope: () => (
     <>
-      <circle cx="12" cy="5" r="2" />
-      <path d="M11 7c-2 4-4 7-5 11M13 7c2 4 4 7 5 11" />
-      <path d="M5 19h2M17 19h2" />
+      <circle cx="12" cy="6" r="2" />
+      <path d="M11 8c-2 4-4 7-5 11M13 8c2 4 4 7 5 11" />
+      <path d="M5 20h2M17 20h2" />
     </>
   ),
   // the D, turned a quarter anticlockwise so the straight grip lies flat at
@@ -108,8 +109,8 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
   // box rather than at 10 and 14, which cut it 5, 4, 6
   machine: () => (
     <>
-      <rect x="6" y="5" width="12" height="15" rx="1.5" />
-      <path d="M6 10h12M6 15h12" />
+      <rect x="6" y="4.5" width="12" height="15" rx="1.5" />
+      <path d="M6 9.5h12M6 14.5h12" />
     </>
   ),
 };
