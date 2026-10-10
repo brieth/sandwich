@@ -45,11 +45,11 @@ const PATHS: Record<Implement, JSX.Element> = {
       <path d="M8 8v12M8 8h3a6 6 0 0 1 0 12H8" />
     </>
   ),
-  // carabiner: spine curving round, gate as the straight side opposite it
+  // snap hook: pear body, narrow at the nose and wide at the foot, with the
+  // gate running up the open side to a notch just short of the nose
   clip: (
     <>
-      <path d="M15 4.2C10.6 2.8 6.5 5.4 6.5 9.6v4.8c0 4.2 4.1 6.8 8.5 5.4" />
-      <path d="M16.6 5v14" />
+      <path d="M15.1 8.3Q14.4 3 11 3 7 3 5.6 7.6L4.6 13.4Q3.6 21.8 10.8 21.8 17 21.8 16.6 15.4L16.3 12.2" />
     </>
   ),
   // weight stack
