@@ -11,7 +11,7 @@
 export type Implement =
   | 'barbell'
   | 'latbar' // wide pulldown bar, ends angled down
-  | 'bar' // short straight cable bar
+  | 'bar' // short cambered cable bar, the EZ curl bend
   | 'rope'
   | 'handle' // single D-handle / stirrup
   | 'clip' // bare carabiner, no attachment
@@ -48,9 +48,9 @@ const IMPLEMENT: Record<string, Implement> = {
   'cable-high-overhead-tricep-extension': 'rope',
   'cable-tricep-pushdown': 'rope',
   'cable-crunch': 'rope',
+  'cable-hammer-curl': 'rope',
   // Cable bar
   'cable-bicep-curl': 'bar',
-  'cable-hammer-curl': 'bar',
   'cable-upright-row': 'bar',
   // Machines: fixed grips
   'machine-leg-press': 'machine',
