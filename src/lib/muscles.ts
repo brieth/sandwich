@@ -41,14 +41,14 @@ const MUSCLE: Record<string, MuscleGroup> = {
   'cable-single-arm-rear-delt-fly': 'Delts',
   // Triceps (forearm/brachioradialis rolls up into Biceps, matching the curls)
   'cable-high-overhead-tricep-extension': 'Triceps',
-  'cable-single-arm-low-overhead-tricep-extension': 'Triceps',
+  'cable-low-overhead-tricep-extension': 'Triceps',
   'cable-tricep-pushdown': 'Triceps',
   'cable-single-arm-underhand-tricep-pushdown': 'Triceps',
   // Biceps
   'cable-behind-the-back-bicep-curl': 'Biceps',
   'cable-bicep-curl': 'Biceps',
   'cable-hammer-curl': 'Biceps',
-  'cable-single-arm-reverse-curl': 'Biceps',
+  'cable-reverse-curl': 'Biceps',
   // Abs (every cable-ab-menu option)
   'cable-crunch': 'Abs',
   'cable-high-woodchopper': 'Abs',
@@ -72,11 +72,11 @@ const MUSCLE: Record<string, MuscleGroup> = {
   'dumbbell-lateral-raise': 'Delts',
   'cable-rear-delt-fly': 'Delts',
   'cable-underhand-tricep-pushdown': 'Triceps',
-  'cable-low-overhead-tricep-extension': 'Triceps',
+  'cable-single-arm-low-overhead-tricep-extension': 'Triceps',
   'dumbbell-skullcrusher': 'Triceps',
   'dumbbell-kickback': 'Triceps',
   'cable-overhead-bicep-curl': 'Biceps',
-  'cable-reverse-curl': 'Biceps',
+  'cable-single-arm-reverse-curl': 'Biceps',
   'incline-dumbbell-curl': 'Biceps',
   'dumbbell-spider-curl': 'Biceps',
 };
