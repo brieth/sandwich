@@ -91,11 +91,11 @@ const ROUTINE_DEFS: RoutineDef[] = [
     ],
   },
   {
-    // The odd one out, and named for it: no letter, because it is the only
-    // workout outside the A/B pairing. A barbell press like an A, a horizontal
-    // cable pull like a B. Every slot fills something the other six miss.
-    id: '4',
-    name: '4',
+    // C because it is neither: a barbell press like an A, a horizontal cable
+    // pull like a B, and the only workout outside the pairing. Every slot
+    // fills something the other six miss.
+    id: '4c',
+    name: '4C',
     exercises: [
       // the only heavy compound press the triceps get
       ['barbell-close-grip-bench-press', 'Barbell Close Grip Bench Press'],
