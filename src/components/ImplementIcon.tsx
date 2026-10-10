@@ -45,11 +45,11 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
       <circle cx="12" cy="7.5" r="2" />
     </>
   ),
-  // short straight bar under its yoke
+  // short straight bar on a single stem
   straight: () => (
     <>
       <path d="M5 18h14" />
-      <path d="M8.5 18l3.5-7 3.5 7" />
+      <path d="M12 10V18" />
       <circle cx="12" cy="8" r="2" />
     </>
   ),
@@ -71,12 +71,15 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
       <path d="M5 19h2M17 19h2" />
     </>
   ),
-  // the D: straight grip, looped back
+  // the D, turned a quarter anticlockwise so the straight grip lies flat at
+  // the bottom and the loop arches over it, which is how it hangs. Same
+  // geometry as before, 12 of grip and a radius 6 loop, rotated and recentred.
   handle: () => (
     <>
-      <circle cx="12" cy="4" r="1.5" />
-      <path d="M12 5.5V8" />
-      <path d="M8 8v12M8 8h3a6 6 0 0 1 0 12H8" />
+      <circle cx="12" cy="6.5" r="1.5" />
+      <path d="M12 8V10" />
+      <path d="M6 19h12" />
+      <path d="M6 19v-3a6 6 0 0 1 12 0v3" />
     </>
   ),
   /*
