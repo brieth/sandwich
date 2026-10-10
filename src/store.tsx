@@ -78,10 +78,15 @@ function applySnap(cal: Calibration): Calibration {
  * breaking history, and anything else is kept so its logged sessions still
  * resolve a name.
  */
-function mergeExercises(stored: Exercise[] | undefined): Exercise[] {
+function mergeExercises(stored: Exercise[] | undefined, logged: Set<string>): Exercise[] {
   const out: Exercise[] = [...SEED.exercises];
   for (const ex of stored ?? []) {
-    if (!out.some((e) => e.id === ex.id)) out.push(ex);
+    if (out.some((e) => e.id === ex.id)) continue;
+    // An id the seed has dropped is worth keeping only while a session still
+    // points at it. One that was never logged is a leftover from a routine
+    // edit, and leaving it in shows a second, empty entry in every picker
+    // under a name the seed already uses.
+    if (logged.has(ex.id)) out.push(ex);
   }
   return out;
 }
@@ -100,10 +105,14 @@ function load(): AppData {
     const stored = JSON.parse(raw) as Partial<AppData>;
     // Program structure (routines, and the exercise list via mergeExercises)
     // always comes from the seed; logged sessions are the user's and are kept.
-    const exercises = mergeExercises(stored.exercises);
     // Anything logged before stations existed carries no station, which means
     // its weights are taken as already normalized. Nothing to migrate.
     const sessions = stored.sessions ?? [];
+    const logged = new Set([
+      ...sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId)),
+      ...(stored.activeSession?.exercises ?? []).map((e) => e.exerciseId),
+    ]);
+    const exercises = mergeExercises(stored.exercises, logged);
     // Refresh menu slot options in an in-progress workout to the current lists,
     // keyed by menu type, and append the ab menu if the session predates it.
     let activeSession = stored.activeSession ?? null;
@@ -508,7 +517,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             return false;
           }
           setData({
-            exercises: mergeExercises(incoming.exercises),
+            exercises: mergeExercises(
+              incoming.exercises,
+              new Set(incoming.sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId))),
+            ),
             routines: Array.isArray(incoming.routines) ? incoming.routines : SEED.routines,
             sessions: incoming.sessions,
             activeSession: null,
