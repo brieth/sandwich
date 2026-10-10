@@ -11,7 +11,7 @@
 export type Implement =
   | 'barbell'
   | 'latbar' // wide pulldown bar, ends angled down
-  | 'bar' // short straight cable bar
+  | 'straight' // short straight cable bar
   | 'cambered' // the EZ curl bend
   | 'rope'
   | 'handle' // single D-handle / stirrup
@@ -54,8 +54,8 @@ const IMPLEMENT: Record<string, Implement> = {
   'cable-bicep-curl': 'cambered',
   'cable-upright-row': 'cambered',
   // Straight bar
-  'cable-single-arm-low-overhead-tricep-extension': 'bar',
-  'cable-single-arm-reverse-curl': 'bar',
+  'cable-single-arm-low-overhead-tricep-extension': 'straight',
+  'cable-single-arm-reverse-curl': 'straight',
   // Machines: fixed grips
   'machine-leg-press': 'machine',
   'machine-leg-curl': 'machine',
@@ -63,13 +63,13 @@ const IMPLEMENT: Record<string, Implement> = {
   'machine-hip-abductor': 'machine',
   'machine-hip-adductor': 'machine',
   // Retired, so History still shows an icon
-  'cable-underhand-tricep-pushdown': 'bar',
-  'cable-low-overhead-tricep-extension': 'bar',
-  'cable-reverse-curl': 'bar',
+  'cable-underhand-tricep-pushdown': 'straight',
+  'cable-low-overhead-tricep-extension': 'straight',
+  'cable-reverse-curl': 'straight',
   'cable-overhead-bicep-curl': 'handle',
   'cable-rear-delt-fly': 'handle',
   'cable-front-raise': 'handle',
-  'cable-row': 'bar',
+  'cable-row': 'straight',
   'v-bar-pulldown': 'latbar',
   'reverse-grip-pull-down': 'latbar',
   'shotgun-row': 'handle',
@@ -80,7 +80,7 @@ const IMPLEMENT: Record<string, Implement> = {
 export const IMPLEMENT_LABELS: Record<Implement, string> = {
   barbell: 'Barbell',
   latbar: 'Pulldown bar',
-  bar: 'Bar',
+  straight: 'Straight',
   cambered: 'Cambered',
   rope: 'Rope',
   handle: 'Handle',

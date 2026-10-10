@@ -46,7 +46,7 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
     </>
   ),
   // short straight bar under its yoke
-  bar: () => (
+  straight: () => (
     <>
       <path d="M5 18h14" />
       <path d="M8.5 18l3.5-7 3.5 7" />
