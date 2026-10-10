@@ -771,7 +771,9 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 5px;
+  /* Matches the gap between the chips, so the space under the head reads the
+     same as the space between them. */
+  margin-top: 6px;
 }
 .history-set {
   background: var(--surface-2);
@@ -929,7 +931,13 @@ body {
  */
 .exercise-head:has(.station-pick) .ex-icon {
   width: 35px;
-  height: 35px;
+  /* Height from the column rather than a matching 35, which left the box
+     0.34 short of it and opened a wider gap beneath the icon than beside the
+     chips. Only the height stretches, so the svg's 100% still has a definite
+     width to resolve against. The box ends fractionally off square; the
+     artwork does not, since the svg keeps its own ratio inside it. */
+  height: auto;
+  align-self: stretch;
 }
 /* Same head in a history row, where the name is 14px rather than 15px. */
 .history-exercise .exercise-head {
