@@ -22,6 +22,14 @@ const CARABINER =
 const HINGE: boolean = false;
 
 /*
+ * Draw the carabiner for "no attachment" rather than the bare cable. Off: the
+ * drawing is literal where every other icon is the same ring and stem with a
+ * different thing on the end, so it read as from a different set. Kept wired
+ * up because it is the most worked-over shape here. Flip this to bring it back.
+ */
+const CARABINER_ART: boolean = false;
+
+/*
  * Drawn as strokes in currentColor so one set works at any size and in any
  * colour. Kept to two or three marks each: at 16px on a phone, anything finer
  * turns to mush.
@@ -85,26 +93,36 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
     </>
   ),
   /*
-   * Carabiner, traced from a reference photo and refitted to six curves. Both
-   * flanks run straight between the waist and the gate, which is the gap on
-   * the left.
+   * Nothing clipped on: the bare cable ending in the ring the others hang from.
+   * It is the straight bar with the bar taken off and flipped, so the ring sits
+   * where the attachment would be and the frame is left empty above it. Same
+   * r=2 ring, same stem length, same ink extent 5.2 to 18.8.
+   *
+   * The alternative is a drawing of the carabiner itself, below.
    */
-  clip: (maskId) => (
-    <>
-      {HINGE ? (
-        <>
-          <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-            <rect x="0" y="0" width="24" height="24" fill="#fff" stroke="none" />
-            <path d="M7.41 9A1.42 1.42 0 0 1 10.21 9" stroke="#000" strokeWidth="0.6" />
-            <circle cx="8.94" cy="8.92" r="0.44" fill="#000" stroke="none" />
-          </mask>
-          <path d={CARABINER} mask={`url(#${maskId})`} />
-        </>
-      ) : (
-        <path d={CARABINER} />
-      )}
-    </>
-  ),
+  clip: (maskId) =>
+    !CARABINER_ART ? (
+      <>
+        <path d="M12 6V14" />
+        <circle cx="12" cy="16" r="2" />
+      </>
+    ) : HINGE ? (
+      /*
+       * Carabiner, traced from a reference photo and refitted to six curves.
+       * Both flanks run straight between the waist and the gate, which is the
+       * gap on the left.
+       */
+      <>
+        <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+          <rect x="0" y="0" width="24" height="24" fill="#fff" stroke="none" />
+          <path d="M7.41 9A1.42 1.42 0 0 1 10.21 9" stroke="#000" strokeWidth="0.6" />
+          <circle cx="8.94" cy="8.92" r="0.44" fill="#000" stroke="none" />
+        </mask>
+        <path d={CARABINER} mask={`url(#${maskId})`} />
+      </>
+    ) : (
+      <path d={CARABINER} />
+    ),
   // weight stack: three equal plates, so the dividers sit on the thirds of the
   // box rather than at 10 and 14, which cut it 5, 4, 6
   machine: () => (
