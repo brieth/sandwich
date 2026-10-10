@@ -45,13 +45,14 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
       <circle cx="12" cy="7.5" r="2" />
     </>
   ),
-  // short cambered bar, the EZ curl bend, on a single stem.
-  // Sat 0.75 high of the straight bar it replaces, so the dips at 18.75 do not
+  // short cambered bar, the EZ curl bend, on a single stem. Ends and centre
+  // run level at 17.25 with the two grip sections dipping to 18.75 between
+  // them. Sat 0.75 high of the straight bar it replaces, so those dips do not
   // drag the ink off centre in the frame.
   bar: () => (
     <>
-      <path d="M5 17.25h2l2 1.5l3-3l3 3l2-1.5h2" />
-      <path d="M12 9.25V15.75" />
+      <path d="M5 17.25h2l2 1.5l1.5-1.5h3l1.5 1.5l2-1.5h2" />
+      <path d="M12 9.25V17.25" />
       <circle cx="12" cy="7.25" r="2" />
     </>
   ),
