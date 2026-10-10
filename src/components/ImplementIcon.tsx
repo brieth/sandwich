@@ -30,11 +30,12 @@ const HINGE: boolean = false;
  * unique per rendered instance.
  */
 const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
-  // sleeve with two plates a side
+  // sleeve with two plates a side, loaded the way you actually load a bar:
+  // the big plate inboard against the collar, the small one outside it
   barbell: () => (
     <>
       <path d="M2 12h20" />
-      <path d="M6 8v8M9 9.5v5M15 9.5v5M18 8v8" />
+      <path d="M6 9.5v5M9 8v8M15 8v8M18 9.5v5" />
     </>
   ),
   // wide bar under its yoke, ends angled down
