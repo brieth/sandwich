@@ -77,10 +77,10 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
   // geometry as before, 12 of grip and a radius 6 loop, rotated and recentred.
   handle: () => (
     <>
-      <circle cx="12" cy="6.5" r="1.5" />
-      <path d="M12 8V10" />
-      <path d="M6 19h12" />
-      <path d="M6 19v-3a6 6 0 0 1 12 0v3" />
+      <circle cx="12" cy="6.5" r="2" />
+      <path d="M12 8.5V10.5" />
+      <path d="M6 19.5h12" />
+      <path d="M6 19.5v-3a6 6 0 0 1 12 0v3" />
     </>
   ),
   /*
@@ -104,11 +104,12 @@ const PATHS: Record<Implement, (maskId: string) => JSX.Element> = {
       )}
     </>
   ),
-  // weight stack
+  // weight stack: three equal plates, so the dividers sit on the thirds of the
+  // box rather than at 10 and 14, which cut it 5, 4, 6
   machine: () => (
     <>
       <rect x="6" y="5" width="12" height="15" rx="1.5" />
-      <path d="M6 10h12M6 14h12" />
+      <path d="M6 10h12M6 15h12" />
     </>
   ),
 };
