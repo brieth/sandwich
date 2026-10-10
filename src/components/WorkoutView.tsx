@@ -557,7 +557,17 @@ function ExerciseCard({
             onClick={() => toggleDone(i, s)}
             aria-label="Mark set done"
           >
-            ✓
+            {/* Drawn rather than set as ✓, so it carries the same weight and
+                flat ends as the X beside it instead of the font's tick. */}
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              aria-hidden="true"
+            >
+              <path d="M5 12.5l5 5L19 6.5" />
+            </svg>
           </button>
           <button className="set-remove" onClick={() => onRemoveSet(i)} aria-label="Remove set">
             ×
