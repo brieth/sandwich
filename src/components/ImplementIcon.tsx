@@ -37,11 +37,11 @@ const PATHS: Record<Implement, JSX.Element> = {
       <path d="M8 8v12M8 8h3a6 6 0 0 1 0 12H8" />
     </>
   ),
-  // carabiner, gate on the right
+  // carabiner: offset-D body, open along the upper right, gate closing it
   clip: (
     <>
-      <path d="M9 3h2a4 4 0 0 1 4 4v10a4 4 0 0 1-8 0V7a4 4 0 0 1 2-3.5" />
-      <path d="M15 7v7" />
+      <path d="M13.5 3.5C9.5 3.5 7 6 7 9.5v6c0 3.4 2.4 5.5 5.5 5.5s5-2 5-4.6V12" />
+      <path d="M13.5 3.5 17.5 12" />
     </>
   ),
   // weight stack
