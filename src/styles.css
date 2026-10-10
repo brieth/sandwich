@@ -931,6 +931,16 @@ body {
   width: 35px;
   height: 35px;
 }
+/* Same head in a history row, where the name is 14px rather than 15px. */
+.history-exercise .exercise-head {
+  margin-bottom: 0;
+}
+/* Only the one-line case: with a station it falls through to the rule above,
+   whose size the station line sets rather than the name. */
+.history-exercise .exercise-head:not(:has(.station-pick)) .ex-icon {
+  width: 16px;
+  height: 16px;
+}
 /*
  * Groups a name with its chips. The exercise head, the history row and the
  * routine list are all flex, so without a wrapper the chips would become

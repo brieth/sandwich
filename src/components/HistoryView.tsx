@@ -105,30 +105,37 @@ export function HistoryView() {
               <div className="history-body">
                 {s.exercises.map((e, i) => (
                   <div key={i} className="history-exercise">
-                    <div className="ex-title-row">
+                    {/* Same head as a workout card: the icon stands to the left
+                        of the name and the station together. */}
+                    <div className="exercise-head">
                       <ImplementIcon exerciseId={e.exerciseId} />
-                      <select
-                        className="history-exercise-select"
-                        value={e.exerciseId}
-                        onChange={(ev) => updateSessionExercise(s.id, i, ev.target.value)}
-                      >
-                        {exerciseOptions.map((ex) => (
-                          <option key={ex.id} value={ex.id}>
-                            {ex.name}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="ex-head-text">
+                        <div className="ex-title-row">
+                          <select
+                            className="history-exercise-select"
+                            value={e.exerciseId}
+                            onChange={(ev) => updateSessionExercise(s.id, i, ev.target.value)}
+                          >
+                            {exerciseOptions.map((ex) => (
+                              <option key={ex.id} value={ex.id}>
+                                {ex.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        {/* Dropped from the routine, so it's shown for the record
+                            but excluded from the volume total above and every
+                            other metric. */}
+                        {!isCurrentExercise(e.exerciseId) && (
+                          <span className="retired-tag">not counted</span>
+                        )}
+                        <StationPicker
+                          stations={stationsFor(e.exerciseId, allStations, e.stationId)}
+                          value={e.stationId}
+                          onChange={(id) => updateSessionStation(s.id, i, id)}
+                        />
+                      </div>
                     </div>
-                    {/* Dropped from the routine, so it's shown for the record but
-                        excluded from the volume total above and every other metric. */}
-                    {!isCurrentExercise(e.exerciseId) && (
-                      <span className="retired-tag">not counted</span>
-                    )}
-                    <StationPicker
-                      stations={stationsFor(e.exerciseId, allStations, e.stationId)}
-                      value={e.stationId}
-                      onChange={(id) => updateSessionStation(s.id, i, id)}
-                    />
                     <div className="history-sets">
                       {e.sets.map((st, j) => (
                         <button
