@@ -297,10 +297,20 @@ body {
 }
 .exercise-head {
   display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+/*
+ * The name and the station, stacked. min-width 0 so a name longer than the card
+ * wraps inside this column instead of forcing the row wider than the card.
+ */
+.ex-head-text {
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0;
-  margin-bottom: 10px;
+  min-width: 0;
 }
 .exercise-card.collapsed .exercise-head {
   margin-bottom: 0;
@@ -901,10 +911,24 @@ body {
   height: 100%;
 }
 /* Beside a 16px exercise name rather than the 14px lists. */
-.exercise-head .ex-icon,
 .modal-head .ex-icon {
   width: 18px;
   height: 18px;
+}
+.exercise-head .ex-icon {
+  width: 20px;
+  height: 20px;
+}
+/*
+ * Where the card also carries a station, the icon grows to stand beside the
+ * name and the station together rather than just the name. Sized to the two
+ * lines (16px name plus the 12px station) instead of stretching to them: an
+ * auto-sized square here has nothing definite to resolve the svg's 100%
+ * against, so it falls back to the svg's own 300px.
+ */
+.exercise-head:has(.station-pick) .ex-icon {
+  width: 36px;
+  height: 36px;
 }
 /*
  * Groups a name with its chips. The exercise head, the history row and the

@@ -466,33 +466,40 @@ function ExerciseCard({
 
   return (
     <div className={selected ? 'exercise-card' : 'exercise-card collapsed'}>
+      {/*
+        * The icon sits outside the text column so it stands to the left of the
+        * name and the station together, and sizes itself to however many lines
+        * that column ends up being.
+        */}
       <div className="exercise-head">
-        <div className="ex-title-row">
-          <ImplementIcon exerciseId={ex.exerciseId} />
-          {options ? (
-            <select
-              className="ex-menu"
-              value={ex.exerciseId}
-              onChange={(e) => onSelect(e.target.value)}
-            >
-              <option value="">{menuLabel ?? 'Select exercise…'}</option>
-              {options.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <span className="exercise-name">{name}</span>
+        <ImplementIcon exerciseId={ex.exerciseId} />
+        <div className="ex-head-text">
+          <div className="ex-title-row">
+            {options ? (
+              <select
+                className="ex-menu"
+                value={ex.exerciseId}
+                onChange={(e) => onSelect(e.target.value)}
+              >
+                <option value="">{menuLabel ?? 'Select exercise…'}</option>
+                {options.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="exercise-name">{name}</span>
+            )}
+          </div>
+          {selected && (
+            <StationPicker
+              stations={stations}
+              value={ex.stationId}
+              onChange={onSelectStation}
+            />
           )}
         </div>
-        {selected && (
-          <StationPicker
-            stations={stations}
-            value={ex.stationId}
-            onChange={onSelectStation}
-          />
-        )}
       </div>
 
       {selected && (
