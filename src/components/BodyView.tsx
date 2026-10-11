@@ -190,6 +190,8 @@ interface Explainer {
   value: string;
   unit: string;
   points: string[];
+  /** Extra classes on the value, so the phase sheet can carry the card's hue. */
+  tone?: string;
 }
 
 /**
@@ -346,7 +348,13 @@ export function BodyView() {
         <PhaseCard
           v={phase}
           onOpen={() =>
-            setExplain({ title: 'Phase', value: phase.label, unit: '', points: phase.why })
+            setExplain({
+              title: 'Phase',
+              value: phase.label,
+              unit: '',
+              tone: `phase-value phase-${phase.phase}`,
+              points: phase.why,
+            })
           }
         />
       )}
@@ -491,7 +499,7 @@ export function BodyView() {
               <span className="modal-title">{explain.title}</span>
               <CloseButton onClick={() => setExplain(null)} label="Close" />
             </div>
-            <p className="stat-explain-value">
+            <p className={`stat-explain-value ${explain.tone ?? ''}`}>
               {explain.value}
               {explain.unit && <small>{explain.unit}</small>}
             </p>

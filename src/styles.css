@@ -1174,6 +1174,15 @@ body {
   font-variant-numeric: tabular-nums;
   color: var(--accent);
 }
+/* The phase sheet is the same object the card is, so it carries the card's hue
+   and case rather than the accent every numeric stat uses. Caps read larger
+   than digits at the same size, so it sits a few px below them. */
+.stat-explain-value.phase-value {
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--phase-hue);
+}
 .stat-explain-value small {
   font-size: 14px;
   color: var(--muted);
