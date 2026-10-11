@@ -226,8 +226,6 @@ export interface PhaseVerdict {
   phase: Phase;
   /** The verdict word. */
   label: string;
-  /** The single line under it. */
-  line: string;
   /** Full reasoning, shown on tap. */
   why: string[];
 }
@@ -317,7 +315,6 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
     return {
       phase,
       label: 'Cut',
-      line: done ? `Cut to ${target} lb.` : `Cut to ${target} lb, then bulk.`,
       why,
     };
   }
@@ -328,7 +325,6 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
     return {
       phase,
       label: 'Bulk',
-      line: `Bulk to ${target} lb, then cut.`,
       why: [
         `At ${pct(bf)} you are inside the ${BULK_FLOOR} to ${BULK_CEILING}% window where a surplus mostly buys tissue rather than fat. This is the half of the cycle that adds mass.`,
         `${lb(leanGap)} of lean short of FFMI ${FFMI_GOAL}. Maintenance will not cover that. A surplus will, and the leaner you start it the more of it lands as muscle.`,
@@ -341,7 +337,6 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
     return {
       phase,
       label: 'Hold',
-      line: `The target is met at ${lb(lean)} of lean and ${pct(bf)}.`,
       why: [
         `Lean is past the ${lb(LEAN_GOAL)} that FFMI ${FFMI_GOAL} asks for, and at ${pct(bf)} it shows. Neither half of the goal has anything left to run.`,
         `Stay near maintenance and keep training and protein where they are. If fat climbs back above ${REVEAL}%, cut. Wanting more size is a new target rather than a continuation of this one.`,
@@ -353,7 +348,6 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
   return {
     phase,
     label: 'Hold',
-    line: 'Recomposition is doing both jobs.',
     why: [
       `Lean up ${lb(dLean)}, fat down ${lb(-dFat)}, over ${days} days. A surplus or a deficit would each hand you only one of those.`,
       `At ${pct(bf)} you are inside the ${BULK_FLOOR} to ${BULK_CEILING}% window, so neither direction is being forced.`,

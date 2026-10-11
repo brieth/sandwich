@@ -193,19 +193,15 @@ interface Explainer {
 }
 
 /**
- * The verdict, above everything else on the tab. It reads the latest scan and
- * the one before it; the reasoning and the numbers behind it are a tap away
- * rather than on the card, since the card's job is to be answerable at a
- * glance.
+ * The verdict, above everything else on the tab. One word: it reads the latest
+ * scan and the one before it, and every number and reason behind the call is a
+ * tap away rather than on the card.
  */
 function PhaseCard({ v, onOpen }: { v: PhaseVerdict; onOpen: () => void }) {
   return (
     <button className={`phase-card phase-${v.phase}`} onClick={onOpen}>
-      <span className="phase-main">
-        <span className="phase-eyebrow">Phase</span>
-        <strong className="phase-verdict">{v.label}</strong>
-      </span>
-      <span className="phase-line">{v.line}</span>
+      <span className="phase-eyebrow">Phase</span>
+      <strong className="phase-verdict">{v.label}</strong>
     </button>
   );
 }
