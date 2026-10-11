@@ -278,61 +278,55 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
     // With the lean target met there is no next bulk to leave room for, so the
     // cut runs past the bulk floor to where the muscle actually shows.
     const floor = done ? REVEAL : BULK_FLOOR;
-    // Solved from lean, then every figure printed at the same one decimal the
-    // scans use. Rounding the scale number to a whole pound made the three
-    // disagree: 167 less a fat mass of 20.0 reads as 147 of lean, which looks
-    // like the cut growing muscle when it is only two roundings going opposite
-    // ways.
+    // Solved from lean, then every figure printed at the one decimal the scans
+    // use, so the arithmetic closes whichever way it is checked.
     const targetFat = (lean * floor) / (100 - floor);
     const toLose = fat - targetFat;
-    const target = lb(lean + targetFat);
+    const target = lean + targetFat;
     // Half to one percent of bodyweight a week is the rate that holds onto
     // lean tissue; past that the deficit starts taking muscle with the fat.
     const wk = (r: number) => Math.round(toLose / (latest.weight * r));
     const span = wk(0.01) === wk(0.005) ? `about ${wk(0.01)}` : `${wk(0.01)} to ${wk(0.005)}`;
+    // Where the whole programme ends, as opposed to where this phase ends.
+    const goalWeight = weightAt(LEAN_GOAL, BULK_FLOOR);
     const why: string[] = [];
 
     why.push(
       done
-        ? `Lean is at ${lb(lean)} against the ${lb(LEAN_GOAL)} target, so the mass goal is met. What is left is showing it, which is why this runs to ${REVEAL}% rather than the ${BULK_FLOOR}% you would start a bulk from.`
-        : `At ${pct(bf)} you are at the top of the ${BULK_FLOOR} to ${BULK_CEILING}% window worth bulking inside. A surplus splits worse the more fat you carry, so starting one here puts you past ${BULK_CEILING + 4}% before it is worth stopping.`,
+        ? `Lean mass is ${lb(lean)} against the ${lb(LEAN_GOAL)} target, so the muscle goal is met. What is left is making it visible, which is a body fat problem rather than a muscle one. That is why this cut runs to ${REVEAL}% body fat instead of stopping at the ${BULK_FLOOR}% you would start a surplus from.`
+        : `Your body fat is ${pct(bf)}. The range worth running a surplus in is ${BULK_FLOOR}% to ${BULK_CEILING}% body fat, and you are at the top of it. The fatter you are when a surplus starts, the more of it ends up as fat rather than muscle, so starting one at ${pct(bf)} would carry you past ${BULK_CEILING + 4}% body fat before it is worth stopping.`,
     );
 
     if (dFat <= -MOVED && dLean >= MOVED) {
       const rate = (-dFat / days) * 30;
       why.push(
-        `Fat is already falling: ${lb(-dFat)} down, lean ${lb(dLean)} up, over ${days} days with no deficit. But ${lb(rate)} a month is ${Math.round(toLose / rate)} months to ${floor}%, against ${span} weeks for a real cut. Recomposition also slows as the return to training is spent, so that rate is the best it gets.`,
+        `Fat is already coming off without a deficit. Between the last two scans, ${days} days apart, fat mass fell ${lb(-dFat)} and lean mass rose ${lb(dLean)}. But that is only ${lb(rate)} of fat per month, which reaches ${floor}% body fat in about ${Math.round(toLose / rate)} months, where a deliberate deficit gets there in ${span} weeks. Recomposition also slows as the return-to-training regain is used up, so ${lb(rate)} per month is the best rate you will see.`,
       );
     }
 
     why.push(
-      `Drop ${lb(toLose)} of fat, ${lb(fat)} down to ${lb(targetFat)}. That is ${target} on the scale if lean holds, a few either side if it does not. ${span} weeks at half to one percent of bodyweight. Protein and training stay as they are.`,
+      `What the cut changes: fat mass goes from ${lb(fat)} to ${lb(targetFat)}, a loss of ${lb(toLose)}. Lean mass stays at ${lb(lean)}, which is what a deficit is for. Body weight therefore goes from ${lb(latest.weight)} to ${lb(target)}. At half to one percent of body weight per week that takes ${span} weeks. Protein and training stay exactly as they are.`,
     );
 
     if (!done) {
       why.push(
-        `Then bulk. ${lb(leanGap)} of lean short of FFMI ${FFMI_GOAL} is several surpluses, and each one starts better from ${BULK_FLOOR}% than from ${pct(bf)}.`,
+        `${lb(target)} is a waypoint, not the finish. The finish is ${lb(LEAN_GOAL)} of lean mass, which is FFMI ${FFMI_GOAL}. At ${BULK_FLOOR}% body fat that works out to ${lb(goalWeight)} of body weight carrying ${lb(goalWeight - LEAN_GOAL)} of fat, so you end up ${lb(goalWeight - latest.weight)} heavier than you are today, not lighter. Getting there means adding ${lb(leanGap)} of lean mass, which is more than one surplus delivers, and every one of those surpluses works better starting from ${BULK_FLOOR}% body fat than from ${pct(bf)}.`,
       );
     }
 
-    return {
-      phase,
-      label: 'Cut',
-      why,
-    };
+    return { phase, label: 'Cut', why };
   }
 
   if (phase === 'bulk') {
     const targetWeight = weightAt(lean, BULK_CEILING);
-    const target = lb(targetWeight);
     const toGain = targetWeight - latest.weight;
     return {
       phase,
       label: 'Bulk',
       why: [
-        `At ${pct(bf)} you are inside the ${BULK_FLOOR} to ${BULK_CEILING}% window where a surplus mostly buys tissue rather than fat. This is the half of the cycle that adds mass.`,
-        `${lb(leanGap)} of lean short of FFMI ${FFMI_GOAL}. Maintenance will not cover that. A surplus will, and the leaner you start it the more of it lands as muscle.`,
-        `Run it to ${target}, which is ${BULK_CEILING}% at today's lean mass, then cut back to ${BULK_FLOOR}. Roughly ${lb(toGain)} of scale weight, at a quarter to a half pound a week. Faster does not add muscle faster, only fat.`,
+        `Your body fat is ${pct(bf)}, inside the ${BULK_FLOOR}% to ${BULK_CEILING}% range where a surplus mostly becomes muscle rather than fat. This is the half of the cycle that adds size.`,
+        `Lean mass is ${lb(lean)} against a target of ${lb(LEAN_GOAL)}, so you are ${lb(leanGap)} short. Eating at maintenance will not close that gap. A surplus will, and the leaner you are when it starts the more of it lands as muscle.`,
+        `Run the surplus until body fat reaches ${BULK_CEILING}%, which at your current lean mass of ${lb(lean)} means ${lb(targetWeight)} of body weight, ${lb(toGain)} above where you are now. Then cut back to ${BULK_FLOOR}% body fat. Add weight at a quarter to a half pound per week. Going faster does not build muscle faster, it only adds fat, and that fat makes the next cut longer.`,
       ],
     };
   }
@@ -342,8 +336,8 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
       phase,
       label: 'Hold',
       why: [
-        `Lean is past the ${lb(LEAN_GOAL)} that FFMI ${FFMI_GOAL} asks for, and at ${pct(bf)} it shows. Neither half of the goal has anything left to run.`,
-        `Stay near maintenance and keep training and protein where they are. If fat climbs back above ${REVEAL}%, cut. Wanting more size is a new target rather than a continuation of this one.`,
+        `Lean mass is ${lb(lean)}, past the ${lb(LEAN_GOAL)} that FFMI ${FFMI_GOAL} asks for, and body fat is ${pct(bf)}, which is lean enough to show it. Both halves of the goal are met, so there is no phase left to run.`,
+        `Stay at maintenance and keep training and protein where they are. If body fat climbs back above ${REVEAL}%, cut. Wanting more size than this is a new target with a new number, not a continuation of this one.`,
       ],
     };
   }
@@ -353,9 +347,9 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
     phase,
     label: 'Hold',
     why: [
-      `Lean up ${lb(dLean)}, fat down ${lb(-dFat)}, over ${days} days. A surplus or a deficit would each hand you only one of those.`,
-      `At ${pct(bf)} you are inside the ${BULK_FLOOR} to ${BULK_CEILING}% window, so neither direction is being forced.`,
-      `You are gaining ${lb(rate)} of lean a month, and recomposition slows as the return to training is spent. When lean stops moving, go to a surplus. When fat starts climbing, cut.`,
+      `Between the last two scans, ${days} days apart, lean mass rose ${lb(dLean)} and fat mass fell ${lb(-dFat)}. You are adding muscle and losing fat at the same time. A surplus would give you the first of those and a deficit the second; this is giving you both.`,
+      `Your body fat is ${pct(bf)}, inside the ${BULK_FLOOR}% to ${BULK_CEILING}% range, so neither direction is being forced on you.`,
+      `Lean mass is rising at ${lb(rate)} per month. Recomposition slows as the return-to-training regain is used up, so watch for it stalling. When lean mass stops rising, switch to a surplus. When fat mass starts rising, cut.`,
     ],
   };
 }
