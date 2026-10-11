@@ -1782,4 +1782,13 @@ body {
   font-size: 15px;
   font-weight: 700;
   color: var(--phase-hue);
+  /* Widened the only way this font stack allows. font-stretch at 110% and at
+     expanded, and a wdth variation axis, all leave the painted width at
+     exactly 34.00px, so none of them has a width to reach for. A scale does
+     it: 1.06 takes the word to 36.13. It thickens vertical stems by the same
+     6%, which on a 2px stem is a tenth of a pixel. Y is untouched, so the
+     centring above still holds. */
+  display: inline-block;
+  transform: scaleX(1.06);
+  transform-origin: left center;
 }
