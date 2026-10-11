@@ -293,7 +293,7 @@ body {
   color: var(--accent);
   border-radius: 6px;
   padding: 1px 7px;
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -374,7 +374,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 2px 8px;
-  font-size: 15px;
+  font-size: 12px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -498,11 +498,11 @@ body {
 .ex-stats-row span {
   text-align: center;
   font-variant-numeric: tabular-nums;
-  font-size: 15px;
+  font-size: 12px;
 }
 .ex-stats-row .k {
   text-align: center;
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text);
 }
@@ -865,7 +865,7 @@ body {
   gap: 5px;
   max-width: 100%;
   margin-top: 2px;
-  font-size: 15px;
+  font-size: 12px;
   color: var(--accent);
   cursor: pointer;
 }
@@ -1080,7 +1080,7 @@ body {
   margin-top: 0;
 }
 .station-guide-title {
-  font-size: 15px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
@@ -1374,7 +1374,7 @@ body {
   align-items: center;
   gap: 14px;
   margin-top: 14px;
-  font-size: 15px;
+  font-size: 12px;
   color: var(--muted);
 }
 .chart-legend .lg {
@@ -1426,7 +1426,7 @@ body {
 }
 .pr-1rm {
   color: var(--accent);
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 500;
 }
 
@@ -1453,7 +1453,7 @@ body {
   font-weight: 700;
 }
 .routine-detail-sub {
-  font-size: 15px;
+  font-size: 12px;
   color: var(--muted);
 }
 .routine-exercises {
@@ -1708,7 +1708,7 @@ body {
 
 /* Change since the previous scan, per body region. */
 .seg-delta {
-  font-size: 15px;
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
