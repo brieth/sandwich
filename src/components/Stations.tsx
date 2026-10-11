@@ -110,10 +110,10 @@ export function Stations() {
     <>
       <h2 className="section">Stations</h2>
       <p className="muted small backup-note">
-        Cable stacks differ between machines, so the same number can be very different resistance.
-        Calibrate the ones you use and every weight logged there converts to real force, keeping
-        history comparable. Exercises with no station are treated as already normalized, so you only
-        need this for machines you actually want to compare.
+        The same number on two different cable stacks is not the same resistance. Calibrating a
+        station converts every weight logged there into real force, so history stays comparable
+        across machines. Exercises with no station are treated as already converted, so you only
+        need to calibrate machines you want to compare.
       </p>
 
       {/* The built-in barbells aren't listed: nothing about them is editable,
@@ -407,7 +407,7 @@ function CalibrationForm({
             <p className="station-fit-eq">{equation(fit, station.unit)}</p>
             <p className="muted small">
               {parsed.length < 3
-                ? 'Two points fit a line exactly, so this assumes the machine is linear rather than checking it. Add a third.'
+                ? 'Two points always fit a line exactly, so this assumes the machine is linear instead of checking. Add a third measurement.'
                 : err < 3
                   ? `Linear across ${lo} to ${hi}. Measure near your working weight so the line isn't stretched far past your samples.`
                   : `Points deviate up to ${err.toFixed(1)}% from the line, which is more curve than expected. Re-check your readings.`}

@@ -95,10 +95,10 @@ export function RoutinesView() {
 
       <h2 className="section">Strength Formula</h2>
       <p className="muted small backup-note">
-        How a set's weight and reps become an estimated 1RM, which every strength number is built
-        on. They agree up to about 10 reps and diverge above it, so a flatter one lets a heavy
-        low-rep set compare better against a high-rep one. Nothing logged changes, so switching
-        back restores the old numbers exactly.
+        Every strength number here is built on an estimated 1RM, calculated from a set's weight
+        and reps. The formulas agree up to about 10 reps and differ above that. A flatter formula
+        gives a high-rep set a higher estimate. Switching formulas recalculates the numbers but
+        changes nothing you logged, so switching back restores them exactly.
       </p>
 
       <select
@@ -115,8 +115,9 @@ export function RoutinesView() {
 
       <h2 className="section">Backup & Data</h2>
       <p className="muted small backup-note">
-        Workouts are saved on this device only. Export a backup file regularly so nothing is lost if
-        your browser data gets cleared — and use Import to restore it or move to another device.
+        Workouts are saved on this device only. Export a backup file regularly so nothing is lost
+        if your browser data is cleared. Use Import to restore a backup or to move your data to
+        another device.
       </p>
 
       <div className="data-buttons">

@@ -121,9 +121,9 @@ const STATS: StatDef[] = [
     dir: 'neutral',
     value: (r) => r.weight,
     explain: [
-      'Your total body weight. Everything, all at once.',
-      'On its own it says nothing about what that weight is made of, which is why the delta here is never colored good or bad. Two people at 177 lb can look completely different depending on the split between muscle and fat.',
-      'Its real use is confirming whether you are eating at maintenance. If weight holds steady while you train hard, your calories are roughly balanced. If it climbs, you are in a surplus whether you intended one or not.',
+      'Your total body weight.',
+      'On its own it says nothing about what that weight is made of, which is why the change here is never marked good or bad. Two people at 177 lb can look completely different depending on how much of it is muscle and how much is fat.',
+      'Its use is checking whether you are eating at maintenance. Steady weight while training hard means calories are roughly balanced. Rising weight means a surplus, whether or not you intended one.',
     ],
   },
   {
@@ -133,8 +133,8 @@ const STATS: StatDef[] = [
     value: (r) => r.leanBodyMass,
     explain: [
       'Everything in your body that is not fat: muscle, organs, bone, and the water held in all of it. Also called fat-free mass.',
-      'This is the number that matters most for looking muscular, because it is the tissue you are trying to add. Organs and bone barely change, so movement in this number is mostly muscle.',
-      'The catch is that it is heavily influenced by hydration. A single scan carries roughly 4 lb of error, so ignore any change smaller than that unless repeated scans point the same way.',
+      'This is the number to watch for building size, because it is the tissue you are adding. Organs and bone barely change, so most of any movement here is muscle.',
+      'It is also heavily affected by hydration. A single scan carries roughly 4 lb of error, so ignore any change smaller than that unless repeated scans point the same way.',
     ],
   },
   {
@@ -144,7 +144,7 @@ const STATS: StatDef[] = [
     value: (r) => r.bodyFatMass,
     explain: [
       'The total weight of fat on your body, in pounds.',
-      'This is more useful for tracking than the body fat percentage, because it isolates a single variable. If this number falls, you lost fat. Nothing else can explain it.',
+      'This is better for tracking than body fat percentage, because only one thing moves it. If this number falls, you lost fat.',
     ],
   },
   {
@@ -153,9 +153,9 @@ const STATS: StatDef[] = [
     dir: 'down',
     value: (r) => r.bodyFatPct,
     explain: [
-      'Your fat mass expressed as a share of your total weight.',
-      'It matters because it determines whether the muscle you have is actually visible. Definition, abdominal separation, and vascularity are all functions of this number rather than of how much muscle you carry.',
-      'Read it carefully though, because it is a ratio and moves whenever either side changes. Gaining muscle lowers your body fat percentage without you losing a single pound of fat. That is why fat mass above is the cleaner number to track.',
+      'Your fat mass as a share of your total weight.',
+      'It determines whether the muscle you have is visible. Definition, abdominal separation and vascularity all depend on this number rather than on how much muscle you carry.',
+      'It is a ratio, so it moves whenever either side changes. Gaining muscle lowers your body fat percentage without you losing any fat. Fat mass above is the cleaner number to track.',
     ],
   },
   {
@@ -164,9 +164,9 @@ const STATS: StatDef[] = [
     dir: 'up',
     value: (r) => r.skeletalMuscleMass,
     explain: [
-      'Skeletal muscle mass: only the muscle attached to your skeleton, which is the tissue you actually train.',
-      'It is narrower than lean mass, which also counts organs, bone and water. Skeletal muscle is normally a bit over half of your lean mass.',
-      'In principle this is the most directly relevant number in the whole panel. In practice it is derived from the same impedance reading as lean mass, so it carries the same hydration error and moves in step with it.',
+      'Skeletal muscle mass: only the muscle attached to your skeleton, which is the tissue you train.',
+      'It is narrower than lean mass, which also counts organs, bone and water. Skeletal muscle is normally a bit over half of lean mass.',
+      'It should be the most relevant number in the panel. In practice it is calculated from the same impedance reading as lean mass, so it carries the same hydration error and moves with it.',
     ],
   },
   {
@@ -176,10 +176,10 @@ const STATS: StatDef[] = [
     value: ffmi,
     dp: 1,
     explain: [
-      'Fat-free mass index. Your lean mass divided by your height squared. Think of it as BMI, except it counts only lean tissue.',
-      'This exists because BMI cannot tell muscle from fat. Your BMI of 24.8 reads as perfectly normal, but it is treating 34 lb of fat as though it were the same thing as muscle. FFMI throws the fat out and asks one question: how much lean tissue do you carry for your height?',
-      'The scale for men runs roughly 18 to 19 for untrained, 20 to 21 for someone who trains and looks fit, 22 to 23 for clearly muscular, 24 to 25 near the natural ceiling, and 26 or above usually indicating enhancement.',
-      `The goal of ${FFMI_GOAL} shown here is the level where the look you are after tends to appear, and it works out to ${LEAN_GOAL} lb of lean mass at your height. It is the sturdiest target in the app, because unlike a lift it cannot be reached through better technique.`,
+      'Fat-free mass index: your lean mass divided by your height squared. It is BMI counting only lean tissue.',
+      'BMI cannot tell muscle from fat. Your BMI of 24.8 reads as normal, but it counts 34 lb of fat the same as it would count muscle. FFMI leaves the fat out and measures how much lean tissue you carry for your height.',
+      'For men the scale runs roughly 18 to 19 untrained, 20 to 21 for someone who trains and looks fit, 22 to 23 for clearly muscular, 24 to 25 near the natural limit, and 26 or above usually meaning drugs.',
+      `The goal of ${FFMI_GOAL} shown here is where that look tends to appear, and it works out to ${LEAN_GOAL} lb of lean mass at your height. Unlike a lift, it cannot be reached through better technique.`,
     ],
   },
 ];
