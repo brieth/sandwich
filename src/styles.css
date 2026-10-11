@@ -293,7 +293,7 @@ body {
   color: var(--accent);
   border-radius: 6px;
   padding: 1px 7px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -374,7 +374,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 2px 8px;
-  font-size: 12px;
+  font-size: 15px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -498,11 +498,11 @@ body {
 .ex-stats-row span {
   text-align: center;
   font-variant-numeric: tabular-nums;
-  font-size: 12px;
+  font-size: 15px;
 }
 .ex-stats-row .k {
   text-align: center;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text);
 }
@@ -865,7 +865,7 @@ body {
   gap: 5px;
   max-width: 100%;
   margin-top: 2px;
-  font-size: 12px;
+  font-size: 15px;
   color: var(--accent);
   cursor: pointer;
 }
@@ -1080,7 +1080,7 @@ body {
   margin-top: 0;
 }
 .station-guide-title {
-  font-size: 12px;
+  font-size: 15px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
@@ -1374,7 +1374,7 @@ body {
   align-items: center;
   gap: 14px;
   margin-top: 14px;
-  font-size: 12px;
+  font-size: 15px;
   color: var(--muted);
 }
 .chart-legend .lg {
@@ -1426,7 +1426,7 @@ body {
 }
 .pr-1rm {
   color: var(--accent);
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
 }
 
@@ -1453,7 +1453,7 @@ body {
   font-weight: 700;
 }
 .routine-detail-sub {
-  font-size: 12px;
+  font-size: 15px;
   color: var(--muted);
 }
 .routine-exercises {
@@ -1708,7 +1708,7 @@ body {
 
 /* Change since the previous scan, per body region. */
 .seg-delta {
-  font-size: 12px;
+  font-size: 15px;
   font-variant-numeric: tabular-nums;
   text-align: right;
 }
@@ -1743,7 +1743,7 @@ body {
   width: 100%;
   margin-top: 16px;
   /* 11 over 9: caps sit high in their line box, so even padding leaves the ink
-     0.9px above the card's centre. This puts it within 0.13. */
+     almost a pixel above the card's centre. This puts it within 0.07. */
   padding: 11px 12px 9px;
   text-align: left;
   font: inherit;
@@ -1767,11 +1767,11 @@ body {
 .phase-verdict {
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  /* One line box for both, so centring the boxes is most of the job. The 15
-     is solved against rendered pixels rather than reasoned: the half-leading
-     each size gets is rounded independently, and every even value tested left
-     the larger word sitting 1.25px low. 15 lands the two cap centres 0.25px
-     apart. */
+  /* One line box for both, so centring the boxes is most of the job. The 15 is
+     solved against rendered pixels rather than reasoned: the half-leading each
+     size gets is rounded independently, so the offset alternates with parity.
+     Every even value tested left the larger word 1.19px low and every odd one
+     0.19px, across line-heights from 15 to 21. */
   line-height: 15px;
 }
 .phase-eyebrow {
@@ -1779,7 +1779,7 @@ body {
   color: var(--muted);
 }
 .phase-verdict {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--phase-hue);
 }
