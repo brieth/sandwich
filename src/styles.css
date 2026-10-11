@@ -1182,6 +1182,11 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--phase-hue);
+  /* Same 6% the card stretches by. The paragraph is already a block, so it
+     needs no display change, and the sheet has nothing to its right to run
+     into. */
+  transform: scaleX(1.06);
+  transform-origin: left center;
 }
 .stat-explain-value small {
   font-size: 14px;
