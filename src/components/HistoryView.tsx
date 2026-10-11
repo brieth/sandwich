@@ -64,7 +64,7 @@ export function HistoryView() {
       <MonthCalendar />
       {data.sessions.length === 0 ? (
         <p className="muted subtitle">
-          No workouts logged yet. Finish a session and it'll show up here.
+          No workouts logged yet. Finish a session and it will appear here.
         </p>
       ) : (
       <div className="history-list">
