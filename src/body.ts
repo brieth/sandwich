@@ -278,11 +278,14 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
     // With the lean target met there is no next bulk to leave room for, so the
     // cut runs past the bulk floor to where the muscle actually shows.
     const floor = done ? REVEAL : BULK_FLOOR;
-    // Solved from lean rather than from the rounded weight, so the pounds of
-    // fat stay exact and the scale number is the rounded consequence of it.
+    // Solved from lean, then every figure printed at the same one decimal the
+    // scans use. Rounding the scale number to a whole pound made the three
+    // disagree: 167 less a fat mass of 20.0 reads as 147 of lean, which looks
+    // like the cut growing muscle when it is only two roundings going opposite
+    // ways.
     const targetFat = (lean * floor) / (100 - floor);
     const toLose = fat - targetFat;
-    const target = Math.round(lean + targetFat);
+    const target = lb(lean + targetFat);
     // Half to one percent of bodyweight a week is the rate that holds onto
     // lean tissue; past that the deficit starts taking muscle with the fat.
     const wk = (r: number) => Math.round(toLose / (latest.weight * r));
@@ -303,7 +306,7 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
     }
 
     why.push(
-      `Drop ${lb(toLose)} of fat, ${lb(fat)} down to ${lb(targetFat)}. That is ${target} lb on the scale if lean holds, a few either side if it does not. ${span} weeks at half to one percent of bodyweight. Protein and training stay as they are.`,
+      `Drop ${lb(toLose)} of fat, ${lb(fat)} down to ${lb(targetFat)}. That is ${target} on the scale if lean holds, a few either side if it does not. ${span} weeks at half to one percent of bodyweight. Protein and training stay as they are.`,
     );
 
     if (!done) {
@@ -320,15 +323,16 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
   }
 
   if (phase === 'bulk') {
-    const target = Math.round(weightAt(lean, BULK_CEILING));
-    const toGain = target - latest.weight;
+    const targetWeight = weightAt(lean, BULK_CEILING);
+    const target = lb(targetWeight);
+    const toGain = targetWeight - latest.weight;
     return {
       phase,
       label: 'Bulk',
       why: [
         `At ${pct(bf)} you are inside the ${BULK_FLOOR} to ${BULK_CEILING}% window where a surplus mostly buys tissue rather than fat. This is the half of the cycle that adds mass.`,
         `${lb(leanGap)} of lean short of FFMI ${FFMI_GOAL}. Maintenance will not cover that. A surplus will, and the leaner you start it the more of it lands as muscle.`,
-        `Run it to ${target} lb, which is ${BULK_CEILING}% at today's lean mass, then cut back to ${BULK_FLOOR}. Roughly ${lb(toGain)} of scale weight, at a quarter to a half pound a week. Faster does not add muscle faster, only fat.`,
+        `Run it to ${target}, which is ${BULK_CEILING}% at today's lean mass, then cut back to ${BULK_FLOOR}. Roughly ${lb(toGain)} of scale weight, at a quarter to a half pound a week. Faster does not add muscle faster, only fat.`,
       ],
     };
   }
