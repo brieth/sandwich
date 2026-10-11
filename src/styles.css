@@ -1729,11 +1729,13 @@ body {
    the palette because nothing else uses it. */
 .phase-card {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 9px;
   width: 100%;
   margin-top: 16px;
-  padding: 10px 12px;
+  /* 11 over 9: caps sit high in their line box, so even padding leaves the ink
+     0.9px above the card's centre. This puts it within 0.13. */
+  padding: 11px 12px 9px;
   text-align: left;
   font: inherit;
   color: var(--text);
@@ -1754,14 +1756,21 @@ body {
 }
 .phase-eyebrow,
 .phase-verdict {
-  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  /* One line box for both, so centring the boxes is most of the job. The 15
+     is solved against rendered pixels rather than reasoned: the half-leading
+     each size gets is rounded independently, and every even value tested left
+     the larger word sitting 1.25px low. 15 lands the two cap centres 0.25px
+     apart. */
+  line-height: 15px;
 }
 .phase-eyebrow {
+  font-size: 10px;
   color: var(--muted);
 }
 .phase-verdict {
+  font-size: 12px;
   font-weight: 700;
   color: var(--phase-hue);
 }
