@@ -317,7 +317,7 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
     return {
       phase,
       label: 'Cut',
-      line: done ? `Down to ${target} lb.` : `Down to ${target} lb, then bulk.`,
+      line: done ? `Take it down to ${target} lb.` : `Take it down to ${target} lb, then bulk.`,
       why,
     };
   }
@@ -328,7 +328,7 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
     return {
       phase,
       label: 'Bulk',
-      line: `Up to ${target} lb, then cut.`,
+      line: `Take it up to ${target} lb, then cut.`,
       why: [
         `At ${pct(bf)} you are inside the ${BULK_FLOOR} to ${BULK_CEILING}% window where a surplus mostly buys tissue rather than fat. This is the half of the cycle that adds mass.`,
         `${lb(leanGap)} of lean short of FFMI ${FFMI_GOAL}. Maintenance will not cover that. A surplus will, and the leaner you start it the more of it lands as muscle.`,
@@ -341,7 +341,7 @@ export function phaseFor(readings: BodyReading[]): PhaseVerdict | null {
     return {
       phase,
       label: 'Hold',
-      line: `${lb(lean)} of lean at ${pct(bf)}. Target met.`,
+      line: `The target is met at ${lb(lean)} of lean and ${pct(bf)}.`,
       why: [
         `Lean is past the ${lb(LEAN_GOAL)} that FFMI ${FFMI_GOAL} asks for, and at ${pct(bf)} it shows. Neither half of the goal has anything left to run.`,
         `Stay near maintenance and keep training and protein where they are. If fat climbs back above ${REVEAL}%, cut. Wanting more size is a new target rather than a continuation of this one.`,
