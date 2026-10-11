@@ -199,7 +199,7 @@ interface Explainer {
  */
 function PhaseCard({ v, onOpen }: { v: PhaseVerdict; onOpen: () => void }) {
   return (
-    <button className={`phase-card phase-${v.phase}`} onClick={onOpen}>
+    <button className="phase-card" onClick={onOpen}>
       <span className="phase-eyebrow">Phase</span>
       <strong className="phase-verdict">{v.label}</strong>
     </button>
