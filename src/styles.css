@@ -1722,32 +1722,46 @@ body {
   --accent: var(--muted);
 }
 
-/* Phase verdict, top of the Body tab. A label and a value on one baseline,
-   on the same type scale as the stat cards below it, since it is one more
-   reading rather than a banner. */
+/* Phase verdict, top of the Body tab. Label and verdict at the same size and
+   tracking, so the pair reads as one caption rather than a banner. The hue is
+   the only thing carrying the direction: warm to take weight off, accent to
+   put it on, muted to leave it alone. The amber is defined here rather than in
+   the palette because nothing else uses it. */
 .phase-card {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 9px;
   width: 100%;
   margin-top: 16px;
-  padding: 9px 12px;
+  padding: 10px 12px;
   text-align: left;
   font: inherit;
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--border);
+  border-left: 3px solid var(--phase-hue);
   border-radius: 10px;
   cursor: pointer;
 }
-.phase-eyebrow {
+.phase-cut {
+  --phase-hue: #e0a33c;
+}
+.phase-bulk {
+  --phase-hue: var(--accent);
+}
+.phase-hold {
+  --phase-hue: var(--muted);
+}
+.phase-eyebrow,
+.phase-verdict {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+.phase-eyebrow {
   color: var(--muted);
 }
 .phase-verdict {
-  font-size: 17px;
   font-weight: 700;
-  line-height: 1.1;
+  color: var(--phase-hue);
 }
