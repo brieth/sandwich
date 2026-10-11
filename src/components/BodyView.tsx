@@ -5,8 +5,10 @@ import {
   FFMI_GOAL,
   HEIGHT_LABEL,
   LEAN_GOAL,
+  phaseFor,
   type BodyReading,
   type Insight,
+  type PhaseVerdict,
   type Segments,
 } from '../body';
 import { LineChart } from './LineChart';
@@ -182,6 +184,32 @@ const STATS: StatDef[] = [
   },
 ];
 
+/** Everything the explainer sheet needs, whichever card opened it. */
+interface Explainer {
+  title: string;
+  value: string;
+  unit: string;
+  points: string[];
+}
+
+/**
+ * The verdict, above everything else on the tab. It reads the latest scan and
+ * the one before it; the reasoning and the numbers behind it are a tap away
+ * rather than on the card, since the card's job is to be answerable at a
+ * glance.
+ */
+function PhaseCard({ v, onOpen }: { v: PhaseVerdict; onOpen: () => void }) {
+  return (
+    <button className={`phase-card phase-${v.phase}`} onClick={onOpen}>
+      <span className="phase-main">
+        <span className="phase-eyebrow">Phase</span>
+        <strong className="phase-verdict">{v.label}</strong>
+      </span>
+      <span className="phase-line">{v.line}</span>
+    </button>
+  );
+}
+
 function StatCard({
   def,
   latest,
@@ -280,7 +308,7 @@ function SegmentTable({
 export function BodyView() {
   const [metric, setMetric] = useState<Metric>('leanBodyMass');
   const [showGoal, setShowGoal] = useState(false);
-  const [explain, setExplain] = useState<number | null>(null);
+  const [explain, setExplain] = useState<Explainer | null>(null);
   useBackToClose(explain !== null, () => setExplain(null));
   const readings = BODY_READINGS;
 
@@ -297,6 +325,7 @@ export function BodyView() {
   const prev = readings.length > 1 ? readings[readings.length - 2] : null;
   const d = (f: (r: BodyReading) => number) => (prev ? f(latest) - f(prev) : null);
 
+  const phase = phaseFor(readings);
   const active = ALL_METRICS.find((m) => m.id === metric)!;
   // A segmental series drops scans from other machines rather than drawing a
   // step that only reflects a change of device.
@@ -317,14 +346,30 @@ export function BodyView() {
         <span className="range-chip">{latest.source}</span>
       </p>
 
+      {phase && (
+        <PhaseCard
+          v={phase}
+          onOpen={() =>
+            setExplain({ title: 'Phase', value: phase.label, unit: '', points: phase.why })
+          }
+        />
+      )}
+
       <div className="body-stats">
-        {STATS.map((s, i) => (
+        {STATS.map((s) => (
           <StatCard
             key={s.label}
             def={s}
             latest={latest}
             delta={d(s.value)}
-            onOpen={() => setExplain(i)}
+            onOpen={() =>
+              setExplain({
+                title: s.label,
+                value: num(s.value(latest), s.dp ?? 1),
+                unit: s.unit,
+                points: s.explain,
+              })
+            }
           />
         ))}
       </div>
@@ -443,18 +488,18 @@ export function BodyView() {
         ))}
       </div>
 
-      {explain != null && (
+      {explain && (
         <div className="modal-overlay" onClick={() => setExplain(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-head">
-              <span className="modal-title">{STATS[explain].label}</span>
+              <span className="modal-title">{explain.title}</span>
               <CloseButton onClick={() => setExplain(null)} label="Close" />
             </div>
             <p className="stat-explain-value">
-              {num(STATS[explain].value(latest), STATS[explain].dp ?? 1)}
-              <small>{STATS[explain].unit}</small>
+              {explain.value}
+              {explain.unit && <small>{explain.unit}</small>}
             </p>
-            {STATS[explain].explain.map((p, i) => (
+            {explain.points.map((p, i) => (
               <p key={i} className="insight-point">
                 {p}
               </p>

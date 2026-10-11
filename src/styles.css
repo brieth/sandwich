@@ -1721,3 +1721,45 @@ body {
 .modal-row:not(.in-mean) .sv-badge {
   --accent: var(--muted);
 }
+
+/* Phase verdict, top of the Body tab. */
+.phase-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px 14px;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.phase-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  flex: none;
+}
+.phase-eyebrow {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.phase-verdict {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+}
+.phase-line {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--muted);
+}
