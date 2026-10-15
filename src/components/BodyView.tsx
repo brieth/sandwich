@@ -6,6 +6,8 @@ import {
   HEIGHT_LABEL,
   LEAN_GOAL,
   phaseFor,
+  segmentsComparable,
+  COMPARABLE_HOURS,
   type BodyReading,
   type Insight,
   type PhaseVerdict,
@@ -78,6 +80,9 @@ const ALL_METRICS = [...METRICS, ...REGION_METRICS];
 
 /** Which way is progress, so deltas can be colored honestly. */
 type Dir = 'up' | 'down' | 'neutral';
+
+/** "Oct 14, 2026 15:22", or just the date where no time was recorded. */
+const fmtStamp = (r: BodyReading) => (r.time ? `${fmtDate(r.date)} ${r.time}` : fmtDate(r.date));
 
 const fmtDate = (iso: string) =>
   new Date(iso + 'T12:00:00').toLocaleDateString(undefined, {
@@ -269,16 +274,19 @@ function SegmentTable({
   seg,
   prev,
   unit,
+  note,
 }: {
   title: string;
   seg: Segments;
   prev?: Segments;
   unit: string;
+  note?: string;
 }) {
   const max = Math.max(...SEG_KEYS.map(([k]) => seg[k]));
   return (
     <div className="seg-block">
       <h2 className="section">{title}</h2>
+      {note && <p className="muted small seg-note">{note}</p>}
       {SEG_KEYS.map(([key, name]) => {
         const v = seg[key];
         const was = prev?.[key];
@@ -324,6 +332,18 @@ export function BodyView() {
   const d = (f: (r: BodyReading) => number) => (prev ? f(latest) - f(prev) : null);
 
   const phase = phaseFor(readings);
+  // Limb figures only compare between scans on one machine taken at a similar
+  // hour. Where they don't, the change column is dropped and the reason shown,
+  // rather than printing a delta that is mostly fluid moving around.
+  const segComparable = prev != null && segmentsComparable(latest, prev);
+  const segNote =
+    prev == null || segComparable
+      ? undefined
+      : prev.source !== latest.source
+        ? `No change shown: the ${fmtDate(prev.date)} scan was taken on a different machine, and limb figures are not comparable across devices.`
+        : !prev.time || !latest.time
+          ? `No change shown: one of the two scans has no recorded time, and limb figures move with the time of day.`
+          : `No change shown: this scan was at ${latest.time} and the ${fmtDate(prev.date)} scan at ${prev.time}. More than ${COMPARABLE_HOURS} hours apart on the clock, fluid has moved between the trunk and the legs, which the limb figures read as tissue.`;
   const active = ALL_METRICS.find((m) => m.id === metric)!;
   // A segmental series drops scans from other machines rather than drawing a
   // step that only reflects a change of device.
@@ -340,7 +360,7 @@ export function BodyView() {
     <div className="view">
       <h1>Body</h1>
       <p className="muted subtitle session-meta">
-        <span className="range-chip">{fmtDate(latest.date)}</span>
+        <span className="range-chip">{fmtStamp(latest)}</span>
         <span className="range-chip">{latest.source}</span>
       </p>
 
@@ -433,8 +453,9 @@ export function BodyView() {
         <SegmentTable
           title="Segmental lean"
           seg={latest.segmentalLean}
-          prev={prev?.source === latest.source ? prev.segmentalLean : undefined}
+          prev={segComparable ? prev?.segmentalLean : undefined}
           unit="lb"
+          note={segNote}
         />
       )}
 
@@ -451,7 +472,7 @@ export function BodyView() {
           <details key={r.date} className="history-card">
             <summary>
               <div>
-                <div className="history-name">{fmtDate(r.date)}</div>
+                <div className="history-name">{fmtStamp(r)}</div>
                 <div className="muted small">
                   {num(r.weight)} lb · {num(r.bodyFatPct)}% fat · {num(r.leanBodyMass)} lb lean
                 </div>
@@ -462,6 +483,7 @@ export function BodyView() {
                 {(
                   [
                     ['Source', r.source],
+                    ['Taken', fmtStamp(r)],
                     ['Height', HEIGHT_LABEL],
                     ['Weight', `${num(r.weight)} lb`],
                     ['Lean body mass', `${num(r.leanBodyMass)} lb`],

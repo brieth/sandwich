@@ -38,6 +38,16 @@ export interface Insight {
 export interface BodyReading {
   /** ISO date of the scan (local calendar day). */
   date: string;
+  /**
+   * Clock time of the scan, HH:MM on a 24-hour clock. Omitted where the
+   * printout is no longer to hand.
+   *
+   * It matters because fluid redistributes over a day. A night lying down
+   * moves it toward the trunk and a day upright pools it in the legs, and
+   * segmental impedance reads that as limb tissue. Two scans taken at
+   * different hours are not comparable limb by limb even on the same machine.
+   */
+  time?: string;
   /** Where it was taken / which machine. */
   source: string;
   weight: number;
@@ -70,6 +80,36 @@ export interface BodyReading {
  */
 export const HEIGHT_M = 1.8034;
 export const HEIGHT_LABEL = `5'11" (180 cm)`;
+
+/**
+ * Largest gap in clock time between two scans whose limb figures are still
+ * worth comparing. Four hours is short enough to keep a morning scan from
+ * being read against an afternoon one, and long enough that two scans taken
+ * in the same part of the day still compare.
+ */
+export const COMPARABLE_HOURS = 4;
+
+/** Hours between two HH:MM clock times, ignoring which day each fell on. */
+function clockGap(a: string, b: string): number {
+  const mins = (t: string) => {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+  };
+  return Math.abs(mins(a) - mins(b)) / 60;
+}
+
+/**
+ * Whether two scans' limb-by-limb figures can be read against each other.
+ *
+ * Different machines run different frequencies, which moves the segmental
+ * numbers far more than the gross ones. Different times of day move them too,
+ * through fluid redistribution. Either difference rules the comparison out.
+ */
+export function segmentsComparable(a: BodyReading, b: BodyReading): boolean {
+  if (a.source !== b.source) return false;
+  if (!a.time || !b.time) return false;
+  return clockGap(a.time, b.time) <= COMPARABLE_HOURS;
+}
 
 /** Fat-free mass index: lean mass (kg) / height (m)^2. */
 export function ffmi(r: BodyReading): number {
@@ -124,6 +164,7 @@ export const BODY_READINGS: BodyReading[] = [
   },
   {
     date: '2026-06-18',
+    time: '13:58',
     source: 'InBody 570',
     weight: 177.5,
     leanBodyMass: 143.1,
@@ -157,6 +198,7 @@ export const BODY_READINGS: BodyReading[] = [
   },
   {
     date: '2026-08-19',
+    time: '04:17',
     source: 'InBody 570',
     weight: 178.3,
     leanBodyMass: 146.8,
@@ -182,7 +224,7 @@ export const BODY_READINGS: BodyReading[] = [
         'The June entry set a rule that a lean change under about 4 lb from one scan is noise, and 3.7 lb is inside that, so it needs checking. The check is dry lean mass: lean tissue with the water removed, protein and mineral only. Hydration moves total body water and leaves dry lean mass alone. Dry lean mass rose 0.8 lb. Muscle is roughly 27% dry, so 0.8 lb of dry tissue implies about 3 lb of muscle, which would carry about 2.2 lb of water with it. Total body water rose 2.9 lb. Those numbers are consistent with real tissue plus some extra fluid.',
         'Against that, 55% of the new water went inside cells, where the existing split is 63%. Muscle holds its water inside cells, so growth should raise that share rather than lower it. The shortfall means part of the gain is fluid. Taking both together, the estimate is 2 to 3 lb of real muscle in 62 days rather than the full 3.7.',
         'Two numbers here look like separate confirmation and are not. Fat mass is calculated as weight minus lean mass, so any error in lean mass passes into fat mass with the sign reversed. Lean up, fat down and weight flat is exactly what a hydration difference produces. BMR is also calculated from lean mass, so its 36 kcal rise is the same figure a third time. The June entry treated a flat BMR as separate evidence, which was wrong. Dry lean mass is the only number in this panel that hydration cannot fake.',
-        'The limb breakdown matches what the program trains. Arms gained 5.1% of their lean mass, the trunk 3.3% and the legs 1.3%. Legs get one exercise per session from a menu and grew the least, in proportion. Left and right are within 1% of each other everywhere, so there is no asymmetry to correct.',
+        'The limb breakdown appeared to match the program, with arms up 5.1% of their lean mass, the trunk up 3.3% and the legs up 1.3%. That reading does not hold. This scan was taken at 04:17 and the June scan at 13:58. A night lying down moves fluid toward the trunk and a day upright pools it in the legs, and segmental impedance reads that as limb tissue, so the two are not comparable limb by limb. The October scan confirms it: at 15:22 the same machine put the legs up and the arms down while total lean mass held. Left and right are within 1% of each other in every scan, which is the one segmental reading that does hold.',
         'FFMI went from 19.96 to 20.47, leaving 18.1 lb of lean mass to reach the target of 23. At this scan\'s rate that is a bit over a year, but this is the fastest stretch. Returning after a break regains tissue faster than building new tissue, and the rate falls once that is used up. The earlier estimate of two to three years still stands, with this scan at the optimistic end of it.',
         'Across those 60 days the longest gap between sessions was 1.9 days, so this was training nearly every day with no planned rest. That produced the result, and it also means there is no deload in the schedule. Connective tissue and central fatigue recover more slowly than muscle, so a forced break is not a setback.',
         'Nothing else needs changing. Visceral fat held at 6, ECW/TBW at 0.370 is normal fluid balance, and SMI rose from 8.5 to 8.7. Take the next scan no sooner than two months out; anything closer will not clear the noise floor.',
@@ -191,6 +233,7 @@ export const BODY_READINGS: BodyReading[] = [
   },
   {
     date: '2026-10-14',
+    time: '15:22',
     source: 'InBody 570',
     weight: 175.2,
     leanBodyMass: 147.1,
@@ -217,7 +260,7 @@ export const BODY_READINGS: BodyReading[] = [
         'Across the full 118 days since June the numbers resolve better than either interval does alone. Dry lean mass rose 1.1 lb, from 38.4 lb to 39.5 lb. Muscle is roughly 27% dry, so that implies about 4.1 lb of muscle, which would carry about 3.0 lb of water with it. Total body water rose 2.9 lb and lean mass rose 4.0 lb. Four figures agree on about 4 lb of real muscle since June, which is roughly 1 lb per month.',
         'Weight fell 0.39 lb per week over the 56 days, which is a deficit of about 194 kcal per day. Whether or not it was intentional, you have already been cutting slowly.',
         'The fat came off the trunk. Trunk fat fell 2.4 lb, from 17.2 lb to 14.8 lb, which is most of the 3.3 lb total. Arms and legs moved 0.2 lb or less. The machine rates trunk fat at 147% of ideal, down from 185% in June. The June scan recorded that the fat had gone central and that this is the distribution that most affects appearance.',
-        'The segmental lean figures contradict themselves and should be ignored. Arms fell 5.5% and 4.6%, the trunk fell 3.4%, and the legs rose 3.6% and 2.4%, while total lean mass held. In August the same breakdown on the same machine showed arms up 5.1% and legs up 1.3%. Two scans disagreeing in direction while the total holds means the limb numbers are not resolving changes this small.',
+        'The segmental figures are a clock artifact, not tissue. Arms fell 5.5% and 4.6%, the trunk fell 3.4%, and the legs rose 3.6% and 2.4%, while total lean mass held. This scan was at 15:22 and the August scan at 04:17. A day upright pools fluid in the legs and a night lying down moves it to the trunk, which is exactly the pattern here, and it runs opposite to the training: legs were barely worked over this period and arms were worked every day. Compare June at 13:58 against this scan at 15:22 instead. Both are mid-afternoon, and across those 118 days the trunk moved 0.1 lb and the arms 0.03 lb.',
         'Visceral fat fell from level 6 to level 5. ECW/TBW is 0.369, which is normal fluid balance. SMI held at 8.7. BMR rose 3 kcal, from 1808 to 1811, which matches flat lean mass.',
         'FFMI is 20.52, up from 20.47. The target is 23, which is 165 lb of lean mass, so 17.9 lb of lean mass remains. The rate of about 1 lb per month came from a stretch that included the regain, so the earlier estimate of two to three years still stands.',
       ],

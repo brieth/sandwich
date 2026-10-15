@@ -1797,3 +1797,8 @@ body {
   transform: scaleX(1.06);
   transform-origin: left center;
 }
+
+/* Why a segmental change column is missing. */
+.seg-note {
+  margin: -2px 0 10px;
+}
