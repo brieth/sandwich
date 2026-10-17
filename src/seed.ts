@@ -51,8 +51,14 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['barbell-bench-press', 'Barbell Bench Press'],
       ['lat-pulldown', 'Lat Pulldown'],
       ['machine-leg-press', 'Machine Leg Press'],
-      ['cable-bicep-curl', 'Cable Bicep Curl'],
-      ['cable-upright-row', 'Cable Upright Row'],
+      // Swapped with 2B's pair. Keeping the curl here put delts on 1A, 1B and
+      // 2A and triceps on 2B, 3A and 3B, three days each in a row. Trading the
+      // two drops every muscle group to a longest run of two, which is the
+      // floor when each appears on four of six days. It also moves the hammer
+      // curl to three days from the reverse curl in both directions instead of
+      // two and four, which matters given the forearm.
+      ['cable-tricep-pushdown', 'Cable Tricep Pushdown'],
+      ['cable-hammer-curl', 'Cable Hammer Curl'],
     ],
   },
   {
@@ -62,8 +68,8 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['cable-mid-crossover-fly', 'Cable Mid Crossover Fly'],
       ['cable-single-arm-mid-row', 'Cable Mid Row'],
       ['machine-leg-curl', 'Machine Leg Curl'],
-      ['cable-tricep-pushdown', 'Cable Tricep Pushdown'],
-      ['cable-hammer-curl', 'Cable Hammer Curl'],
+      ['cable-bicep-curl', 'Cable Bicep Curl'],
+      ['cable-upright-row', 'Cable Upright Row'],
     ],
   },
   {
