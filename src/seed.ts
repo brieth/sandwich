@@ -86,11 +86,20 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['cable-low-crossover-fly', 'Cable Low Crossover Fly'],
       ['cable-single-arm-low-row', 'Cable Low Row'],
       ['machine-leg-curl', 'Machine Leg Curl'],
-      // Re-ided, not just renamed: one arm at a time logs about half the
-      // weight, so the two-arm numbers belong to a separate exercise rather
-      // than reading as a collapse in this one.
-      ['cable-single-arm-low-overhead-tricep-extension', 'Cable Low Overhead Tricep Extension'],
-      ['cable-single-arm-reverse-curl', 'Cable Reverse Curl'],
+      // Two-arm on the straight bar, which is where these started.
+      //
+      // A D handle frees the wrist, but a reverse curl needs a fixed pronated
+      // grip and only a bar gives one. Both exercises in a slot share an
+      // attachment, so the curl decides it. Cambered was tried on both and
+      // felt worse than straight.
+      //
+      // What is actually awkward is not the extension, it is getting the bar
+      // from the floor to behind the head and controlling it back down at
+      // failure. That is a setup problem rather than an exercise problem, and
+      // the levers for it are in the gym: raise the pulley off the floor, or
+      // kneel, so the bar starts near where the hands already are.
+      ['cable-low-overhead-tricep-extension', 'Cable Low Overhead Tricep Extension'],
+      ['cable-reverse-curl', 'Cable Reverse Curl'],
     ],
   },
   {
