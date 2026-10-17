@@ -51,14 +51,15 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['barbell-bench-press', 'Barbell Bench Press'],
       ['lat-pulldown', 'Lat Pulldown'],
       ['machine-leg-press', 'Machine Leg Press'],
-      // Swapped with 2B's pair. Keeping the curl here put delts on 1A, 1B and
-      // 2A and triceps on 2B, 3A and 3B, three days each in a row. Trading the
-      // two drops every muscle group to a longest run of two, which is the
-      // floor when each appears on four of six days. It also moves the hammer
-      // curl to three days from the reverse curl in both directions instead of
-      // two and four, which matters given the forearm.
-      ['cable-tricep-pushdown', 'Cable Tricep Pushdown'],
-      ['cable-hammer-curl', 'Cable Hammer Curl'],
+      // The bicep pair sits here, and the tricep pair on 2B, because the
+      // barbell press is itself a tricep exercise. Keeping the tricep
+      // isolation off the three press days spreads the real daily load: no
+      // muscle group ever drops to zero and the worst peak-to-trough across a
+      // cycle is 3.0 effective sets. Swapping these two with 2B's looks better
+      // if you count only isolation slots and is worse once the press counts,
+      // because it puts triceps at 4.5 on 2A, 0 on 2B and 4.5 on 3A.
+      ['cable-bicep-curl', 'Cable Bicep Curl'],
+      ['cable-upright-row', 'Cable Upright Row'],
     ],
   },
   {
@@ -68,8 +69,8 @@ const ROUTINE_DEFS: RoutineDef[] = [
       ['cable-mid-crossover-fly', 'Cable Mid Crossover Fly'],
       ['cable-single-arm-mid-row', 'Cable Mid Row'],
       ['machine-leg-curl', 'Machine Leg Curl'],
-      ['cable-bicep-curl', 'Cable Bicep Curl'],
-      ['cable-upright-row', 'Cable Upright Row'],
+      ['cable-tricep-pushdown', 'Cable Tricep Pushdown'],
+      ['cable-hammer-curl', 'Cable Hammer Curl'],
     ],
   },
   {
