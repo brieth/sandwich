@@ -24,7 +24,6 @@ const MUSCLE: Record<string, MuscleGroup> = {
   'barbell-incline-bench-press': 'Chest',
   'barbell-bench-press': 'Chest',
   'barbell-decline-bench-press': 'Chest',
-  'barbell-close-grip-bench-press': 'Chest',
   'cable-high-crossover-fly': 'Chest',
   'cable-mid-crossover-fly': 'Chest',
   'cable-low-crossover-fly': 'Chest',
@@ -35,14 +34,11 @@ const MUSCLE: Record<string, MuscleGroup> = {
   'cable-single-arm-high-row': 'Back',
   'cable-single-arm-mid-row': 'Back',
   'cable-single-arm-low-row': 'Back',
-  'cable-wide-grip-row': 'Back',
-  'cable-straight-arm-pulldown': 'Back',
   // Delts (front / side / rear tracked together as one group)
   'cable-behind-the-back-lateral-raise': 'Delts',
   'cable-upright-row': 'Delts',
   'cable-face-pull': 'Delts',
   'cable-single-arm-rear-delt-fly': 'Delts',
-  'cable-front-raise': 'Delts',
   // Triceps (forearm/brachioradialis rolls up into Biceps, matching the curls)
   'cable-high-overhead-tricep-extension': 'Triceps',
   'cable-low-overhead-tricep-extension': 'Triceps',
@@ -72,6 +68,10 @@ const MUSCLE: Record<string, MuscleGroup> = {
   'reverse-grip-pull-down': 'Back',
   'shotgun-row': 'Back',
   'machine-lying-hamstring-curl': 'Legs',
+  'barbell-close-grip-bench-press': 'Chest',
+  'cable-wide-grip-row': 'Back',
+  'cable-straight-arm-pulldown': 'Back',
+  'cable-front-raise': 'Delts',
   'dumbbell-lateral-raise': 'Delts',
   'cable-rear-delt-fly': 'Delts',
   'cable-underhand-tricep-pushdown': 'Triceps',
@@ -110,7 +110,6 @@ const SECONDARY: Record<string, MuscleGroup[]> = {
   'barbell-incline-bench-press': ['Triceps', 'Delts'],
   'barbell-bench-press': ['Triceps', 'Delts'],
   'barbell-decline-bench-press': ['Triceps', 'Delts'],
-  'barbell-close-grip-bench-press': ['Triceps', 'Delts'],
   // pulldowns drive the biceps; rows additionally hit the rear delts
   'close-grip-lat-pulldown': ['Biceps'],
   'lat-pulldown': ['Biceps'],
@@ -118,10 +117,11 @@ const SECONDARY: Record<string, MuscleGroup[]> = {
   'cable-single-arm-high-row': ['Biceps', 'Delts'],
   'cable-single-arm-mid-row': ['Biceps', 'Delts'],
   'cable-single-arm-low-row': ['Biceps', 'Delts'],
+  // retired exercises, kept for older logged sessions
+  'barbell-close-grip-bench-press': ['Triceps', 'Delts'],
   'cable-wide-grip-row': ['Biceps', 'Delts'],
   // no biceps: the elbow never flexes, which is the point of it
   'cable-straight-arm-pulldown': [],
-  // retired exercises, kept for older logged sessions
   'v-bar-pulldown': ['Biceps'],
   'reverse-grip-pull-down': ['Biceps'],
   'cable-row': ['Biceps', 'Delts'],
