@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { CUES, FIGURES, FIGURE_FOR, sweeps } from '../lib/stretch';
-import type { Figure, Joint, View } from '../lib/stretch';
+import { CUES, FIGURES, FIGURE_FOR, VIEW_LABEL, VIEW_ORDER, posesOf, sweeps } from '../lib/stretch';
+import type { Pose, Joint, View } from '../lib/stretch';
 import { useBackToClose } from '../lib/useBackToClose';
 import { CloseButton } from './CloseButton';
 import { ImplementIcon } from './ImplementIcon';
@@ -16,11 +16,11 @@ const SIDE = { headX: 118, headY: 42, headR: 11, spineTop: 53, hipY: 152, hipHal
 const FRONT = { headX: 120, headY: 30, headR: 12, spineTop: 44, hipY: 120, hipHalf: 16 };
 
 /** Scaffolding: drawn faint, because it is there to place the limb, not to be read. */
-function Body({ view, f }: { view: View; f: Figure }) {
+function Body({ view, f }: { view: View; f: Pose }) {
   const o = f.body;
   const dim = 'currentColor';
 
-  if (view === 'side' || view === 'front') {
+  if (view === 'side' || view === 'front' || view === 'back') {
     const b = view === 'side' ? SIDE : FRONT;
     const headY = o?.headY ?? b.headY;
     const spineTop = o?.spineTop ?? b.spineTop;
@@ -30,7 +30,26 @@ function Body({ view, f }: { view: View; f: Figure }) {
         <circle cx={b.headX} cy={headY} r={b.headR} fill="none" stroke={dim} strokeWidth="2.5" />
         <line x1={b.headX} y1={spineTop} x2={b.headX} y2={hipY} stroke={dim} strokeWidth="2.5" strokeLinecap="round" />
         <line x1={b.headX - b.hipHalf} y1={hipY} x2={b.headX + b.hipHalf} y2={hipY} stroke={dim} strokeWidth="2.5" strokeLinecap="round" />
-        {view === 'front' && (
+        {view === 'back' && (
+          /*
+           * Two blades either side of the spine, which slide between the poses.
+           * Drawn here rather than in the limb chain because they translate
+           * instead of rotating, and because they are the only reason this
+           * angle exists.
+           */
+          <g
+            className={f.blades ? 'blade-slide' : undefined}
+            style={
+              f.blades
+                ? ({ ['--dx' as string]: `${f.blades.dx}px`, ['--dy' as string]: `${f.blades.dy}px` } as React.CSSProperties)
+                : undefined
+            }
+          >
+            <rect x={b.headX + 8} y={spineTop + 16} width="17" height="27" rx="5" fill="none" stroke={dim} strokeWidth="2" />
+            <rect x={b.headX - 25} y={spineTop + 16} width="17" height="27" rx="5" fill="none" stroke={dim} strokeWidth="2" />
+          </g>
+        )}
+        {(view === 'front' || view === 'back') && (
           <line
             x1={b.headX - 40}
             y1={spineTop + 12}
@@ -50,16 +69,6 @@ function Body({ view, f }: { view: View; f: Figure }) {
       <g opacity="0.5">
         <rect x="96" y="76" width="48" height="34" rx="14" fill="none" stroke={dim} strokeWidth="2.5" />
         <circle cx="120" cy="64" r="11" fill="none" stroke={dim} strokeWidth="2.5" opacity="0.75" />
-      </g>
-    );
-  }
-
-  if (view === 'bench') {
-    return (
-      <g opacity="0.5">
-        <rect x="104" y="60" width="32" height="76" rx="6" fill="none" stroke={dim} strokeWidth="1.6" opacity="0.6" />
-        <rect x="102" y="78" width="36" height="40" rx="14" fill="none" stroke={dim} strokeWidth="2.5" />
-        <circle cx="120" cy="66" r="10" fill="none" stroke={dim} strokeWidth="2.5" opacity="0.75" />
       </g>
     );
   }
@@ -104,7 +113,7 @@ function Limb({ chain, i, pts, sw }: { chain: Joint[]; i: number; pts: { x: numb
   );
 }
 
-export function StretchFigure({ f }: { f: Figure }) {
+export function StretchFigure({ f }: { f: Pose }) {
   // Walked from the root rather than read off each joint, so a nested pivot can
   // never disagree with the end of the segment it hangs from.
   const pts: { x: number; y: number }[] = [{ x: f.chain[0].x, y: f.chain[0].y }];
@@ -159,7 +168,17 @@ export default function StretchModal({
   const key = FIGURE_FOR[exerciseId];
   const cue = key ? CUES[key] : null;
   const figure = key ? FIGURES[key] : undefined;
+  // Buttons read in a fixed left-to-right order so the angles sit in the same
+  // place for every exercise, but the angle that opens is the figure's primary
+  // one, which is not always the leftmost button.
+  const poses = figure
+    ? posesOf(figure)
+        .slice()
+        .sort((a, b) => VIEW_ORDER.indexOf(a.view) - VIEW_ORDER.indexOf(b.view))
+    : [];
+  const [viewIdx, setViewIdx] = useState(() => Math.max(0, poses.indexOf(figure as Pose)));
   if (!cue) return null;
+  const pose = poses[Math.min(viewIdx, poses.length - 1)];
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -171,7 +190,20 @@ export default function StretchModal({
           </span>
           <CloseButton onClick={onClose} label="Close" />
         </div>
-        {figure && <StretchFigure f={figure} />}
+        {pose && <StretchFigure f={pose} />}
+        {poses.length > 1 && (
+          <div className="metric-toggle view-toggle">
+            {poses.map((p, i) => (
+              <button
+                key={p.view}
+                className={i === viewIdx ? 'active' : ''}
+                onClick={() => setViewIdx(i)}
+              >
+                {VIEW_LABEL[p.view]}
+              </button>
+            ))}
+          </div>
+        )}
         <p className="stretch-reach">{cue.reach}</p>
         {cue.points.map((p, i) => (
           <p key={i} className="muted small stretch-point">

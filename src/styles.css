@@ -429,13 +429,45 @@ body {
   display: block;
   width: 100%;
   max-width: 300px;
-  margin: 4px auto 14px;
+  margin: 4px auto 10px;
   height: auto;
   color: var(--muted);
 }
 .stretch-mark {
   font-size: 11px;
   font-weight: 500;
+}
+/*
+ * Blades translate rather than rotate, so they need their own keyframe. Timing
+ * matches limb-sweep exactly, since the blade and the arm are one movement.
+ */
+@keyframes blade-slide {
+  0%,
+  16% {
+    transform: translate(0, 0);
+  }
+  54%,
+  66% {
+    transform: translate(var(--dx, 0), var(--dy, 0));
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+.blade-slide {
+  transform-box: view-box;
+  animation: blade-slide 3.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .blade-slide {
+    animation: none;
+  }
+}
+/* Sits under the figure it drives, so it takes the figure's bottom margin. */
+.view-toggle {
+  margin-top: 0;
+  margin-bottom: 14px;
+  justify-content: center;
 }
 .stretch-reach {
   margin: 0 0 10px;

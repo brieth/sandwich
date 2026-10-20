@@ -14,7 +14,19 @@
  */
 
 /** Body drawn behind the limb, which also fixes what the angles mean. */
-export type View = 'side' | 'front' | 'top' | 'seated' | 'bench';
+export type View = 'front' | 'back' | 'side' | 'top' | 'bottom' | 'seated';
+
+/** Button order, so the angles read left to right the same way every time. */
+export const VIEW_ORDER: View[] = ['front', 'back', 'side', 'top', 'bottom', 'seated'];
+
+export const VIEW_LABEL: Record<View, string> = {
+  front: 'Front',
+  back: 'Back',
+  side: 'Side',
+  top: 'Top',
+  bottom: 'Bottom',
+  seated: 'Side',
+};
 
 /**
  * One moving joint: where it pivots, how long the segment is, and the angle at
@@ -35,7 +47,7 @@ export interface Joint {
   hand?: boolean;
 }
 
-export interface Figure {
+export interface Pose {
   view: View;
   /** Root first. A second joint hangs off the end of the first. */
   chain: Joint[];
@@ -45,7 +57,24 @@ export interface Figure {
   marks?: { x: number; y: number; text: string; anchor?: 'start' | 'middle' | 'end' }[];
   /** Overrides the view's default body placement where a figure needs headroom. */
   body?: { headY: number; spineTop: number; hipY: number };
+  /**
+   * How far the shoulder blades travel between the two poses, in the back view.
+   *
+   * The blade is what the pulldown and row cues are actually about, and no
+   * other angle shows it: from the front or the side it is behind the ribcage.
+   */
+  blades?: { dx: number; dy: number };
   height: number;
+}
+
+export interface Figure extends Pose {
+  /** Other angles on the same movement, each a complete pose of its own. */
+  alts?: Pose[];
+}
+
+/** Every angle a figure can be read from, primary first. */
+export function posesOf(f: Figure): Pose[] {
+  return [f, ...(f.alts ?? [])];
 }
 
 export interface Cue {
@@ -94,6 +123,19 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       { x: 149.4, y: 69.3, len: 32, stretched: -74, contracted: 198, hand: true },
     ],
     marks: [{ x: 14, y: 30, text: 'blade rises' }],
+    alts: [
+      {
+        view: 'back',
+        height: 180,
+        body: { headY: 76, spineTop: 90, hipY: 166 },
+        chain: [
+          { x: 140, y: 102, len: 34, stretched: -74, contracted: 45 },
+          { x: 149.4, y: 69.3, len: 32, stretched: -74, contracted: 198, hand: true },
+        ],
+        blades: { dx: 0, dy: 9 },
+        marks: [{ x: 14, y: 30, text: 'blades ride up' }],
+      },
+    ],
   },
 
   // Cable row. Same joint as the pulldown at the other end of the movement.
@@ -105,6 +147,17 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       { x: 144, y: 56, len: 28, stretched: -90, contracted: -86, hand: true },
     ],
     marks: [{ x: 120, y: 150, text: 'seen from above', anchor: 'middle' }],
+    alts: [
+      {
+        view: 'back',
+        height: 172,
+        // The arm points away from the camera here, so it foreshortens and the
+        // forearm is left off. The blades are the whole reason for this angle.
+        chain: [{ x: 140, y: 56, len: 30, stretched: -20, contracted: 35, hand: true }],
+        blades: { dx: -8, dy: 0 },
+        marks: [{ x: 14, y: 150, text: 'blades spread at the front' }],
+      },
+    ],
   },
 
   // Crossover fly. Top view is the only one that shows the pec's range, which
@@ -126,6 +179,18 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     fixed: { x1: 128, y1: 90, x2: 134, y2: 48 },
     chain: [{ x: 134, y: 48, len: 34.4, stretched: 35.5, contracted: -81.9, hand: true }],
     marks: [{ x: 14, y: 36, text: 'upper arm stays up' }],
+    alts: [
+      {
+        view: 'back',
+        height: 180,
+        body: { headY: 70, spineTop: 81, hipY: 162 },
+        chain: [
+          { x: 150, y: 93, len: 42, stretched: -80, contracted: -80 },
+          { x: 157.3, y: 51.6, len: 28, stretched: 140, contracted: -80, hand: true },
+        ],
+        marks: [{ x: 14, y: 30, text: 'elbows stay in' }],
+      },
+    ],
   },
 
   // Pushdown. Shoulder is down, so the long head is short whatever you do and
@@ -163,6 +228,14 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     height: 172,
     chain: [{ x: 140, y: 56, len: 62, stretched: 108, contracted: 0, hand: true }],
     marks: [{ x: 18, y: 150, text: 'past the midline' }],
+    alts: [
+      {
+        view: 'top',
+        height: 158,
+        chain: [{ x: 144, y: 86, len: 60, stretched: 195, contracted: 0, hand: true }],
+        marks: [{ x: 120, y: 150, text: 'seen from above', anchor: 'middle' }],
+      },
+    ],
   },
 
   rearDelt: {
@@ -170,6 +243,15 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     height: 158,
     chain: [{ x: 144, y: 86, len: 60, stretched: 190, contracted: 15, hand: true }],
     marks: [{ x: 120, y: 150, text: 'seen from above', anchor: 'middle' }],
+    alts: [
+      {
+        view: 'back',
+        height: 172,
+        chain: [{ x: 150, y: 56, len: 56, stretched: 170, contracted: 0, hand: true }],
+        blades: { dx: -8, dy: 0 },
+        marks: [{ x: 14, y: 150, text: 'blades squeeze at the end' }],
+      },
+    ],
   },
 
   facePull: {
@@ -180,6 +262,15 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       { x: 144, y: 56, len: 28, stretched: -90, contracted: 150, hand: true },
     ],
     marks: [{ x: 120, y: 150, text: 'seen from above', anchor: 'middle' }],
+    alts: [
+      {
+        view: 'back',
+        height: 172,
+        chain: [{ x: 140, y: 56, len: 30, stretched: -25, contracted: -55, hand: true }],
+        blades: { dx: -8, dy: 0 },
+        marks: [{ x: 14, y: 150, text: 'elbows finish high' }],
+      },
+    ],
   },
 
   uprightRow: {
@@ -190,6 +281,17 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       { x: 140, y: 90, len: 32, stretched: 90, contracted: 160, hand: true },
     ],
     marks: [{ x: 18, y: 150, text: 'arms fully down' }],
+    alts: [
+      {
+        view: 'side',
+        height: 180,
+        chain: [
+          { x: 128, y: 62, len: 34, stretched: 90, contracted: -10 },
+          { x: 128, y: 96, len: 32, stretched: 90, contracted: 170, hand: true },
+        ],
+        marks: [{ x: 14, y: 36, text: 'elbow leads' }],
+      },
+    ],
   },
 
   legPress: {
