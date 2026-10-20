@@ -68,7 +68,12 @@ function Body({ view, f }: { view: View; f: Pose }) {
     return (
       <g opacity="0.5">
         <rect x="96" y="76" width="48" height="34" rx="14" fill="none" stroke={dim} strokeWidth="2.5" />
-        <circle cx="120" cy="64" r="11" fill="none" stroke={dim} strokeWidth="2.5" opacity="0.75" />
+        {/*
+          * Looking straight down, the head is above the torso rather than in
+          * front of it, so it overlaps the front edge instead of sitting clear
+          * of it. Drawn after the torso so it reads as the nearer shape.
+          */}
+        <circle cx="120" cy="84" r="11" fill="var(--surface)" stroke={dim} strokeWidth="2.5" opacity="0.75" />
       </g>
     );
   }
