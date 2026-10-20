@@ -3,6 +3,7 @@ import { useStore } from '../store';
 import { AB_OPTION_IDS, LEG_OPTION_IDS } from '../seed';
 import { Stations } from './Stations';
 import { ImplementIcon } from './ImplementIcon';
+import { useStretchModal } from './StretchModal';
 import { DEFAULT_FORMULA, FORMULAS, type OneRMFormulaId } from '../lib/onerm';
 
 export function RoutinesView() {
@@ -39,6 +40,8 @@ export function RoutinesView() {
     reader.readAsText(file);
   }
 
+  const stretch = useStretchModal();
+
   return (
     <div className="view">
       <h1>Routine</h1>
@@ -56,7 +59,12 @@ export function RoutinesView() {
                   <li key={`${re.exerciseId}-${i}`}>
                     <span className="ex-title-row">
                       <ImplementIcon exerciseId={re.exerciseId} />
-                      <span className="re-name">{exerciseName(re.exerciseId)}</span>
+                      <button
+                        className="re-name ex-name-btn"
+                        onClick={() => stretch.show(re.exerciseId, exerciseName(re.exerciseId))}
+                      >
+                        {exerciseName(re.exerciseId)}
+                      </button>
                     </span>
                   </li>
                 ))}
@@ -82,7 +90,12 @@ export function RoutinesView() {
                   <li key={id}>
                     <span className="ex-title-row">
                       <ImplementIcon exerciseId={id} />
-                      <span className="re-name">{exerciseName(id)}</span>
+                      <button
+                        className="re-name ex-name-btn"
+                        onClick={() => stretch.show(id, exerciseName(id))}
+                      >
+                        {exerciseName(id)}
+                      </button>
                     </span>
                   </li>
                 ))}
@@ -90,6 +103,8 @@ export function RoutinesView() {
           </div>
         ))}
       </div>
+
+      {stretch.node}
 
       <Stations />
 

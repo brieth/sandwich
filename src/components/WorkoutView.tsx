@@ -21,6 +21,7 @@ import { NumField } from './NumField';
 import { StationPicker } from './Stations';
 import { ImplementIcon } from './ImplementIcon';
 import { CloseButton } from './CloseButton';
+import { useStretchModal } from './StretchModal';
 
 export function WorkoutView() {
   const { data, startSession } = useStore();
@@ -210,6 +211,8 @@ function ActiveSession() {
     });
   }
 
+  const stretch = useStretchModal();
+
   return (
     <div className="view">
       <div className="session-head">
@@ -270,6 +273,8 @@ function ActiveSession() {
               onSelectStation={(id) => setActiveStation(exIdx, id)}
               onSelect={(id) => changeExercise(exIdx, id)}
               onShowHistory={() => setHistoryFor(ex.exerciseId)}
+              onShowStretch={() => stretch.show(ex.exerciseId, exerciseName(ex.exerciseId))}
+              hasStretch={stretch.has(ex.exerciseId)}
               onChange={(setIdx, patch) => setSetValue(exIdx, setIdx, patch)}
               onAddSet={() => addSet(exIdx)}
               onRemoveSet={(setIdx) => removeSet(exIdx, setIdx)}
@@ -281,6 +286,8 @@ function ActiveSession() {
       <button className="btn primary block finish" onClick={handleFinish}>
         Finish workout
       </button>
+
+      {stretch.node}
 
       {historyFor && (
         <ExerciseHistoryModal
@@ -390,6 +397,8 @@ function ExerciseCard({
   onSelectStation,
   onSelect,
   onShowHistory,
+  onShowStretch,
+  hasStretch,
   onChange,
   onAddSet,
   onRemoveSet,
@@ -409,6 +418,9 @@ function ExerciseCard({
   onSelectStation: (id: string | undefined) => void;
   onSelect: (id: string) => void;
   onShowHistory: () => void;
+  onShowStretch: () => void;
+  /** Off where the exercise has no recorded stretch position, so the name stays plain text. */
+  hasStretch: boolean;
   onChange: (setIdx: number, patch: Partial<SetEntry>) => void;
   onAddSet: () => void;
   onRemoveSet: (setIdx: number) => void;
@@ -469,7 +481,13 @@ function ExerciseCard({
         * that column ends up being.
         */}
       <div className="exercise-head">
-        <ImplementIcon exerciseId={ex.exerciseId} />
+        {options && hasStretch ? (
+          <button className="icon-btn" onClick={onShowStretch} aria-label={`${name}: stretch position`}>
+            <ImplementIcon exerciseId={ex.exerciseId} />
+          </button>
+        ) : (
+          <ImplementIcon exerciseId={ex.exerciseId} />
+        )}
         <div className="ex-head-text">
           <div className="ex-title-row">
             {options ? (
@@ -485,6 +503,10 @@ function ExerciseCard({
                   </option>
                 ))}
               </select>
+            ) : hasStretch ? (
+              <button className="exercise-name ex-name-btn" onClick={onShowStretch}>
+                {name}
+              </button>
             ) : (
               <span className="exercise-name">{name}</span>
             )}

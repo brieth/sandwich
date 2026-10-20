@@ -393,6 +393,88 @@ body {
   outline: none;
 }
 
+/* ---------- stretch position ---------- */
+/*
+ * One keyframe for every segment of every figure. Each group carries its own
+ * --sweep, so the amount is per joint while the timing stays shared and the
+ * figures in a modal move together.
+ *
+ * Rest is the stretched pose at rotate(0), which is why the hold sits at the
+ * start and end rather than in the middle: the first frame a reader sees is the
+ * position the exercise is supposed to reach.
+ */
+@keyframes limb-sweep {
+  0%,
+  16% {
+    transform: rotate(0deg);
+  }
+  54%,
+  66% {
+    transform: rotate(var(--sweep, 0deg));
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+.limb-seg {
+  transform-box: view-box;
+  animation: limb-sweep 3.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .limb-seg {
+    animation: none;
+  }
+}
+.stretch-svg {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 4px auto 14px;
+  height: auto;
+  color: var(--muted);
+}
+.stretch-mark {
+  font-size: 11px;
+  font-weight: 500;
+}
+.stretch-reach {
+  margin: 0 0 10px;
+  font-weight: 600;
+}
+.stretch-point {
+  margin: 0 0 10px;
+}
+.stretch-point:last-child {
+  margin-bottom: 4px;
+}
+/*
+ * The name is the tap target for the position, so it reads as one. Dotted
+ * rather than solid, because a solid underline on a 15px bold name looks like
+ * a link into another page instead of a panel on this one.
+ */
+/* Carries the tap where the name renders inside a select and cannot. */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.ex-name-btn {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline dotted var(--muted);
+  text-underline-offset: 3px;
+}
+
 /* ---------- modal ---------- */
 .modal-overlay {
   position: fixed;

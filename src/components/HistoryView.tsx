@@ -7,6 +7,7 @@ import { useBackToClose } from '../lib/useBackToClose';
 import { isCurrentExercise } from '../seed';
 import { StationPicker } from './Stations';
 import { ImplementIcon } from './ImplementIcon';
+import { useStretchModal } from './StretchModal';
 import { CloseButton } from './CloseButton';
 import { findStation, stationsFor } from '../lib/stations';
 
@@ -58,9 +59,12 @@ export function HistoryView() {
     [data.sessions],
   );
 
+  const stretch = useStretchModal();
+
   return (
     <div className="view">
       <h1>History</h1>
+      {stretch.node}
       <MonthCalendar />
       {data.sessions.length === 0 ? (
         <p className="muted subtitle">
@@ -109,7 +113,17 @@ export function HistoryView() {
                     {/* Same head as a workout card: the icon stands to the left
                         of the name and the station together. */}
                     <div className="exercise-head">
-                      <ImplementIcon exerciseId={e.exerciseId} />
+                      {stretch.has(e.exerciseId) ? (
+                        <button
+                          className="icon-btn"
+                          onClick={() => stretch.show(e.exerciseId, exerciseName(e.exerciseId))}
+                          aria-label={`${exerciseName(e.exerciseId)}: stretch position`}
+                        >
+                          <ImplementIcon exerciseId={e.exerciseId} />
+                        </button>
+                      ) : (
+                        <ImplementIcon exerciseId={e.exerciseId} />
+                      )}
                       <div className="ex-head-text">
                         <div className="ex-title-row">
                           <select
