@@ -465,12 +465,10 @@ body {
 }
 /*
  * A single angle still gets a button, so every figure says which angle it is.
- * It states the angle rather than offering a choice, so it sizes to its text
- * instead of stretching the row and keeps the default cursor.
+ * It states the angle rather than offering a choice, so it keeps the default
+ * cursor, but it still spans the row like a pair or a trio does.
  */
 .view-toggle.one button {
-  flex: 0 0 auto;
-  padding: 9px 18px;
   cursor: default;
 }
 
@@ -478,7 +476,6 @@ body {
 .view-toggle {
   margin-top: 0;
   margin-bottom: 14px;
-  justify-content: center;
 }
 .stretch-reach {
   margin: 0 0 10px;
