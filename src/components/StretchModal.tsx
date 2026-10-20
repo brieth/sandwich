@@ -191,8 +191,8 @@ export default function StretchModal({
           <CloseButton onClick={onClose} label="Close" />
         </div>
         {pose && <StretchFigure f={pose} />}
-        {poses.length > 1 && (
-          <div className="metric-toggle view-toggle">
+        {poses.length > 0 && (
+          <div className={poses.length > 1 ? 'metric-toggle view-toggle' : 'metric-toggle view-toggle one'}>
             {poses.map((p, i) => (
               <button
                 key={p.view}

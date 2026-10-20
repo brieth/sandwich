@@ -463,6 +463,17 @@ body {
     animation: none;
   }
 }
+/*
+ * A single angle still gets a button, so every figure says which angle it is.
+ * It states the angle rather than offering a choice, so it sizes to its text
+ * instead of stretching the row and keeps the default cursor.
+ */
+.view-toggle.one button {
+  flex: 0 0 auto;
+  padding: 9px 18px;
+  cursor: default;
+}
+
 /* Sits under the figure it drives, so it takes the figure's bottom margin. */
 .view-toggle {
   margin-top: 0;
