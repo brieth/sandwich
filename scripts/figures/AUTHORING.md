@@ -216,7 +216,9 @@ keep pulleys out of the fit only when they would shrink the person a lot.
 The leverage table: `share` is the torque about the axis the limb is moving
 in, as a fraction of the most the force could give at that distance (100 is a
 force square to the limb in its plane of motion). `sine` is the angle between
-the limb and the force regardless of plane. `resists +1` means the force works
+the limb and the force regardless of plane. `moment arm` is the torque about the
+motion's axis per unit of force, in cm; it does not shrink when the limb folds,
+so it is the row to compare across a press, a row or a curl. `resists +1` means the force works
 against the contraction, as a load should.
 
 ## The cue
@@ -238,6 +240,12 @@ and what to keep fixed. Read the fly cues for the voice. Rules (CLAUDE.md):
 
 Everything the cue says must be true of the drawing and of the check numbers.
 Name only research you are sure of, by its finding, stated conservatively.
+
+Standing distances are given in steps, the same way in every cue. One step is
+about 75 cm. Say the nearest half step and keep it honest: 100 cm is "about one
+and a half steps", 120 cm "a little over one and a half steps", 130 cm "a
+little under two steps", 150 cm "about two steps". Do not add centimeters to
+the cue text.
 
 ## What to return
 

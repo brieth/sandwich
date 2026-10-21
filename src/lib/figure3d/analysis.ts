@@ -37,12 +37,16 @@ export function hipFlex(b: Body, s: 'R' | 'L'): number {
   return deg(Math.atan2(dot(th, fwd), dot(th, down)));
 }
 
-/** Hip abduction: thigh out from the pelvis's down axis toward its own side, degrees. */
+/**
+ * Hip abduction: how far the thigh points out of the pelvis's midline plane
+ * toward its own side, degrees. Measured against that plane rather than
+ * against the down axis, which read 180 for a seated thigh pointing straight
+ * forward.
+ */
 export function hipAbd(b: Body, s: 'R' | 'L'): number {
   const th = segDir(b.j[`hip${s}`], b.j[`knee${s}`]);
-  const down = b.dirOf('pelvis', [0, 1, 0]);
   const out = b.dirOf('pelvis', [s === 'R' ? 1 : -1, 0, 0]);
-  return deg(Math.atan2(dot(th, out), dot(th, down)));
+  return deg(Math.asin(Math.max(-1, Math.min(1, dot(th, out)))));
 }
 
 /** Upper arm against the upper torso: elevation from hanging, and how far forward of the side it points. */
@@ -86,7 +90,7 @@ export function muscleLength(b: Body, m: MuscleName, s: 'R' | 'L'): number {
   const ef = rad(elbowFlex(b, s));
   const kf = rad(kneeFlex(b, s));
   // Inferior angle of the blade, from the blade's own drawn arc.
-  const inferior = s === 'R' ? b.blade.R[8] : b.blade.L[8];
+  const inferior = s === 'R' ? b.bladeTip.R : b.bladeTip.L;
   const lateralOfThigh = () => {
     const th = segDir(b.j[`hip${s}`], b.j[`knee${s}`]);
     return perpTo(th, b.dirOf('pelvis', [s === 'R' ? 1 : -1, 0, 0]));
@@ -129,7 +133,10 @@ export function muscleLength(b: Body, m: MuscleName, s: 'R' | 'L'): number {
     case 'hamstrings':
       return dist(lm(b, 'pelvis', s, [7, 6, -7]), b.j[`knee${s}`]) - 3 * kf;
     case 'gluteMax':
-      return dist(lm(b, 'pelvis', s, [5, -6, -11]), femur(b, s, 10));
+      // Wrapped behind the hip, low on the pelvis, so it keeps lengthening
+      // past 90 degrees of hip flexion; a straight line from the sacrum to
+      // the femur peaked at about 90 and shortened in a deep leg press.
+      return pathLen([lm(b, 'pelvis', s, [5, -6, -11]), lm(b, 'pelvis', s, [7, 6, -9]), femur(b, s, 10)]);
     case 'gluteMed':
       return dist(lm(b, 'pelvis', s, [13, -11, 0]), add(femur(b, s, 2), mul(lateralOfThigh(), 5)));
     case 'adductors':
@@ -154,7 +161,7 @@ export function muscleLength(b: Body, m: MuscleName, s: 'R' | 'L'): number {
  * from the joint. 1 is a force square to the limb in the plane it moves in; 0
  * is a force along the limb, or one that only twists it.
  */
-function leverShare(def: FigureDef, t: number, li: number): { share: number; sine: number; sign: number } | null {
+function leverShare(def: FigureDef, t: number, li: number): { share: number; sine: number; sign: number; arm: number } | null {
   const lev = def.check?.lever?.[li];
   const load = def.check?.load;
   if (!lev || !load) return null;
@@ -171,12 +178,15 @@ function leverShare(def: FigureDef, t: number, li: number): { share: number; sin
   const r = sub(F.at, J);
   const fh = norm(F.dir);
   const sine = len(cross(norm(r), fh));
-  if (len(axis) < 1e-9) return { share: 0, sine, sign: 0 };
+  if (len(axis) < 1e-9) return { share: 0, sine, sign: 0, arm: 0 };
   const ax = norm(axis);
   const tau = dot(cross(r, fh), ax);
   // Positive when the force turns the limb back toward the stretch, which is
   // what a load resisting the contraction does.
-  return { share: Math.abs(tau) / Math.max(1e-9, len(r)), sine, sign: -Math.sign(tau) };
+  // arm is the torque about the motion's axis per unit of force, in cm. share
+  // divides it by the joint-to-force distance, which shrinks as a limb folds,
+  // so across a press or a row only arm compares like with like.
+  return { share: Math.abs(tau) / Math.max(1e-9, len(r)), sine, sign: -Math.sign(tau), arm: Math.abs(tau) };
 }
 
 /* ---------- collisions ---------- */
@@ -243,7 +253,7 @@ export interface Issue {
 export interface Report {
   issues: Issue[];
   muscles: { name: string; lengths: number[]; maxAt: number; drop: number }[];
-  lever: { name: string; share: number[]; sine: number[]; sign: number[] }[];
+  lever: { name: string; share: number[]; sine: number[]; sign: number[]; arm: number[] }[];
   angles: Record<string, number[]>;
   ts: number[];
 }
@@ -404,6 +414,7 @@ export function analyze(def: FigureDef): Report {
       share: rows.map((r) => r?.share ?? NaN),
       sine: rows.map((r) => r?.sine ?? NaN),
       sign: rows.map((r) => r?.sign ?? 0),
+      arm: rows.map((r) => r?.arm ?? NaN),
     };
   });
 

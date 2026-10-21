@@ -47,6 +47,15 @@ export interface PDot extends Base {
   movesWith?: string[];
   /** Pulls the dot toward the camera in the sort, so a hand draws over the bar it holds. */
   lift?: number;
+  /**
+   * Where to test whether the dot is hidden, in place of the dot itself. A
+   * shoulder joint sits a few centimeters inside the torso's corner, more with
+   * the blade pulled back, so its own position reads as hidden from the front
+   * and from above. Its dot marks where the arm hangs on, so it is tested a
+   * little way out along the upper arm: it shows wherever the arm can be seen
+   * leaving the body, and hides with the arm on the far side.
+   */
+  probe?: V3;
 }
 
 /** A convex solid. Every part in a group is drawn as one outline. */
@@ -63,6 +72,12 @@ export interface PSolid extends Base {
    */
   round?: number | number[];
   w?: number;
+  /**
+   * Cuts this much off each upright edge for the hiding test only, so a limb
+   * passing a corner the outline draws rounded is not hidden by the square
+   * corner of the box behind it. For prisms made by prismFaces.
+   */
+  chamfer?: number;
   /**
    * Per face, how far inside it a point still counts as on the surface; see
    * INSET. A face where two parts of a group meet takes -INSET, which pushes
@@ -133,9 +148,10 @@ interface Plane {
 }
 
 /** Outward face planes of a convex solid: inside where n . x <= d. */
-function planesOf(verts: V3[], faces: number[][], insets?: number[]): Plane[] {
+function planesOf(verts: V3[], faces: number[][], insets?: number[], chamfer = 0): Plane[] {
   const c = mul(verts.reduce((s, v) => add(s, v), [0, 0, 0] as V3), 1 / verts.length);
   const out: Plane[] = [];
+  const normals: (V3 | null)[] = faces.map(() => null);
   for (const [fi, f] of faces.entries()) {
     // Newell's method, so a face with a slightly bent or tiny edge still gets a normal.
     let n: V3 = [0, 0, 0];
@@ -152,7 +168,28 @@ function planesOf(verts: V3[], faces: number[][], insets?: number[]): Plane[] {
     const side = dot(n, sub(c, p0));
     if (Math.abs(side) < 1e-3) continue;
     if (side > 0) n = mul(n, -1);
+    normals[fi] = n;
     out.push({ n, d: dot(n, p0), inset: insets?.[fi] });
+  }
+  if (chamfer > 0 && faces.length > 4) {
+    // Side faces follow the two rings, each sharing an upright edge with the
+    // next. The bevel through that edge cuts chamfer off both faces.
+    const sides = faces.length - 2;
+    for (let k = 0; k < sides; k++) {
+      const fa = 2 + k;
+      const fb = 2 + ((k + 1) % sides);
+      const nA = normals[fa];
+      const nB = normals[fb];
+      const shared = faces[fa].filter((i) => faces[fb].includes(i));
+      if (!nA || !nB || shared.length !== 2) continue;
+      const e0 = verts[shared[0]];
+      const e1 = verts[shared[1]];
+      const n = norm(add(nA, nB));
+      let tA = norm(cross(norm(sub(e1, e0)), nA));
+      if (dot(tA, nB) > 0) tA = mul(tA, -1);
+      const mid = mul(add(e0, e1), 0.5);
+      out.push({ n, d: dot(n, mid) + chamfer * dot(n, tA), inset: insets?.[fa] });
+    }
   }
   // Fewer than four planes cannot close a solid; treat it as having no inside.
   return out.length >= 4 ? out : [];
@@ -165,7 +202,9 @@ function clipRay(planes: Plane[], o: V3, d: V3, inset: number): [number, number]
   let s1 = Infinity;
   for (const pl of planes) {
     const den = dot(pl.n, d);
-    const num = pl.d - (inset ? (pl.inset ?? inset) : 0) - dot(pl.n, o);
+    // A face's own inset wins unless the caller asks for more, so a joint
+    // filler's pushed-out faces stay pushed out.
+    const num = pl.d - (inset ? (pl.inset !== undefined && pl.inset < 0 ? pl.inset : Math.max(pl.inset ?? inset, inset)) : 0) - dot(pl.n, o);
     if (Math.abs(den) < 1e-12) {
       if (num < 0) return null;
       continue;
@@ -190,11 +229,11 @@ function clipBall(c: V3, r: number, o: V3, d: V3): [number, number] | null {
 
 /**
  * How far inside its surface a point may sit and still count as on top, and
- * how far a ray must then travel through the solid to count as hidden. A
- * shoulder joint lies on the torso's edge and should show from the front; a
- * blade sits 2 under the back, so from behind its ray crosses 0.5 of the inset
- * solid and it shows, while from the side or above the ray crosses the whole
- * torso and it does not.
+ * how far a ray must then travel through the solid to count as hidden. A limb
+ * running along the side of the body shows. A blade sits 2 under the back, so
+ * from behind its ray crosses 0.5 of the inset solid and it shows, while from
+ * the side or above the ray crosses the whole torso and it does not. At 0.75,
+ * an elbow resting 1.3 into a row's torso box went missing from the back.
  */
 const INSET = 1.5;
 const THROUGH = 1;
@@ -207,14 +246,14 @@ interface Occluder {
 function occluderOf(group: string, prims: (PSolid | PBall)[]): Occluder {
   return {
     group,
-    parts: prims.map((p) => (p.k === 'solid' ? { planes: planesOf(p.verts, p.faces, p.inset) } : { c: p.c, r: p.r })),
+    parts: prims.map((p) => (p.k === 'solid' ? { planes: planesOf(p.verts, p.faces, p.inset, p.chamfer) } : { c: p.c, r: p.r })),
   };
 }
 
 /** Whether something solid in the group lies between a point and the camera. */
-function hides(o: Occluder, p: V3, dir: V3): boolean {
+function hides(o: Occluder, p: V3, dir: V3, inset = INSET): boolean {
   for (const part of o.parts) {
-    const hit = 'planes' in part ? clipRay(part.planes, p, dir, INSET) : clipBall(part.c, part.r - INSET, p, dir);
+    const hit = 'planes' in part ? clipRay(part.planes, p, dir, inset) : clipBall(part.c, part.r - inset, p, dir);
     if (hit && hit[1] - Math.max(hit[0], 0) > THROUGH) return true;
   }
   return false;
@@ -272,7 +311,7 @@ export type Op =
 export const level = (cam: Camera): boolean => Math.abs(cam.up[1]) > 0.99;
 
 /** Line pieces are at most this long, so one that crosses a body edge splits close to it. */
-const PIECE = 3;
+const PIECE = 1.5;
 
 /** Whether a part is left out by a view's hide list, matched by prefix. */
 export function hidden(part: string, hide: string[] | undefined): boolean {
@@ -413,7 +452,7 @@ export function layout(prims: Prim[], cam: Camera, toneOf: (p: Prim) => Tone, hi
       }
     } else if (p.k === 'dot') {
       pieces.push({
-        slot: slotOf(p.p),
+        slot: slotOf(p.probe ?? p.p),
         depth: depthOf(cam, p.p) + (p.lift ?? 0.5),
         op: { op: 'dot', c: proj(p.p), r: p.movesWith && toneOf(p) !== 'move' ? 3.4 : p.r, tone: toneOf(p), ring: !!p.ring },
       });
@@ -485,6 +524,8 @@ const torsoPart = (name: string, verts: V3[], round: number | number[], rings: [
   verts,
   faces: HEXA_FACES,
   round,
+  // About the outline's corner rounding, in cm at the usual scale.
+  chamfer: 5,
   inset: [...rings, INSET, INSET, INSET, INSET],
 });
 
@@ -514,7 +555,14 @@ export function bodyPrims(b: Body): Prim[] {
     out.push(
       { k: 'line', part: `${arm}.upper`, pts: [j[`shoulder${s}`], j[`elbow${s}`]] },
       { k: 'line', part: `${arm}.lower`, pts: [j[`elbow${s}`], j[`hand${s}`]] },
-      { k: 'dot', part: `${arm}.shoulder`, p: j[`shoulder${s}`], r: 4.4, movesWith: [`${arm}.upper`] },
+      {
+        k: 'dot',
+        part: `${arm}.shoulder`,
+        p: j[`shoulder${s}`],
+        r: 4.4,
+        movesWith: [`${arm}.upper`],
+        probe: add(j[`shoulder${s}`], mul(norm(sub(j[`elbow${s}`], j[`shoulder${s}`])), 4)),
+      },
       { k: 'dot', part: `${arm}.elbow`, p: j[`elbow${s}`], r: 4.4, movesWith: [`${arm}.upper`, `${arm}.lower`] },
       { k: 'dot', part: `${arm}.hand`, p: j[`hand${s}`], r: 4.8, movesWith: [`${arm}.lower`], lift: 2 },
       { k: 'line', part: `${leg}.thigh`, pts: [j[`hip${s}`], j[`knee${s}`]] },

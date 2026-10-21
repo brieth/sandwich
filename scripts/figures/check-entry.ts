@@ -25,6 +25,7 @@ export function run(keys: string[]): { text: string; failed: number } {
     for (const l of r.lever) {
       text += `lever  ${l.name.padEnd(18)}${l.share.map((v) => pct(v).padStart(6)).join('')}   share of full leverage, %\n`;
       text += `       ${'sine arm/cable'.padEnd(18)}${l.sine.map((v) => pct(v).padStart(6)).join('')}\n`;
+      text += `       ${'moment arm, cm'.padEnd(18)}${l.arm.map((v) => (Number.isNaN(v) ? '-' : v.toFixed(1)).padStart(6)).join('')}   torque about the motion's axis per unit force\n`;
       text += `       ${'resists (+1)'.padEnd(18)}${l.sign.map((v) => String(v).padStart(6)).join('')}\n`;
     }
     for (const [k, v] of Object.entries(r.angles)) text += `angle  ${k.padEnd(18)}${v.map((x) => String(x).padStart(6)).join('')}\n`;

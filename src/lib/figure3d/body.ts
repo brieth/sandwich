@@ -191,6 +191,11 @@ export interface Body {
   head: { c: V3; r: number };
   /** Inner border of each shoulder blade, as points along the arc. */
   blade: { R: V3[]; L: V3[] };
+  /**
+   * Bottom corner of each blade where it really is, for the muscle measures.
+   * The drawn arc above is kept off the torso's sides, which this is not.
+   */
+  bladeTip: { R: V3; L: V3 };
   /** How far each limb end fell short of where it was sent, or a length was off. */
   gaps: Record<'armR' | 'armL' | 'legR' | 'legL', number>;
   /** A body-coordinate point on a segment, in the room. */
@@ -223,6 +228,12 @@ const UPPER_CORNERS = hexa(DIM.mid, DIM.top);
 function backAt(y: number): number {
   const k = (y - DIM.mid.y) / (DIM.top.y - DIM.mid.y);
   return -(DIM.mid.b + k * (DIM.top.b - DIM.mid.b));
+}
+
+/** Half width of the upper torso at a height. */
+function halfWidthAt(y: number): number {
+  const k = (y - DIM.mid.y) / (DIM.top.y - DIM.mid.y);
+  return DIM.mid.w + k * (DIM.top.w - DIM.mid.w);
 }
 
 interface LimbOut {
@@ -311,27 +322,35 @@ export function solveBody(spec: BodySpec): Body {
     return { heel: sub(sole, mul(norm(f.dir), DIM.heel)), toe: add(sole, mul(norm(f.dir), DIM.toe)) };
   });
 
-  const blade = (side: 1 | -1, s: Scap): V3[] => {
-    // Slides with the joint across the back but stays on its surface, 2
-    // under it so the torso hides it from every side but behind (see INSET
-    // in scene.ts). Turning is about the arc's middle, in the plane of the
-    // back.
+  /** The blade's three arc points in the back's plane, slid and turned. */
+  const bladeArc = (s: Scap): [number, number][] => {
     const q = DIM.blade.map(([x, y]) => [x + (s.x ?? 0), y + (s.y ?? 0)] as [number, number]);
     const cx = q[1][0];
     const cy = q[1][1];
     const a = ((s.rot ?? 0) * Math.PI) / 180;
-    const turned = q.map(([x, y]) => {
+    return q.map(([x, y]) => {
       const dx = x - cx;
       const dy = y - cy;
       // Upward rotation swings the bottom of the blade out, away from the spine.
       return [cx + dx * Math.cos(a) + dy * Math.sin(a), cy - dx * Math.sin(a) + dy * Math.cos(a)] as [number, number];
     });
+  };
+  const blade = (side: 1 | -1, s: Scap): V3[] => {
+    // Slides with the joint across the back but stays on its surface, 2
+    // under it so the torso hides it from every side but behind (see INSET
+    // in scene.ts). Turning is about the arc's middle, in the plane of the
+    // back.
+    const turned = bladeArc(s);
     const pts: V3[] = [];
     for (let k = 0; k <= 8; k++) {
       const u = k / 8;
       const x = (1 - u) * (1 - u) * turned[0][0] + 2 * (1 - u) * u * turned[1][0] + u * u * turned[2][0];
       const y = (1 - u) * (1 - u) * turned[0][1] + 2 * (1 - u) * u * turned[1][1] + u * u * turned[2][1];
-      pts.push(at('upper', [side * x, y, backAt(y) + 2]));
+      // A blade pushed far forward and turned up would reach round the back
+      // corner of the box torso and show from the side as a stray tick; a
+      // real one wraps round the ribs. 7 short of the side keeps it clear of
+      // the 5 the hiding test cuts off that corner (chamfer in scene.ts).
+      pts.push(at('upper', [side * Math.min(x, halfWidthAt(y) - 7), y, backAt(y) + 2]));
     }
     return pts;
   };
@@ -369,6 +388,10 @@ export function solveBody(spec: BodySpec): Body {
     },
     head: { c: at('head', DIM.head.c), r: DIM.head.r },
     blade: { R: blade(1, sR), L: blade(-1, sL) },
+    bladeTip: {
+      R: (([x, y]) => at('upper', [x, y, backAt(y) + 2]))(bladeArc(sR)[2]),
+      L: (([x, y]) => at('upper', [-x, y, backAt(y) + 2]))(bladeArc(sL)[2]),
+    },
     gaps: { armR: armR.gap, armL: armL.gap, legR: legR.gap, legL: legL.gap },
     at,
     dirOf,

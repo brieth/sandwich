@@ -72,12 +72,13 @@ export function drawOps(ctx: CanvasRenderingContext2D, ops: Op[], pal: Palette, 
   ctx.lineJoin = 'round';
   for (const o of ops) {
     if (o.op === 'floor') {
-      // Spans most of the box, as the old figures' floor did at 40 to 200 of 240.
+      // Nearly the box's full width: at 12 to 88% of it, as the old figures
+      // drew it, a low pulley at the edge of a side view sat past its end.
       ctx.strokeStyle = pal.equip;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(W * 0.12, o.y + 1);
-      ctx.lineTo(W * 0.88, o.y + 1);
+      ctx.moveTo(W * 0.03, o.y + 1);
+      ctx.lineTo(W * 0.97, o.y + 1);
       ctx.stroke();
     } else if (o.op === 'seg') {
       ctx.strokeStyle = col(o.tone);
