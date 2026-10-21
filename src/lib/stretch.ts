@@ -177,13 +177,16 @@ export type FigureKey =
  * exactly at every frame rather than drifting the way interpolated endpoints do.
  */
 /*
- * The rep's tempo, shared by every figure: a 5 second cycle starting at the
+ * The rep's tempo, shared by every figure: a 4 second cycle starting at the
  * stretch. Hold there 1 second, contract over 1, then return into the stretch
- * over 3. The slow return and the pause are where the stretch stimulus is, so
- * they get most of the time. Tracks sample this curve; the CSS limb-sweep and
- * blade-slide keyframes and the counter under the figure run the same one.
+ * over 2. Growth is about the same anywhere from half a second to 8 seconds per
+ * rep when sets go near failure, so the slow return is for control: reaching
+ * full length every rep and not bouncing out of it. 2 seconds does that; 3 cost
+ * reps for nothing. The hold is there to stop the bounce. Tracks sample this
+ * curve; the CSS limb-sweep and blade-slide keyframes and the counter under the
+ * figure run the same one.
  */
-export const TEMPO = { hold: 1, contract: 1, stretch: 3 } as const;
+export const TEMPO = { hold: 1, contract: 1, stretch: 2 } as const;
 export const CYCLE = TEMPO.hold + TEMPO.contract + TEMPO.stretch;
 const EASE = (x: number): number => {
   // cubic-bezier(0.42, 0, 0.58, 1), which is what CSS ease-in-out means.

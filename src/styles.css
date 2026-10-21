@@ -399,17 +399,17 @@ body {
  * --sweep, so the amount is per joint while the timing stays shared and the
  * figures in a modal move together.
  *
- * The tempo is TEMPO in stretch.ts: a 5 s rep starting at the stretch. Hold
- * there 1 s (0 to 20%), contract over 1 s (to 40%), then return into the
- * stretch over 3 s (to 100%). Rest is the stretched pose at rotate(0), so the
+ * The tempo is TEMPO in stretch.ts: a 4 s rep starting at the stretch. Hold
+ * there 1 s (0 to 25%), contract over 1 s (to 50%), then return into the
+ * stretch over 2 s (to 100%). Rest is the stretched pose at rotate(0), so the
  * first frame a reader sees is the position the exercise is supposed to reach.
  */
 @keyframes limb-sweep {
   0%,
-  20% {
+  25% {
     transform: rotate(0deg);
   }
-  40% {
+  50% {
     transform: rotate(var(--sweep, 0deg));
   }
   100% {
@@ -418,7 +418,7 @@ body {
 }
 .limb-seg {
   transform-box: view-box;
-  animation: limb-sweep 5s ease-in-out infinite;
+  animation: limb-sweep 4s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .limb-seg {
@@ -443,10 +443,10 @@ body {
  */
 @keyframes blade-slide {
   0%,
-  20% {
+  25% {
     transform: translate(0, 0);
   }
-  40% {
+  50% {
     transform: translate(var(--dx, 0), var(--dy, 0));
   }
   100% {
@@ -455,7 +455,7 @@ body {
 }
 .blade-slide {
   transform-box: view-box;
-  animation: blade-slide 5s ease-in-out infinite;
+  animation: blade-slide 4s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .blade-slide {
@@ -477,14 +477,14 @@ body {
   margin-bottom: 14px;
 }
 /*
- * Tempo counter under the figure, on the right. One row per phase of the 5 s
+ * Tempo counter under the figure, on the right. One row per phase of the 4 s
  * rep, all stacked at the right edge so the dial holds its place while the
  * word, which changes length, grows to its left. Each row shows for its whole
  * phase. Its dial, a teal ring with a pie, fills clockwise from twelve o'clock
  * over that phase, and the number on top counts its seconds.
  *
- * Windows are fractions of the 5 s cycle: a 1 s phase is 20%, the 3 s stretch
- * is 60%, matching TEMPO in stretch.ts. When each window starts comes from
+ * Windows are fractions of the 4 s cycle: a 1 s phase is 25%, the 2 s stretch
+ * is 50%, matching TEMPO in stretch.ts. When each window starts comes from
  * TEMPO as a negative delay set inline, so the counter starts with the figure.
  *
  * The pie is a circle of radius 5.75 stroked 11.5 wide, which covers the disc
@@ -506,10 +506,10 @@ body {
   opacity: 0;
 }
 .tempo-step.w1 {
-  animation: tempo-w1 5s step-end infinite;
+  animation: tempo-w1 4s step-end infinite;
 }
-.tempo-step.w3 {
-  animation: tempo-w3 5s step-end infinite;
+.tempo-step.w2 {
+  animation: tempo-w2 4s step-end infinite;
 }
 .tempo-word {
   font-size: 15px;
@@ -543,10 +543,10 @@ body {
   opacity: 0.45;
 }
 .tempo-fill.w1 {
-  animation: tempo-fill-w1 5s linear infinite;
+  animation: tempo-fill-w1 4s linear infinite;
 }
-.tempo-fill.w3 {
-  animation: tempo-fill-w3 5s linear infinite;
+.tempo-fill.w2 {
+  animation: tempo-fill-w2 4s linear infinite;
 }
 .tempo-n {
   position: absolute;
@@ -558,22 +558,22 @@ body {
   font-variant-numeric: tabular-nums;
   color: var(--text);
   opacity: 0;
-  animation: tempo-w1 5s step-end infinite;
+  animation: tempo-w1 4s step-end infinite;
 }
 @keyframes tempo-w1 {
   0% {
     opacity: 1;
   }
-  20%,
+  25%,
   100% {
     opacity: 0;
   }
 }
-@keyframes tempo-w3 {
+@keyframes tempo-w2 {
   0% {
     opacity: 1;
   }
-  60%,
+  50%,
   100% {
     opacity: 0;
   }
@@ -582,16 +582,16 @@ body {
   0% {
     stroke-dashoffset: 36.13;
   }
-  20%,
+  25%,
   100% {
     stroke-dashoffset: 0;
   }
 }
-@keyframes tempo-fill-w3 {
+@keyframes tempo-fill-w2 {
   0% {
     stroke-dashoffset: 36.13;
   }
-  60%,
+  50%,
   100% {
     stroke-dashoffset: 0;
   }

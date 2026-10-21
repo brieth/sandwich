@@ -340,15 +340,15 @@ export function StretchFigure({ f }: { f: Pose }) {
  * The rep's tempo under the figure, in step with it.
  *
  * One row per phase, shown for that whole phase. The dial fills once over the
- * phase and the number on top counts its seconds, so the 3 s stretch reads as
- * one long fill ticking 1, 2, 3. Words name what the muscle is doing rather
+ * phase and the number on top counts its seconds, so the 2 s stretch reads as
+ * one long fill ticking 1, 2. Words name what the muscle is doing rather
  * than which way the weight goes, because lowering the weight is arms up on a
  * pulldown and arms down on a curl. The order follows the figure from its
  * first frame: paused at the stretch, contracting, then the slow return.
  *
  * Start times come from TEMPO, as negative delays: a window that starts s
  * seconds in uses s - CYCLE, so at time zero it is already the right distance
- * through its cycle. Phase lengths pick a 1 s or 3 s window in the CSS.
+ * through its cycle. Phase lengths pick a 1 s or 2 s window in the CSS.
  */
 function TempoCount() {
   const phases = [
