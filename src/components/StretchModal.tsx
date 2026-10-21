@@ -346,16 +346,28 @@ export function StretchFigure({ f }: { f: Pose }) {
  */
 function TempoCount() {
   const steps = [
-    ...Array.from({ length: TEMPO.hold }, (_, i) => `Hold ${i + 1}`),
-    ...Array.from({ length: TEMPO.contract }, (_, i) => `Contract ${i + 1}`),
-    ...Array.from({ length: TEMPO.stretch }, (_, i) => `Stretch ${i + 1}`),
+    ...Array.from({ length: TEMPO.hold }, (_, i) => ({ word: 'Hold', n: i + 1 })),
+    ...Array.from({ length: TEMPO.contract }, (_, i) => ({ word: 'Contract', n: i + 1 })),
+    ...Array.from({ length: TEMPO.stretch }, (_, i) => ({ word: 'Stretch', n: i + 1 })),
   ];
   return (
-    <div className="tempo" aria-label={`Tempo: ${TEMPO.stretch} seconds into the stretch, hold ${TEMPO.hold}, contract ${TEMPO.contract}`}>
-      {steps.map((t) => (
-        <span key={t} aria-hidden="true">
-          {t}
-        </span>
+    <div
+      className="tempo"
+      aria-label={`Tempo: ${TEMPO.stretch} seconds into the stretch, hold ${TEMPO.hold}, contract ${TEMPO.contract}`}
+    >
+      {steps.map(({ word, n }) => (
+        <div className="tempo-step" key={`${word}${n}`} aria-hidden="true">
+          <span className="tempo-word">{word}</span>
+          <span className="tempo-dial">
+            <svg viewBox="0 0 28 28">
+              <circle className="tempo-ring" cx="14" cy="14" r="12.5" />
+              {/* Rotated so the fill starts at twelve o'clock; a circle's
+                  stroke runs clockwise from three o'clock. */}
+              <circle className="tempo-fill" cx="14" cy="14" r="5.75" transform="rotate(-90 14 14)" />
+            </svg>
+            <span className="tempo-n">{n}</span>
+          </span>
+        </div>
       ))}
       <div className="tempo-still">
         Stretch {TEMPO.stretch} s, hold {TEMPO.hold} s, contract {TEMPO.contract} s
