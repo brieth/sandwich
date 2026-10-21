@@ -357,14 +357,13 @@ export default function StretchModal({
   const cue = key ? CUES[key] : null;
   const figure = key ? FIGURES[key] : undefined;
   // Buttons read in a fixed left-to-right order so the angles sit in the same
-  // place for every exercise, but the angle that opens is the figure's primary
-  // one, which is not always the leftmost button.
+  // place for every exercise, and the modal opens on the leftmost one.
   const poses = figure
     ? posesOf(figure)
         .slice()
         .sort((a, b) => VIEW_ORDER.indexOf(a.view) - VIEW_ORDER.indexOf(b.view))
     : [];
-  const [viewIdx, setViewIdx] = useState(() => Math.max(0, poses.indexOf(figure as Pose)));
+  const [viewIdx, setViewIdx] = useState(0);
   if (!cue) return null;
   const pose = poses[Math.min(viewIdx, poses.length - 1)];
 

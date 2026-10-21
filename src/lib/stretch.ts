@@ -463,11 +463,8 @@ function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: nu
     }
     const lines: Pt[][] = [];
     const dots: Pt[] = [];
-    if (view === 'top') {
-      // From above the torso hides the legs, so only the feet show, one ahead
-      // of the hips and one behind.
-      for (const l of legs) dots.push(P(l.foot));
-    } else {
+    // From above the torso hides the legs, so the top view draws none.
+    if (view !== 'top') {
       for (const l of legs) {
         lines.push([P(l.hip), P(l.knee), P(l.foot)]);
         dots.push(P(l.knee), P(l.foot));
