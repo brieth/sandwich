@@ -218,10 +218,10 @@ function flyFigure(startElev: number, endElev: number): Figure {
   };
 
   const project = (view: 'top' | 'front'): Track => {
-    // Top: shoulder on the torso side at mid depth, forward is up the page.
-    // Front: shoulder on the shoulder line, up is up.
-    const sx = view === 'top' ? 144 : 140;
-    const sy = view === 'top' ? 93 : 56;
+    // Top: shoulder on the torso's side at mid depth, forward is up the page.
+    // Front: shoulder at the torso's top corner, up is up.
+    const sx = 140;
+    const sy = view === 'top' ? 93 : 49;
     const to2 = (v: V3): Pt => (view === 'top' ? { x: v[0], y: -v[2] } : { x: v[0], y: v[1] });
     const frames: Pt[][][] = [];
     for (let i = 0; i < FRAMES; i++) {
@@ -281,10 +281,10 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     height: 180,
     body: { headY: 76, spineTop: 90, hipY: 166 },
     chain: [
-      { x: 144, y: 102, len: 34, stretched: -74, contracted: 45 },
-      { x: 153.4, y: 69.3, len: 32, stretched: -74, contracted: 198, hand: true },
+      { x: 140, y: 95, len: 34, stretched: -74, contracted: 45 },
+      { x: 149.4, y: 62.3, len: 32, stretched: -74, contracted: 198, hand: true },
     ],
-    marks: [{ x: 14, y: 30, text: 'blade rises' }],
+    marks: [{ x: 14, y: 176, text: 'blade rises' }],
     mirror: true,
     alts: [
       {
@@ -292,11 +292,11 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
         height: 180,
         body: { headY: 76, spineTop: 90, hipY: 166 },
         chain: [
-          { x: 144, y: 102, len: 34, stretched: -74, contracted: 45 },
-          { x: 153.4, y: 69.3, len: 32, stretched: -74, contracted: 198, hand: true },
+          { x: 140, y: 95, len: 34, stretched: -74, contracted: 45 },
+          { x: 149.4, y: 62.3, len: 32, stretched: -74, contracted: 198, hand: true },
         ],
         blades: { dx: 0, dy: 9 },
-        marks: [{ x: 14, y: 30, text: 'blades ride up' }],
+        marks: [{ x: 14, y: 176, text: 'blades ride up' }],
         mirror: true,
       },
     ],
@@ -307,8 +307,8 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     view: 'top',
     height: 158,
     chain: [
-      { x: 144, y: 93, len: 30, stretched: -90, contracted: 78 },
-      { x: 144, y: 63, len: 28, stretched: -90, contracted: -86, hand: true },
+      { x: 140, y: 93, len: 30, stretched: -90, contracted: 78 },
+      { x: 140, y: 63, len: 28, stretched: -90, contracted: -86, hand: true },
     ],
     alts: [
       {
@@ -317,10 +317,10 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
         // The forearm points mostly away from the camera here, so it is drawn
         // short. The blades are the whole reason for this angle.
         chain: [
-          { x: 144, y: 56, len: 30, stretched: -20, contracted: 35 },
-          { x: 172.2, y: 45.7, len: 10, stretched: -20, contracted: 35, hand: true },
+          { x: 140, y: 49, len: 30, stretched: -20, contracted: 35 },
+          { x: 168.2, y: 38.7, len: 10, stretched: -20, contracted: 35, hand: true },
         ],
-        blades: { dx: -8, dy: 0 },
+        blades: { dx: -4, dy: 0 },
         marks: [{ x: 14, y: 150, text: 'blades spread at the front' }],
       },
     ],
@@ -330,13 +330,14 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   // three: hands behind the line of the torso. The front view shows what the
   // pulley height changes, which is the plane the arm sweeps in. The high fly
   // starts 30 up and finishes 35 down at the waist. The low fly starts 30 down
-  // and its upper arm finishes 5 up. The forearm runs 20 further along the
-  // rising arc, which lifts the hands to y 44.5, just under the chin at 42, so
-  // they finish at collarbone height. Measured: any finish from 10 up put the
-  // hands over the face, 13.0 to 13.2 from the head center against 13.5.
+  // and its upper arm finishes 2 below level. The forearm runs 20 further along
+  // the rising arc, which lifts the hands to y 44.7, 2.7 under the chin at 42,
+  // so they finish at collarbone height. Measured with the shoulder at y 49:
+  // a finish of 2 up put the hands over the face, 13.4 from the head center
+  // against a limit of 13.5.
   flyHigh: flyFigure(30, -35),
   flyMid: flyFigure(0, 0),
-  flyLow: flyFigure(-30, 5),
+  flyLow: flyFigure(-30, -2),
 
   // Overhead extension. The long head crosses the shoulder, so it only reaches
   // length with the upper arm up. The upper arm is drawn fixed because holding
@@ -359,8 +360,8 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
           // around the elbow. From behind, the folded forearm points partly
           // toward the viewer and projects short, so it is drawn 18 long. At 28
           // the correct path crossed the head, 8.3 from its center.
-          { x: 144, y: 93, len: 42, stretched: -80, contracted: -80 },
-          { x: 151.3, y: 51.6, len: 18, stretched: 125, contracted: 280, hand: true },
+          { x: 140, y: 86, len: 42, stretched: -80, contracted: -80 },
+          { x: 147.3, y: 44.6, len: 18, stretched: 125, contracted: 280, hand: true },
         ],
         marks: [{ x: 14, y: 176, text: 'elbows stay in' }],
         mirror: true,
@@ -406,8 +407,8 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     view: 'front',
     height: 172,
     chain: [
-      { x: 144, y: 56, len: 32, stretched: 108, contracted: 0 },
-      { x: 134.1, y: 86.4, len: 30, stretched: 108, contracted: 0, hand: true },
+      { x: 140, y: 49, len: 32, stretched: 108, contracted: 0 },
+      { x: 130.1, y: 79.4, len: 30, stretched: 108, contracted: 0, hand: true },
     ],
     marks: [{ x: 18, y: 150, text: 'past the midline' }],
     alts: [
@@ -418,10 +419,11 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
         height: 165,
         chain: [
           // Behind the back: the arm crosses behind the torso at the bottom.
-          // 145 keeps the upper arm 13.8 from the head center, clear of its
-          // radius of 11 plus the stroke.
-          { x: 144, y: 93, len: 31, stretched: 145, contracted: 0 },
-          { x: 118.6, y: 110.8, len: 29, stretched: 145, contracted: 0, hand: true },
+          // From a shoulder 20 from the head center, the upper arm passes
+          // 20 sin(180 - a) from it, so 135 keeps it 14.1 clear against a
+          // limit of 12.5, the radius of 11 plus half the stroke.
+          { x: 140, y: 93, len: 31, stretched: 135, contracted: 0 },
+          { x: 118.1, y: 114.9, len: 29, stretched: 135, contracted: 0, hand: true },
         ],
       },
     ],
@@ -436,18 +438,18 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       // 15, the same direction, so the sweep runs +155 forward through
       // straight ahead; 15 made it run -205 backward around the shoulder and
       // through the head.
-      { x: 144, y: 93, len: 31, stretched: 220, contracted: 375 },
-      { x: 120.3, y: 73.1, len: 29, stretched: 220, contracted: 375, hand: true },
+      { x: 140, y: 93, len: 31, stretched: 220, contracted: 375 },
+      { x: 116.3, y: 73.1, len: 29, stretched: 220, contracted: 375, hand: true },
     ],
     alts: [
       {
         view: 'back',
         height: 172,
         chain: [
-          { x: 144, y: 56, len: 29, stretched: 170, contracted: 0 },
-          { x: 115.4, y: 61.0, len: 27, stretched: 170, contracted: 0, hand: true },
+          { x: 140, y: 49, len: 29, stretched: 170, contracted: 0 },
+          { x: 111.4, y: 54, len: 27, stretched: 170, contracted: 0, hand: true },
         ],
-        blades: { dx: -8, dy: 0 },
+        blades: { dx: -4, dy: 0 },
         marks: [{ x: 14, y: 150, text: 'blades squeeze at the end' }],
       },
     ],
@@ -458,18 +460,18 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     mirror: true,
     height: 158,
     chain: [
-      { x: 144, y: 93, len: 30, stretched: -90, contracted: -10 },
-      { x: 144, y: 63, len: 28, stretched: -90, contracted: 150, hand: true },
+      { x: 140, y: 93, len: 30, stretched: -90, contracted: -10 },
+      { x: 140, y: 63, len: 28, stretched: -90, contracted: 150, hand: true },
     ],
     alts: [
       {
         view: 'back',
         height: 172,
         chain: [
-          { x: 144, y: 56, len: 30, stretched: -25, contracted: -55 },
-          { x: 171.2, y: 43.3, len: 16, stretched: -25, contracted: -95, hand: true },
+          { x: 140, y: 49, len: 30, stretched: -25, contracted: -55 },
+          { x: 167.2, y: 36.3, len: 16, stretched: -25, contracted: -95, hand: true },
         ],
-        blades: { dx: -8, dy: 0 },
+        blades: { dx: -4, dy: 0 },
         marks: [{ x: 14, y: 150, text: 'elbows finish high' }],
         mirror: true,
       },
@@ -483,8 +485,8 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       // 84 rather than 90: from a shoulder on the torso's edge, hanging
       // straight down laid the arm along the torso's side. At 84 the hand
       // hangs 7 outside it.
-      { x: 144, y: 56, len: 34, stretched: 84, contracted: 10 },
-      { x: 147.6, y: 89.8, len: 32, stretched: 84, contracted: 160, hand: true },
+      { x: 140, y: 49, len: 34, stretched: 84, contracted: 10 },
+      { x: 143.6, y: 82.8, len: 32, stretched: 84, contracted: 160, hand: true },
     ],
     marks: [{ x: 18, y: 150, text: 'arms fully down' }],
     mirror: true,

@@ -28,22 +28,27 @@ function Body({ view, f }: { view: View; f: Pose }) {
       <g opacity="0.5">
         <circle cx={FRONT.headX} cy={headY} r={FRONT.headR} fill="none" stroke={dim} strokeWidth="2.5" />
         {/*
-          * Same 48 wide torso as the top view, x 96 to 144, so the shoulders
-          * sit on its sides at the same x from every angle. Top edge at the
-          * spine top, just under the chin, and the arms pivot 12 below it at
-          * the shoulder line. With a 10 corner radius the straight run of each
-          * side starts 10 down, so the joint lands on the flat side rather
-          * than the corner curve.
+          * 40 wide at the shoulders, x 100 to 140, tapering to 28 at the
+          * waist, so it reads as a body rather than a box. Same shoulder width
+          * as the top view, so the shoulders sit at the same x from every
+          * angle. The arms pivot at the top corners, 5 below the top edge, so
+          * they meet the body at the shoulder rather than the chest.
           */}
-        <rect x="96" y={top} width="48" height={hipY - top} rx="10" fill="none" stroke={dim} strokeWidth="2.5" />
+        <path
+          d={`M108,${top} H132 Q140,${top} 140,${top + 9} L134,${hipY - 8} Q133,${hipY} 126,${hipY} H114 Q107,${hipY} 106,${hipY - 8} L100,${top + 9} Q100,${top} 108,${top} Z`}
+          fill="none"
+          stroke={dim}
+          strokeWidth="2.5"
+        />
         {view === 'back' && (
           /*
            * Two blades either side of the spine, which slide between the poses.
            * Drawn here rather than in the limb chain because they translate
            * instead of rotating, and because they are the only reason this
-           * angle exists. 14 wide at x 128 and 98, inside the torso's 96 to
-           * 144, and 16 apart at rest, so a retraction of 8 each brings them
-           * together at the spine without overlapping.
+           * angle exists. 12 wide at x 124 and 104 and 24 tall, which keeps
+           * them inside the taper all the way down, and 8 apart at rest, so a
+           * retraction of 4 each brings them together at the spine without
+           * overlapping.
            */
           <g
             className={f.blades ? 'blade-slide' : undefined}
@@ -53,8 +58,8 @@ function Body({ view, f }: { view: View; f: Pose }) {
                 : undefined
             }
           >
-            <rect x="128" y={top + 16} width="14" height="27" rx="5" fill="none" stroke={dim} strokeWidth="2" />
-            <rect x="98" y={top + 16} width="14" height="27" rx="5" fill="none" stroke={dim} strokeWidth="2" />
+            <rect x="124" y={top + 14} width="12" height="24" rx="5" fill="none" stroke={dim} strokeWidth="2" />
+            <rect x="104" y={top + 14} width="12" height="24" rx="5" fill="none" stroke={dim} strokeWidth="2" />
           </g>
         )}
       </g>
@@ -78,12 +83,14 @@ function Body({ view, f }: { view: View; f: Pose }) {
     return (
       <g opacity="0.5">
         {/*
-          * Shoulders pivot at y 93, the torso's mid depth, which is also the
+          * 40 wide, matching the front view's shoulders, so the arms pivot at
+          * x 100 and 140 from every angle. Shoulders pivot at y 93, the
+          * torso's mid depth, which is also the
           * middle of the only straight run of each side (y 90 to 96, inside
           * the 14 corner radius). Any further forward and the joint lands on
           * the corner curve and reads as the front of the body.
           */}
-        <rect x="96" y="76" width="48" height="34" rx="14" fill="none" stroke={dim} strokeWidth="2.5" />
+        <rect x="100" y="76" width="40" height="34" rx="14" fill="none" stroke={dim} strokeWidth="2.5" />
         {/*
           * Looking straight down, the head sits on the torso. Centered on the
           * same mid depth as the shoulder pivots, so head and shoulders read as
