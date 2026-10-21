@@ -477,15 +477,19 @@ body {
   margin-bottom: 14px;
 }
 /*
- * Seconds counter under the figure, on the right. One row per second of the
- * 5 s rep, all stacked at the right edge so the dial holds its place while the
- * word, which changes length, grows to its left. Row n shows for its own second
- * through a negative delay of n - 6 seconds, so the counter starts with the
- * figure. The word matches the section headings' caps. The dial is a teal ring
- * with a pie that fills clockwise from twelve o'clock over that second: a
- * circle of radius 5.75 stroked 11.5 wide covers the disc out to the ring, and
- * its dash runs the circumference, 36.13. The fill is a lighter teal so the
- * number reads over it at every point.
+ * Tempo counter under the figure, on the right. One row per phase of the 5 s
+ * rep, all stacked at the right edge so the dial holds its place while the
+ * word, which changes length, grows to its left. Each row shows for its whole
+ * phase. Its dial, a teal ring with a pie, fills clockwise from twelve o'clock
+ * over that phase, and the number on top counts its seconds.
+ *
+ * Windows are fractions of the 5 s cycle: a 1 s phase is 20%, the 3 s stretch
+ * is 60%, matching TEMPO in stretch.ts. When each window starts comes from
+ * TEMPO as a negative delay set inline, so the counter starts with the figure.
+ *
+ * The pie is a circle of radius 5.75 stroked 11.5 wide, which covers the disc
+ * out to the ring, with its dash running the circumference, 36.13. The fill is
+ * a lighter teal than the ring so the number reads over it at every point.
  */
 .tempo {
   position: relative;
@@ -500,7 +504,12 @@ body {
   align-items: center;
   gap: 10px;
   opacity: 0;
-  animation: tempo-tick 5s step-end infinite;
+}
+.tempo-step.w1 {
+  animation: tempo-w1 5s step-end infinite;
+}
+.tempo-step.w3 {
+  animation: tempo-w3 5s step-end infinite;
 }
 .tempo-word {
   font-size: 15px;
@@ -532,7 +541,12 @@ body {
   stroke-dasharray: 36.13;
   stroke-dashoffset: 36.13;
   opacity: 0.45;
-  animation: tempo-fill 5s linear infinite;
+}
+.tempo-fill.w1 {
+  animation: tempo-fill-w1 5s linear infinite;
+}
+.tempo-fill.w3 {
+  animation: tempo-fill-w3 5s linear infinite;
 }
 .tempo-n {
   position: absolute;
@@ -543,8 +557,10 @@ body {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--text);
+  opacity: 0;
+  animation: tempo-w1 5s step-end infinite;
 }
-@keyframes tempo-tick {
+@keyframes tempo-w1 {
   0% {
     opacity: 1;
   }
@@ -553,7 +569,16 @@ body {
     opacity: 0;
   }
 }
-@keyframes tempo-fill {
+@keyframes tempo-w3 {
+  0% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tempo-fill-w1 {
   0% {
     stroke-dashoffset: 36.13;
   }
@@ -562,25 +587,14 @@ body {
     stroke-dashoffset: 0;
   }
 }
-.tempo-step:nth-child(1),
-.tempo-step:nth-child(1) .tempo-fill {
-  animation-delay: -5s;
-}
-.tempo-step:nth-child(2),
-.tempo-step:nth-child(2) .tempo-fill {
-  animation-delay: -4s;
-}
-.tempo-step:nth-child(3),
-.tempo-step:nth-child(3) .tempo-fill {
-  animation-delay: -3s;
-}
-.tempo-step:nth-child(4),
-.tempo-step:nth-child(4) .tempo-fill {
-  animation-delay: -2s;
-}
-.tempo-step:nth-child(5),
-.tempo-step:nth-child(5) .tempo-fill {
-  animation-delay: -1s;
+@keyframes tempo-fill-w3 {
+  0% {
+    stroke-dashoffset: 36.13;
+  }
+  60%,
+  100% {
+    stroke-dashoffset: 0;
+  }
 }
 .tempo .tempo-still {
   display: none;
@@ -598,6 +612,10 @@ body {
     letter-spacing: 0.08em;
     color: var(--muted);
   }
+}
+.stretch-body {
+  overflow-y: auto;
+  min-height: 0;
 }
 .stretch-reach {
   margin: 0 0 10px;

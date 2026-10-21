@@ -337,35 +337,53 @@ export function StretchFigure({ f }: { f: Pose }) {
 }
 
 /**
- * Counts the seconds of the rep under the figure, in step with it.
+ * The rep's tempo under the figure, in step with it.
  *
- * Words name what the muscle is doing rather than which way the weight goes,
- * because lowering the weight is arms up on a pulldown and arms down on a
- * curl. The order follows the figure from its first frame: paused at the
- * stretch, contracting, then the slow return into the stretch.
+ * One row per phase, shown for that whole phase. The dial fills once over the
+ * phase and the number on top counts its seconds, so the 3 s stretch reads as
+ * one long fill ticking 1, 2, 3. Words name what the muscle is doing rather
+ * than which way the weight goes, because lowering the weight is arms up on a
+ * pulldown and arms down on a curl. The order follows the figure from its
+ * first frame: paused at the stretch, contracting, then the slow return.
+ *
+ * Start times come from TEMPO, as negative delays: a window that starts s
+ * seconds in uses s - CYCLE, so at time zero it is already the right distance
+ * through its cycle. Phase lengths pick a 1 s or 3 s window in the CSS.
  */
 function TempoCount() {
-  const steps = [
-    ...Array.from({ length: TEMPO.hold }, (_, i) => ({ word: 'Hold', n: i + 1 })),
-    ...Array.from({ length: TEMPO.contract }, (_, i) => ({ word: 'Contract', n: i + 1 })),
-    ...Array.from({ length: TEMPO.stretch }, (_, i) => ({ word: 'Stretch', n: i + 1 })),
-  ];
+  const phases = [
+    { word: 'Hold', secs: TEMPO.hold },
+    { word: 'Contract', secs: TEMPO.contract },
+    { word: 'Stretch', secs: TEMPO.stretch },
+  ].map((ph, i, all) => ({ ...ph, start: all.slice(0, i).reduce((t, q) => t + q.secs, 0) }));
+  const delay = (t: number) => ({ animationDelay: `${t - CYCLE}s` });
   return (
     <div
       className="tempo"
       aria-label={`Tempo: ${TEMPO.stretch} seconds into the stretch, hold ${TEMPO.hold}, contract ${TEMPO.contract}`}
     >
-      {steps.map(({ word, n }) => (
-        <div className="tempo-step" key={`${word}${n}`} aria-hidden="true">
+      {phases.map(({ word, secs, start }) => (
+        <div className={`tempo-step w${secs}`} key={word} style={delay(start)} aria-hidden="true">
           <span className="tempo-word">{word}</span>
           <span className="tempo-dial">
             <svg viewBox="0 0 28 28">
               <circle className="tempo-ring" cx="14" cy="14" r="12.5" />
               {/* Rotated so the fill starts at twelve o'clock; a circle's
                   stroke runs clockwise from three o'clock. */}
-              <circle className="tempo-fill" cx="14" cy="14" r="5.75" transform="rotate(-90 14 14)" />
+              <circle
+                className={`tempo-fill w${secs}`}
+                style={delay(start)}
+                cx="14"
+                cy="14"
+                r="5.75"
+                transform="rotate(-90 14 14)"
+              />
             </svg>
-            <span className="tempo-n">{n}</span>
+            {Array.from({ length: secs }, (_, k) => (
+              <span className="tempo-n" key={k} style={delay(start + k)}>
+                {k + 1}
+              </span>
+            ))}
           </span>
         </div>
       ))}
@@ -417,29 +435,35 @@ export default function StretchModal({
           </span>
           <CloseButton onClick={onClose} label="Close" />
         </div>
-        {/* Keyed by angle, so switching angles restarts the figure and the
-            counter together and they stay on the same second. */}
-        {pose && <StretchFigure key={viewIdx} f={pose} />}
-        {pose && <TempoCount key={`t${viewIdx}`} />}
-        {poses.length > 0 && (
-          <div className={poses.length > 1 ? 'metric-toggle view-toggle' : 'metric-toggle view-toggle one'}>
-            {poses.map((p, i) => (
-              <button
-                key={p.view}
-                className={i === viewIdx ? 'active' : ''}
-                onClick={() => setViewIdx(i)}
-              >
-                {VIEW_LABEL[p.view]}
-              </button>
-            ))}
-          </div>
-        )}
-        <p className="stretch-reach">{cue.reach}</p>
-        {cue.points.map((p, i) => (
-          <p key={i} className="muted small stretch-point">
-            {p}
-          </p>
-        ))}
+        {/* Everything under the title scrolls. As direct children of the
+            modal's capped flex column, the drawing was the one item that could
+            shrink, and long cues squeezed it: measured at 81px tall on the mid
+            fly and 52 on the low fly, against 256 at full size. */}
+        <div className="stretch-body">
+          {/* Keyed by angle, so switching angles restarts the figure and the
+              counter together and they stay on the same second. */}
+          {pose && <StretchFigure key={viewIdx} f={pose} />}
+          {pose && <TempoCount key={`t${viewIdx}`} />}
+          {poses.length > 0 && (
+            <div className={poses.length > 1 ? 'metric-toggle view-toggle' : 'metric-toggle view-toggle one'}>
+              {poses.map((p, i) => (
+                <button
+                  key={p.view}
+                  className={i === viewIdx ? 'active' : ''}
+                  onClick={() => setViewIdx(i)}
+                >
+                  {VIEW_LABEL[p.view]}
+                </button>
+              ))}
+            </div>
+          )}
+          <p className="stretch-reach">{cue.reach}</p>
+          {cue.points.map((p, i) => (
+            <p key={i} className="muted small stretch-point">
+              {p}
+            </p>
+          ))}
+        </div>
       </div>
     </div>
   );
