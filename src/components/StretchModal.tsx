@@ -25,30 +25,32 @@ function Body({ view, f }: { view: View; f: Pose }) {
     const top = o?.spineTop ?? FRONT.spineTop;
     const hipY = o?.hipY ?? FRONT.hipY;
     return (
-      <g opacity="0.5">
-        <circle cx={FRONT.headX} cy={headY} r={FRONT.headR} fill="none" stroke={dim} strokeWidth="2.5" />
-        {/*
-          * 40 wide at the shoulders, x 100 to 140, tapering to 28 at the
-          * waist, so it reads as a body rather than a box. Same shoulder width
-          * as the top view, so the shoulders sit at the same x from every
-          * angle. The arms pivot at the top corners, 5 below the top edge, so
-          * they meet the body at the shoulder rather than the chest.
-          */}
-        <path
-          d={`M108,${top} H132 Q140,${top} 140,${top + 9} L134,${hipY - 8} Q133,${hipY} 126,${hipY} H114 Q107,${hipY} 106,${hipY - 8} L100,${top + 9} Q100,${top} 108,${top} Z`}
-          fill="none"
-          stroke={dim}
-          strokeWidth="2.5"
-        />
+      <g>
+        <g opacity="0.5">
+          <circle cx={FRONT.headX} cy={headY} r={FRONT.headR} fill="none" stroke={dim} strokeWidth="2.5" />
+          {/*
+            * 40 wide at the shoulders, x 100 to 140, tapering to 28 at the
+            * waist, so it reads as a body rather than a box. Same shoulder width
+            * as the top view, so the shoulders sit at the same x from every
+            * angle. The arms pivot at the top corners, 5 below the top edge, so
+            * they meet the body at the shoulder rather than the chest.
+            */}
+          <path
+            d={`M108,${top} H132 Q140,${top} 140,${top + 9} L134,${hipY - 8} Q133,${hipY} 126,${hipY} H114 Q107,${hipY} 106,${hipY - 8} L100,${top + 9} Q100,${top} 108,${top} Z`}
+            fill="none"
+            stroke={dim}
+            strokeWidth="2.5"
+          />
+        </g>
         {view === 'back' && (
           /*
-           * Two blades either side of the spine, which slide between the poses.
-           * Drawn here rather than in the limb chain because they translate
-           * instead of rotating, and because they are the only reason this
-           * angle exists. 12 wide at x 124 and 104 and 24 tall, which keeps
-           * them inside the taper all the way down, and 8 apart at rest, so a
-           * retraction of 4 each brings them together at the spine without
-           * overlapping.
+           * Two blades either side of the spine, each drawn as an arc for its
+           * inner border, which bows toward the spine. Drawn outside the faint
+           * body group, because a blade that slides is part of the movement and
+           * takes the moving color, while one that holds still stays with the
+           * body. Translated rather than rotated, so they sit outside the limb
+           * chain. The arcs bow to x 125 and 115, 10 apart at rest, so a
+           * retraction of 4 each leaves them 2 apart at the spine.
            */
           <g
             className={f.blades ? 'blade-slide' : undefined}
@@ -57,9 +59,14 @@ function Body({ view, f }: { view: View; f: Pose }) {
                 ? ({ ['--dx' as string]: `${f.blades.dx}px`, ['--dy' as string]: `${f.blades.dy}px` } as React.CSSProperties)
                 : undefined
             }
+            fill="none"
+            stroke={f.blades ? 'var(--accent)' : dim}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            opacity={f.blades ? 1 : 0.5}
           >
-            <rect x="124" y={top + 14} width="12" height="24" rx="5" fill="none" stroke={dim} strokeWidth="2" />
-            <rect x="104" y={top + 14} width="12" height="24" rx="5" fill="none" stroke={dim} strokeWidth="2" />
+            <path d={`M130,${top + 12} Q125,${top + 25} 130,${top + 38}`} />
+            <path d={`M110,${top + 12} Q115,${top + 25} 110,${top + 38}`} />
           </g>
         )}
       </g>
@@ -211,16 +218,15 @@ function TrackLimbs({ track, layer }: { track: Track; layer: 'behind' | 'front' 
   return (
     <>
       {cb?.[0].map((c0, ci) => inLayer(ci) && (
-        // Thin and muted: the cable is equipment, the arm is what moves.
+        // Teal because it moves; thin, so the arm still reads first.
         <line
           key={`c${ci}`}
           x1={c0[0].x}
           y1={c0[0].y}
           x2={c0[1].x}
           y2={c0[1].y}
-          stroke="currentColor"
+          stroke="var(--accent)"
           strokeWidth="1.4"
-          opacity="0.6"
         >
           {anim('x2', cvals(ci, 1, 'x'))}
           {anim('y2', cvals(ci, 1, 'y'))}
@@ -280,6 +286,9 @@ export function StretchFigure({ f }: { f: Pose }) {
         <Limb key={k} chain={c} i={0} pts={pointsOf(c)} sw={sweeps(c)} />
       ))}
       {f.track && <TrackLimbs track={f.track} layer="front" />}
+      {f.track?.onTop?.map((q, i) => (
+        <circle key={`t${i}`} cx={q.x} cy={q.y} r="4.4" fill="var(--accent)" />
+      ))}
       {f.marks?.map((m, k) => (
         <text key={k} className="stretch-mark" x={m.x} y={m.y} textAnchor={m.anchor ?? 'start'} fill="var(--accent)">
           {m.text}

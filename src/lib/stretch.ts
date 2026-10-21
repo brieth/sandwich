@@ -72,6 +72,12 @@ export interface Track {
    * would look like it went through it.
    */
   behind?: number[];
+  /**
+   * Joints that sit on the body's surface and stay visible even when their limb
+   * is drawn behind it. From behind, a fly's shoulders are on the torso's edge;
+   * drawn with the hidden arms, the torso cut each one in half.
+   */
+  onTop?: Pt[];
 }
 
 /**
@@ -257,6 +263,18 @@ function leanBy(v: V3, deg: number): V3 {
   return [v[0], v[1] * Math.cos(t) + v[2] * Math.sin(t), -v[1] * Math.sin(t) + v[2] * Math.cos(t)];
 }
 
+/**
+ * Inner border of the right shoulder blade, as a quadratic arc on the back
+ * surface: top, control, bottom. The border bows toward the spine, which is the
+ * shape it has. Held retracted, so it sits 4 to 9 from the spine; mirrored for
+ * the left blade.
+ */
+const BLADE: [V3, V3, V3] = [
+  [9, -50, -15],
+  [4, -41, -15],
+  [9, -31, -14],
+];
+
 /** Knee for a leg from hip to foot, bent forward, by the law of cosines. */
 function knee(hip: V3, foot: V3): V3 {
   const dy = foot[1] - hip[1];
@@ -303,7 +321,7 @@ function rounded(poly: Pt[], r: number): string {
   return d + 'Z';
 }
 
-type FlyView = 'front' | 'side' | 'top';
+type FlyView = 'front' | 'back' | 'side' | 'top';
 
 /**
  * Where each view puts a body-frame point on screen.
@@ -315,10 +333,12 @@ type FlyView = 'front' | 'side' | 'top';
  */
 const PROJECT: Record<FlyView, (v: V3) => Pt> = {
   front: (v) => ({ x: 120 + v[0], y: 120 + v[1] }),
+  // From behind, the person's right is on the viewer's right.
+  back: (v) => ({ x: 120 + v[0], y: 120 + v[1] }),
   side: (v) => ({ x: 130 - v[2], y: 120 + v[1] }),
   top: (v) => ({ x: 120 + v[0], y: 92 - v[2] }),
 };
-const FLY_HEIGHT: Record<FlyView, number> = { front: 205, side: 205, top: 160 };
+const FLY_HEIGHT: Record<FlyView, number> = { front: 205, back: 205, side: 205, top: 160 };
 
 /**
  * A crossover fly as one whole body in 3D, projected into the front, side and
@@ -381,6 +401,20 @@ function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: nu
     }
     const lines: Pt[][] = [];
     const dots: Pt[] = [];
+    if (view === 'back') {
+      // Blades only show from behind. They hold still through a fly, so they
+      // are drawn with the body rather than in the moving color.
+      for (const side of [1, -1]) {
+        const arc: Pt[] = [];
+        for (let k = 0; k <= 8; k++) {
+          const t = k / 8;
+          const q = BLADE.map((b) => [side * b[0], b[1], b[2]] as V3);
+          const v: V3 = [0, 1, 2].map((i) => (1 - t) * (1 - t) * q[0][i] + 2 * (1 - t) * t * q[1][i] + t * t * q[2][i]) as V3;
+          arc.push(P(up(v)));
+        }
+        lines.push(arc);
+      }
+    }
     if (view === 'top') {
       // From above the torso hides the legs, so only the feet show, one ahead
       // of the hips and one behind.
@@ -397,7 +431,12 @@ function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: nu
     return {
       view,
       height: FLY_HEIGHT[view],
-      track: { frames, cables, behind: view === 'side' ? [0] : [] },
+      track: {
+        frames,
+        cables,
+        behind: view === 'side' ? [0] : view === 'back' ? [0, 1] : [],
+        onTop: view === 'back' ? frames[0].map((limb) => limb[0]) : undefined,
+      },
       scaffold: {
         head: { x: hp.x, y: hp.y, r: HEAD.r },
         torso: rounded(hull(torsoCorners.map(P)), 7),
@@ -408,7 +447,7 @@ function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: nu
     };
   };
 
-  return { ...pose('top'), alts: [pose('front'), pose('side')] };
+  return { ...pose('top'), alts: [pose('front'), pose('back'), pose('side')] };
 }
 
 /**
@@ -743,7 +782,7 @@ export const CUES: Record<FigureKey, Cue> = {
       'Stand a step in front of the pulleys with one foot forward, and lean forward about 20 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
       'The pulley is high, so the hands sweep down and in and finish low in front. That path works the lower and middle fibers of the pec, and those are longest with the arm raised and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
-      'Keep the chest open. A shoulder that rolls forward at the start puts the range into the joint instead of the pec.',
+      'Pull your shoulder blades back and down before the first rep and hold them there through the set. If they slide forward at the start, part of the range comes from the shoulder girdle and the pec stretches less. If they roll forward as the hands meet, the front delts take over the finish.',
     ],
   },
   flyMid: {
@@ -752,7 +791,7 @@ export const CUES: Record<FigureKey, Cue> = {
       'Stand a step in front of the pulleys with one foot forward, and lean forward about 12 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
       'The hands travel level and meet in front of the chest. That path works the middle fibers of the pec.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
-      'Keep the chest open. A shoulder that rolls forward at the start puts the range into the joint instead of the pec.',
+      'Pull your shoulder blades back and down before the first rep and hold them there through the set. If they slide forward at the start, part of the range comes from the shoulder girdle and the pec stretches less. If they roll forward as the hands meet, the front delts take over the finish.',
     ],
   },
   flyLow: {
@@ -761,7 +800,7 @@ export const CUES: Record<FigureKey, Cue> = {
       'Stand a step in front of the pulleys with one foot forward, and lean forward only slightly, about 5 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
       'The pulley is low, so the hands sweep up and in and finish high in front. That path works the upper fibers of the pec, the clavicular head, and those are longest with the arm low and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
-      'Keep the chest open. A shoulder that rolls forward at the start puts the range into the joint instead of the pec.',
+      'Pull your shoulder blades back and down before the first rep and hold them there through the set. If they slide forward at the start, part of the range comes from the shoulder girdle and the pec stretches less. If they roll forward as the hands meet, the front delts take over the finish.',
     ],
   },
   bench: {
