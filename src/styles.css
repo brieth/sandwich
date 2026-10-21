@@ -395,72 +395,17 @@ body {
 
 /* ---------- stretch position ---------- */
 /*
- * One keyframe for every segment of every figure. Each group carries its own
- * --sweep, so the amount is per joint while the timing stays shared and the
- * figures in a modal move together.
- *
- * The tempo is TEMPO in stretch.ts: a 4 s rep starting at the stretch. Hold
- * there 1 s (0 to 25%), contract over 1 s (to 50%), then return into the
- * stretch over 2 s (to 100%). Rest is the stretched pose at rotate(0), so the
- * first frame a reader sees is the position the exercise is supposed to reach.
+ * The figure, drawn to a canvas by FigureCanvas. Its aspect ratio is set
+ * inline from the figure's box, so the height follows the width. The muted
+ * color is read from here for the body and equipment.
  */
-@keyframes limb-sweep {
-  0%,
-  25% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(var(--sweep, 0deg));
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
-.limb-seg {
-  transform-box: view-box;
-  animation: limb-sweep 4s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .limb-seg {
-    animation: none;
-  }
-}
-.stretch-svg {
+.stretch-canvas {
   display: block;
   width: 100%;
-  max-width: 300px;
+  max-width: 340px;
   margin: 4px auto 10px;
   height: auto;
   color: var(--muted);
-}
-.stretch-mark {
-  font-size: 11px;
-  font-weight: 500;
-}
-/*
- * Blades translate rather than rotate, so they need their own keyframe. Timing
- * matches limb-sweep exactly, since the blade and the arm are one movement.
- */
-@keyframes blade-slide {
-  0%,
-  25% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(var(--dx, 0), var(--dy, 0));
-  }
-  100% {
-    transform: translate(0, 0);
-  }
-}
-.blade-slide {
-  transform-box: view-box;
-  animation: blade-slide 4s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .blade-slide {
-    animation: none;
-  }
 }
 /*
  * A single angle still gets a button, so every figure says which angle it is.

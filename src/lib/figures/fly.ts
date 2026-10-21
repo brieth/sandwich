@@ -4,15 +4,18 @@
  * The arms sweep along a great circle between a start and a finish direction,
  * tilted by the pulley height, with the forearm 20 degrees further along the
  * same arc to hold the elbow bend. Headings: upper arm from 34 at the stretch
- * to -92.5 with the hands together in front. The arm path is set against the
- * upper torso. The lean is a hinge at the hips; the upper back extends against
- * it by up to THORACIC_EXT, so the chest faces forward while the hips stay
- * hinged. Legs stand in a staggered stance. The pulleys are fixed in the room,
- * so the cable from each to its hand shows the angle the lean makes with it.
+ * to -92.5 at the finish, close to as far across as the torso lets the upper
+ * arms come (at -97 they pass into it in the mid and low flys). There the
+ * hands are about 20 apart, center to center: high 20, mid 19, low 23.
+ * The arm path is set against the upper torso. The lean is a hinge at the
+ * hips; the upper back extends against it by up to THORACIC_EXT, so the chest
+ * faces forward while the hips stay hinged. Legs stand in a staggered stance.
+ * The pulleys are fixed in the room.
  */
+import type { Body } from '../figure3d/body';
 import type { FigureDef } from '../figure3d/figure';
 import type { V3 } from '../figure3d/math';
-import { angleBetween, lerpN, slerpDir, sub } from '../figure3d/math';
+import { add, angleBetween, dist, lerpN, mul, norm, slerpDir, sub } from '../figure3d/math';
 import { cable, floor, handle, pulley } from '../figure3d/equipment';
 import type { Group } from './kit';
 import { DIM, VIEW, dirHE, mx } from './kit';
@@ -21,55 +24,102 @@ import { DIM, VIEW, dirHE, mx } from './kit';
  * Upper-back extension, in degrees, between the torso's lower and upper
  * halves. A single rigid torso tipped forward pointed the chest at the floor,
  * which is the slouch the chest-up cue prevents. The upper half tips back this
- * much against the lower, never past upright.
+ * much against the lower, never past upright, so the chest tips forward 8
+ * degrees in the high fly and stays upright in the mid and low.
  */
 const THORACIC_EXT = 12;
 
 /*
  * Hip joints to floor. 93 straight; the stance has the feet 20 ahead and 20
- * behind with soft knees, the same 0.983 of full leg length hip to ankle that
- * the first fly figures stood with.
+ * behind, hip to ankle 0.98 of full leg length as the first fly figures
+ * stood, which bends both knees 22 degrees.
  */
 const FLOOR = 89;
 const STAGGER = 20;
 
 /*
- * The person stands about two steps, an arm's length, in front of the pulley
- * line. At one step the cable at the stretch ran nearly along the arm, so it
- * loaded the shoulder joint and barely turned the arm. Measured as the share of
- * the cable's full leverage on the arm, stretch then finish:
+ * Distance from the hips back to the line between the pulleys, fly()'s
+ * behind: 100 for the high and mid flys, about one and a half steps of 75,
+ * and 130 for the low, a little under two. Measured with check.mjs, stretch
+ * / finish, percent. share is the cable's torque about the axis the arm
+ * sweeps in, over the most the cable could give; sine is the sine of the
+ * angle between arm and cable, which also counts torque that pulls the arm
+ * off its path.
  *
- *   40 in front:  high 43 / 37, mid 20 / 45, low 54 / 71
- *   100 in front: high 79 / 34, mid 76 / 27, low 59 / 55
+ *                      high      mid       low
+ *   share, 40 in front   41 / 34   20 / 45   13 / 67
+ *   share, 70            56 / 26   64 / 35   13 / 59
+ *   share, 100           62 / 20   76 / 27   34 / 51
+ *   share, 130           65 / 14   80 / 21   48 / 45
+ *   share, 160           66 / 10   83 / 16   58 / 39
+ *   sine, as drawn       75 / 28   76 / 27   65 / 52
  *
- * At 100 all three load the stretch at least as hard as the finish. A real
- * station puts each pulley about 130 out from center; 100 is what fits the box.
+ * As drawn, share peaks at 95 at t = 0.30 for the high fly and 100 at 0.26
+ * for the mid, both with the arms out to the sides, and 94 at 0.42 for the
+ * low. At 100 the high and mid flys load the stretch harder than the finish
+ * by both measures. The low fly at 100 loaded its stretch less than its
+ * finish by share, 34 / 51 (sine 59 / 58); at 130 the two are about even.
+ * Closer in, the stretch gets lighter and the finish heavier; the low fly's
+ * stretch stops falling at 13 by 70. The low fly's pulleys at 130 lengthen
+ * its Top view, so it draws at scale 1.084 against 1.10 for the others. The check
+ * counts the cable only; the arm's own weight adds load as the low fly's
+ * arms rise and takes some off as the high fly's arms fall.
+ *
+ * The pulleys are drawn 100 out from center. Many stations are wider, about
+ * 130 to 150 out, but at 130 out the drawing shrinks from scale 1.10 to 0.85
+ * to keep them in frame. A wider station loads the stretch less at the same
+ * distance: with the pulleys 130 out, share is high 41 / 31 and mid 52 / 39
+ * at 100 in front, and low 41 / 51 at 130.
  */
-const PULLEY_BEHIND = 100;
 const PULLEY_OUT = 100;
 
 /*
  * How far the right blade, and the shoulder joint on it, shifts from its set
  * position through the rep. At the stretch, opening the arms draws it 2
  * further toward the spine and 3 back. At the finish, reaching across lets it
- * drift 3 out and 2 forward, which holding the blades back keeps small.
+ * drift 3 out and 2 forward, which holding the blades back keeps small. The
+ * set position, back and down, is drawn at the body's default. Offsetting it
+ * 1 in, 2 down and 1 back shortened the lower-fiber proxies at the stretch by
+ * about 1 (high pecSternal 38.5 to 37.5, mid 37.6 to 37.0), since a lowered
+ * shoulder sits closer to the sternum below it, which would have the drawing
+ * argue against the cue's reason for setting the blades. The
+ * retraction drawn at the stretch lengthens the pec proxies by 0.3 (high,
+ * mid) to 0.8 (low) over blades held at the set position.
  */
 const SCAP_STRETCH = { x: -2, z: -3 };
 const SCAP_FINISH = { x: 3, z: 2 };
 
-function fly(startElev: number, endElev: number, lean: number, pulleyY: number): FigureDef {
+/** Upper arm 10 from the shoulder, where the pec proxies in analysis.ts insert. */
+const humerus10 = (b: Body, s: 'R' | 'L'): V3 =>
+  add(b.j[`shoulder${s}`], mul(norm(sub(b.j[`elbow${s}`], b.j[`shoulder${s}`])), 10));
+
+/*
+ * Lowest sternal fibers, from the bottom of the sternum, for the high fly's
+ * claim about the lower fibers. analysis.ts has no proxy this low.
+ */
+const pecCostal = (s: 'R' | 'L') => ({
+  name: `pecCostal${s}`,
+  len: (b: Body) => dist(b.at('upper', [s === 'R' ? 3 : -3, -30, 14]), humerus10(b, s)),
+});
+
+/** Which pec fibers the path works: picks the length proxies the check verifies. */
+type Fibers = 'lower' | 'middle' | 'upper';
+
+/** behind: from the hips back to the line between the pulleys. */
+function fly(startElev: number, endElev: number, lean: number, pulleyY: number, fibers: Fibers, behind: number): FigureDef {
   const d0 = dirHE(34, startElev);
   const d1 = dirHE(-92.5, endElev);
   const lead = 20 / angleBetween(d0, d1);
   const ext = Math.min(lean, THORACIC_EXT);
   const pulleys: V3[] = [
-    [PULLEY_OUT, pulleyY, -PULLEY_BEHIND],
-    [-PULLEY_OUT, pulleyY, -PULLEY_BEHIND],
+    [PULLEY_OUT, pulleyY, -behind],
+    [-PULLEY_OUT, pulleyY, -behind],
   ];
   const foot = (x: number, z: number) => ({
     foot: { heel: [x, FLOOR, z - DIM.heel] as V3, dir: [0, 0, 1] as V3 },
     pole: [0, 0, 1] as V3,
   });
+  const pec = fibers === 'upper' ? 'pecClavicular' : 'pecSternal';
   return {
     views: [VIEW.front, VIEW.back, VIEW.side, { ...VIEW.top, hide: ['leg'] }],
     pose: (t) => {
@@ -102,9 +152,10 @@ function fly(startElev: number, endElev: number, lean: number, pulleyY: number):
     },
     check: {
       muscles: [
-        { m: pulleyY > 0 ? 'pecClavicular' : 'pecSternal', side: 'R' },
-        { m: pulleyY > 0 ? 'pecClavicular' : 'pecSternal', side: 'L' },
+        { m: pec, side: 'R' },
+        { m: pec, side: 'L' },
       ],
+      custom: fibers === 'lower' ? [pecCostal('R'), pecCostal('L')] : undefined,
       load: (b) =>
         (['R', 'L'] as const).map((s, i) => {
           const at = s === 'R' ? b.j.handR : b.j.handL;
@@ -128,43 +179,61 @@ function fly(startElev: number, endElev: number, lean: number, pulleyY: number):
 }
 
 export const group: Group = {
-  // Pulley heights are hip-relative: above the head, shoulder height, and 10
-  // off the floor. Leans are the usual coaching ranges: more for a high
-  // pulley, close to upright for a low one.
+  /*
+   * Pulleys: 205 off the floor for the high fly, the top of a real station
+   * and about 30 above the head; shoulder height for the mid; 10 off the floor
+   * for the low. At the high fly's stretch the cable rises 19 degrees from the
+   * hand to the pulley; at 189, where the pulley sat before, it rose 10 and
+   * read as level from the side.
+   *
+   * The low fly starts with the upper arms 30 degrees below level, as the
+   * first figures did. The hands sit 17 above the hip joints and 10 behind the
+   * back of the torso at that height, behind it in the Side and Top views.
+   * The plane the arm sweeps in misses the low pulley there, so part of the
+   * cable's pull at the stretch goes across it (share 48 against sine 65 at
+   * 130) and the hands dip 3 before rising. A start 55 below level put the
+   * plane through the pulley and gave share 58 / 57 at 100, but brought the
+   * hands 2 in front of the back of the torso and shortened the
+   * pecClavicular proxy at the stretch from 27.4 to 26.0. The start stays at
+   * 30 below, and standing at 130 brings the stretch up to the finish.
+   *
+   * Leans are the usual coaching ranges: more for a high pulley, close to
+   * upright for a low one.
+   */
   figures: {
-    flyHigh: fly(30, -35, 20, -100),
-    flyMid: fly(0, 0, 12, -53),
-    flyLow: fly(-30, -2, 5, FLOOR - 10),
+    flyHigh: fly(30, -35, 20, FLOOR - 205, 'lower', 100),
+    flyMid: fly(0, 0, 12, -53, 'middle', 100),
+    flyLow: fly(-30, -2, 5, FLOOR - 10, 'upper', 130),
   },
   cues: {
     flyHigh: {
       reach: 'Arms up and out at the start, with the hands behind the line of your torso.',
       points: [
-        'Stand about two steps in front of the pulleys, roughly an arm\'s length. At one step the cable pulls nearly along your arm at the stretch, which loads the shoulder joint more than the pec. At two it pulls across the arm, so the stretch is the hardest point of the rep.',
-        'Stagger your feet and lean forward about 20 degrees from the hips with your chest up. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward. The lean sets the angle between the cable and your chest.',
-        'The pulley is high, so the hands sweep down and in and finish low in front. That path works the lower and middle fibers of the pec, and those are longest with the arm raised and back.',
-        'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
-        'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
+        'Set both pulleys at the top and clip a D handle to each. Hold one handle in each hand and stand with your hips about one and a half steps in front of the pulleys. Stagger your feet and lean forward about 20 degrees from the hips with your chest up. Chest up means your upper back arches against the lean, so your chest tips forward about 8 degrees. The stagger and the lean keep you balanced against the cables pulling your arms back.',
+        "The hands sweep forward and down, then in, and finish about a hand's width apart in front of your hips. That path works the middle and lower fibers of the pec, the sternal head, and those are longest with the arm raised and back.",
+        'Keep the elbows bent about 20 degrees and hold that angle through the rep. If the elbows bend and straighten, the fly becomes a press and the triceps takes part of the work.',
+        'Pull your shoulder blades back and down before the first rep. As the arms open, the shoulder blades draw a little farther together and the shoulder joints move back, so the pec is a little longer at the stretch. As the hands close in front, the shoulder blades drift a little apart and forward. Keep that drift small. Letting them slide all the way forward turns the finish into front delt and serratus work.',
+        'The cable resists the movement most about a third of the way through the rep, as your arms pass out to your sides. At the stretch it resists about two thirds as much, and at the finish about a fifth as much. Standing closer makes the stretch lighter and the finish heavier.',
       ],
     },
     flyMid: {
-      reach: 'Arms out at chest height at the start, with the hands behind the line of your torso.',
+      reach: 'Arms out at shoulder height at the start, with the hands behind the line of your torso.',
       points: [
-        'Stand about two steps in front of the pulleys, roughly an arm\'s length. At one step the cable pulls nearly along your arm at the stretch, which loads the shoulder joint more than the pec. At two it pulls across the arm, so the stretch is the hardest point of the rep.',
-        'Stagger your feet and lean forward about 12 degrees from the hips with your chest up. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward. The lean sets the angle between the cable and your chest.',
-        'The hands travel level and meet in front of the chest. That path works the middle fibers of the pec.',
-        'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
-        'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
+        'Set both pulleys at shoulder height and clip a D handle to each. Hold one handle in each hand and stand with your hips about one and a half steps in front of the pulleys. Stagger your feet and lean forward about 12 degrees from the hips with your chest up. Chest up means your upper back arches against the lean, so your chest stays upright. The stagger and the lean keep you balanced against the cables pulling your arms back.',
+        "The hands travel level, forward and then in, and finish about a hand's width apart in front of you. That path works the middle fibers of the pec, and those are longest with the arm out to the side and back.",
+        'Keep the elbows bent about 20 degrees and hold that angle through the rep. If the elbows bend and straighten, the fly becomes a press and the triceps takes part of the work.',
+        'Pull your shoulder blades back and down before the first rep. As the arms open, the shoulder blades draw a little farther together and the shoulder joints move back, so the pec is a little longer at the stretch. As the hands close in front, the shoulder blades drift a little apart and forward. Keep that drift small. Letting them slide all the way forward turns the finish into front delt and serratus work.',
+        'The cable resists the movement most about a quarter of the way through the rep, as your arms pass straight out to your sides. At the stretch it resists about three quarters as much, and at the finish about a quarter as much. Standing closer makes the stretch lighter and the finish heavier.',
       ],
     },
     flyLow: {
       reach: 'Arms down and out at the start, with the hands behind the line of your torso.',
       points: [
-        'Stand about two steps in front of the pulleys, roughly an arm\'s length. At one step the cable pulls nearly along your arm at the stretch, which loads the shoulder joint more than the pec. At two it pulls across the arm, so the stretch carries at least as much load as the finish.',
-        'Stagger your feet and lean forward only slightly, about 5 degrees, from the hips with your chest up. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward. The lean sets the angle between the cable and your chest.',
-        'The pulley is low, so the hands sweep up and in and finish high in front. That path works the upper fibers of the pec, the clavicular head, and those are longest with the arm low and back.',
-        'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
-        'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
+        'Set both pulleys at the bottom and clip a D handle to each. Hold one handle in each hand and stand with your hips a little under two steps in front of the pulleys. Stagger your feet and lean forward about 5 degrees from the hips with your chest up. Chest up means your upper back arches against the lean, so your chest stays upright. The stagger and the lean keep you balanced against the cables pulling your arms back.',
+        'The hands sweep forward, then up and in, and finish in front of you at shoulder height. The upper fibers of the pec, the clavicular head, raise the arm forward and across, so this path works them. They are longest with the arm back.',
+        'Keep the elbows bent about 20 degrees and hold that angle through the rep. If the elbows bend and straighten, the fly becomes a press and the triceps takes part of the work.',
+        'Pull your shoulder blades back and down before the first rep. As the arms open, the shoulder blades draw a little farther together and the shoulder joints move back, so the pec is a little longer at the stretch. As the hands close in front, the shoulder blades drift a little apart and forward. Keep that drift small. Letting them slide all the way forward turns the finish into front delt and serratus work.',
+        'The cable resists the movement most a little before halfway through the rep. At the stretch and at the finish it resists about half as much. Standing closer makes the stretch lighter and the finish heavier.',
       ],
     },
   },
