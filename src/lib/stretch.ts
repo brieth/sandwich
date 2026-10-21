@@ -293,6 +293,17 @@ const scapAt = (t: number, side: number): V3 => [
   SCAP_STRETCH[2] + t * (SCAP_FINISH[2] - SCAP_STRETCH[2]),
 ];
 
+/**
+ * Upper-back extension, in degrees, between the torso's lower and upper halves.
+ *
+ * The lean comes from the hips, and the upper back stays extended rather than
+ * rounding, which is what chest up means. A single rigid torso tipped forward
+ * pointed the chest at the floor, which is the slouch the cue prevents. Split at
+ * mid-back, the upper half tips back this much against the lower half, never
+ * past upright, so the chest faces forward while the hips stay hinged.
+ */
+const THORACIC_EXT = 12;
+
 /** Knee for a leg from hip to foot, bent forward, by the law of cosines. */
 function knee(hip: V3, foot: V3): V3 {
   const dy = foot[1] - hip[1];
@@ -366,8 +377,9 @@ const FLY_HEIGHT: Record<FlyView, number> = { front: 205, back: 205, side: 205, 
  * tilted by the pulley height, with the forearm 20 degrees further along the same
  * arc to hold the elbow bend. Headings are the ones the top view always used:
  * upper arm from 34 at the stretch to -92.5 with the hands together in front.
- * The arm path is defined against the torso, and the whole upper body, arms
- * included, is then tipped forward about the hips by the lean. Legs stay upright
+ * The arm path is defined against the upper torso. The lean is a hinge at the
+ * hips; the upper back extends against it by THORACIC_EXT, so the chest and the
+ * arm path tip forward less than the hips do. Legs stay upright
  * in a staggered stance. Pulleys are fixed in the room, so the cable from each
  * to its hand shows the angle the lean makes with it.
  */
@@ -376,16 +388,31 @@ function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: nu
   const d1 = dir(-92.5, endElev);
   const total = (Math.acos(dot3(d0, d1)) * 180) / Math.PI;
   const lead = 20 / total;
-  const up = (v: V3) => leanBy(v, lean);
 
-  // Static body, in the room.
+  // Two-part torso: below mid-back tips with the hips by the full lean, above
+  // it tips by the lean less the upper back's extension. Everything that rides
+  // on the upper back, shoulders, blades, head and the arm path, uses the upper
+  // part, so the chest comes up with it.
+  const midY = -TORSO.height / 2;
+  const upperLean = Math.max(0, lean - THORACIC_EXT);
+  const mid = leanBy([0, midY, 0], lean);
+  const place = (v: V3): V3 =>
+    v[1] >= midY ? leanBy(v, lean) : add3(mid, leanBy([v[0], v[1] - midY, v[2]], upperLean));
+  const turn = (v: V3): V3 => leanBy(v, upperLean);
+
+  // Static body, in the room. The mid-back section goes in twice, once with
+  // each half, so the outline covers the bend.
+  const midW = (TORSO.waistHalf + TORSO.shoulderHalf) / 2;
+  const midD = (TORSO.waistDepth + TORSO.chestDepth) / 2;
   const torsoCorners: V3[] = [];
-  for (const [y, w, d] of [
-    [0, TORSO.waistHalf, TORSO.waistDepth],
-    [-TORSO.height, TORSO.shoulderHalf, TORSO.chestDepth],
-  ] as const)
-    for (const sx of [-1, 1]) for (const sz of [-1, 1]) torsoCorners.push(up([sx * w, y, sz * d]));
-  const head = up(HEAD.c);
+  for (const sx of [-1, 1])
+    for (const sz of [-1, 1]) {
+      torsoCorners.push(leanBy([sx * TORSO.waistHalf, 0, sz * TORSO.waistDepth], lean));
+      torsoCorners.push(leanBy([sx * midW, midY, sz * midD], lean));
+      torsoCorners.push(add3(mid, leanBy([sx * midW, 0, sz * midD], upperLean)));
+      torsoCorners.push(place([sx * TORSO.shoulderHalf, -TORSO.height, sz * TORSO.chestDepth]));
+    }
+  const head = place(HEAD.c);
   const legs = [
     { hip: [-HIP_HALF, 0, 0] as V3, foot: [-HIP_HALF, FLOOR, STAGGER] as V3 },
     { hip: [HIP_HALF, 0, 0] as V3, foot: [HIP_HALF, FLOOR, -STAGGER] as V3 },
@@ -401,9 +428,9 @@ function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: nu
     const f = slerp(d0, d1, t + lead);
     return [1, -1].map((side) => {
       const m = (v: V3): V3 => [side * v[0], v[1], v[2]];
-      const sh = up(add3(m(SHOULDER), scapAt(t, side)));
-      const el = add3(sh, mul3(up(m(u)), 34));
-      const ha = add3(el, mul3(up(m(f)), 32));
+      const sh = place(add3(m(SHOULDER), scapAt(t, side)));
+      const el = add3(sh, mul3(turn(m(u)), 34));
+      const ha = add3(el, mul3(turn(m(f)), 32));
       return [sh, el, ha];
     });
   };
@@ -428,7 +455,7 @@ function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: nu
             for (let k = 0; k <= 8; k++) {
               const u = k / 8;
               const v = [0, 1, 2].map((j) => (1 - u) * (1 - u) * q[0][j] + 2 * (1 - u) * u * q[1][j] + u * u * q[2][j]) as V3;
-              arc.push(P(up(v)));
+              arc.push(P(place(v)));
             }
             return arc;
           }),
@@ -801,7 +828,7 @@ export const CUES: Record<FigureKey, Cue> = {
   flyHigh: {
     reach: 'Arms up and out at the start, with the hands behind the line of your torso.',
     points: [
-      'Stand a step in front of the pulleys with one foot forward, and lean forward about 20 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
+      'Stand a step in front of the pulleys with one foot forward, and lean forward about 20 degrees from the hips with your chest up. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward.',
       'The pulley is high, so the hands sweep down and in and finish low in front. That path works the lower and middle fibers of the pec, and those are longest with the arm raised and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
       'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
@@ -810,7 +837,7 @@ export const CUES: Record<FigureKey, Cue> = {
   flyMid: {
     reach: 'Arms out at chest height at the start, with the hands behind the line of your torso.',
     points: [
-      'Stand a step in front of the pulleys with one foot forward, and lean forward about 12 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
+      'Stand a step in front of the pulleys with one foot forward, and lean forward about 12 degrees from the hips with your chest up. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward.',
       'The hands travel level and meet in front of the chest. That path works the middle fibers of the pec.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
       'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
@@ -819,7 +846,7 @@ export const CUES: Record<FigureKey, Cue> = {
   flyLow: {
     reach: 'Arms down and out at the start, with the hands behind the line of your torso.',
     points: [
-      'Stand a step in front of the pulleys with one foot forward, and lean forward only slightly, about 5 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
+      'Stand a step in front of the pulleys with one foot forward, and lean forward only slightly, about 5 degrees, from the hips with your chest up. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward.',
       'The pulley is low, so the hands sweep up and in and finish high in front. That path works the upper fibers of the pec, the clavicular head, and those are longest with the arm low and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
       'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
