@@ -103,7 +103,7 @@ export interface Pose {
   track?: Track;
   /** Used instead of the view's body template, for a figure modeled in 3D. */
   scaffold?: Scaffold;
-  /** Fixed segment drawn in the limb's color, e.g. an upper arm held still. */
+  /** A body segment that holds still, e.g. an upper arm on a curl. Drawn in the body color. */
   fixed?: { x1: number; y1: number; x2: number; y2: number };
   /** Short words placed in the drawing, at most two. */
   marks?: { x: number; y: number; text: string; anchor?: 'start' | 'middle' | 'end' }[];

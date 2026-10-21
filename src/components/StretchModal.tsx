@@ -218,15 +218,17 @@ function TrackLimbs({ track, layer }: { track: Track; layer: 'behind' | 'front' 
   return (
     <>
       {cb?.[0].map((c0, ci) => inLayer(ci) && (
-        // Teal because it moves; thin, so the arm still reads first.
+        // Equipment, so it stays with the body color even though it moves:
+        // teal is for body parts that move. Thin, so it reads as a cable.
         <line
           key={`c${ci}`}
           x1={c0[0].x}
           y1={c0[0].y}
           x2={c0[1].x}
           y2={c0[1].y}
-          stroke="var(--accent)"
+          stroke="currentColor"
           strokeWidth="1.4"
+          opacity="0.6"
         >
           {anim('x2', cvals(ci, 1, 'x'))}
           {anim('y2', cvals(ci, 1, 'y'))}
@@ -271,15 +273,18 @@ export function StretchFigure({ f }: { f: Pose }) {
       {f.track && <TrackLimbs track={f.track} layer="behind" />}
       {f.scaffold ? <ScaffoldBody s={f.scaffold} /> : <Body view={f.view} f={f} />}
       {f.fixed && (
+        // Held still through the movement, so it takes the body color. The
+        // joint at its far end stays teal, because that is where the moving
+        // segment turns.
         <line
           x1={f.fixed.x1}
           y1={f.fixed.y1}
           x2={f.fixed.x2}
           y2={f.fixed.y2}
-          stroke="var(--accent)"
-          strokeWidth="3"
+          stroke="currentColor"
+          strokeWidth="2.5"
           strokeLinecap="round"
-          opacity="0.85"
+          opacity="0.5"
         />
       )}
       {chains.map((c, k) => (
@@ -290,7 +295,9 @@ export function StretchFigure({ f }: { f: Pose }) {
         <circle key={`t${i}`} cx={q.x} cy={q.y} r="4.4" fill="var(--accent)" />
       ))}
       {f.marks?.map((m, k) => (
-        <text key={k} className="stretch-mark" x={m.x} y={m.y} textAnchor={m.anchor ?? 'start'} fill="var(--accent)">
+        // Text, so it takes the muted color: teal is reserved for body parts
+        // that move. Full strength, unlike the faint body, so it stays legible.
+        <text key={k} className="stretch-mark" x={m.x} y={m.y} textAnchor={m.anchor ?? 'start'} fill="currentColor">
           {m.text}
         </text>
       ))}
