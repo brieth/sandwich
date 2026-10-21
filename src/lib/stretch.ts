@@ -164,7 +164,13 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   fly: {
     view: 'top',
     height: 158,
-    chain: [{ x: 144, y: 93, len: 64, stretched: 27, contracted: -99.5, hand: true }],
+    // Slight fixed elbow bend: the forearm sits 20 degrees forward of the upper
+    // arm and both turn by the same 126.5, so the bend never changes. Resting
+    // hand at (203, 120), contracted hands meet in front at (130, 29).
+    chain: [
+      { x: 144, y: 93, len: 34, stretched: 34, contracted: -92.5 },
+      { x: 172.2, y: 112.0, len: 32, stretched: 14, contracted: -112.5, hand: true },
+    ],
   },
 
   // Overhead extension. The long head crosses the shoulder, so it only reaches
