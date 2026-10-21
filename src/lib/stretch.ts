@@ -63,6 +63,30 @@ export interface Pt {
  */
 export interface Track {
   frames: Pt[][][];
+  /** Cables, frame then cable, each running from its pulley to a hand. */
+  cables?: Pt[][][];
+  /**
+   * Limbs, by index, that sit farther from the camera than the body and are
+   * drawn before it, so the torso and head hide them where they cross. From
+   * the side, the far arm of a fly passes behind the head; drawn on top, it
+   * would look like it went through it.
+   */
+  behind?: number[];
+}
+
+/**
+ * A whole static body, already projected, for a figure built from a 3D model.
+ * Replaces the view's 2D template, which has no lean, legs or equipment.
+ */
+export interface Scaffold {
+  head: { x: number; y: number; r: number };
+  /** Outline of the torso as drawn from this angle. */
+  torso: string;
+  /** Legs and the floor, which hold still through the movement. */
+  lines: Pt[][];
+  /** Knees and feet, drawn small so the stance reads. */
+  dots: Pt[];
+  pulleys: Pt[];
 }
 
 export interface Pose {
@@ -71,6 +95,8 @@ export interface Pose {
   chain?: Joint[];
   /** Used instead of chain where the limb foreshortens. Includes every limb. */
   track?: Track;
+  /** Used instead of the view's body template, for a figure modeled in 3D. */
+  scaffold?: Scaffold;
   /** Fixed segment drawn in the limb's color, e.g. an upper arm held still. */
   fixed?: { x1: number; y1: number; x2: number; y2: number };
   /** Short words placed in the drawing, at most two. */
@@ -192,57 +218,197 @@ function dir(heading: number, elevation: number): V3 {
 
 const FRAMES = 61;
 
-/**
- * A crossover fly as one movement in 3D, projected into the top and front views.
- *
- * The arm sweeps in a plane tilted by the pulley height: a high pulley starts the
- * arm raised and finishes it low in front, a low pulley the reverse. Both views
- * are projections of the same motion, so they cannot disagree.
- *
- * Headings are the ones the top view already used: upper arm from 34 at the
- * stretch to -92.5 with the hands together in front, a 126.5 degree sweep. The
- * forearm runs 20 degrees further along the same arc, which is the fixed elbow
- * bend. At zero elevation this reproduces the previous top view exactly, which
- * is how the model was checked.
+/*
+ * The whole body for a fly, in a body frame: origin at the center of the hips,
+ * x to the right, y down, z forward. Proportions follow the usual figure rule of
+ * about three head heights from chin to crotch, and are shorter in the torso than
+ * the 2D figures, whose 76 tall torso read as too long once legs were wanted.
  */
-function flyFigure(startElev: number, endElev: number): Figure {
+const HIP_HALF = 10;
+const TORSO = { height: 58, shoulderHalf: 20, waistHalf: 14, chestDepth: 15, waistDepth: 13 };
+/** Shoulder pivot: at the torso's top corner, 5 below its top edge. */
+const SHOULDER: V3 = [20, -53, 0];
+const HEAD: { c: V3; r: number } = { c: [0, -76, 3], r: 11 };
+const THIGH = 40;
+const SHIN = 38;
+/** Hip to floor. Shorter than the 78 of thigh and shin, so the knees soften. */
+const FLOOR = 74;
+/** Staggered stance: left foot forward, right foot back. */
+const STAGGER = 20;
+/*
+ * Equipment, at the figure's scale of roughly a centimeter per unit, which the
+ * 40 unit shoulder width sets. A step in front of the pulley line is about half
+ * a meter. A real crossover station puts each pulley about 130 out from center,
+ * which does not fit the 240 box, so they sit at 100, the most the front view
+ * allows; at 85 the hands nearly reached the pulleys at the stretch.
+ */
+const PULLEY_BEHIND = 40;
+const PULLEY_OUT = 100;
+
+const add3 = (a: V3, b: V3): V3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+const mul3 = (a: V3, k: number): V3 => [a[0] * k, a[1] * k, a[2] * k];
+
+/**
+ * Tip a body-frame vector forward about the hips. Up, (0, -1, 0), becomes
+ * (0, -cos t, sin t), so everything above the hips moves forward as it rises.
+ */
+function leanBy(v: V3, deg: number): V3 {
+  const t = (deg * Math.PI) / 180;
+  return [v[0], v[1] * Math.cos(t) + v[2] * Math.sin(t), -v[1] * Math.sin(t) + v[2] * Math.cos(t)];
+}
+
+/** Knee for a leg from hip to foot, bent forward, by the law of cosines. */
+function knee(hip: V3, foot: V3): V3 {
+  const dy = foot[1] - hip[1];
+  const dz = foot[2] - hip[2];
+  const d = Math.hypot(dy, dz);
+  const a = Math.acos(Math.max(-1, Math.min(1, (THIGH * THIGH + d * d - SHIN * SHIN) / (2 * THIGH * d))));
+  const phi = Math.atan2(dz, dy);
+  return [hip[0], hip[1] + THIGH * Math.cos(phi + a), hip[2] + THIGH * Math.sin(phi + a)];
+}
+
+/** Convex hull by monotone chain, counterclockwise. */
+function hull(pts: Pt[]): Pt[] {
+  const p = [...pts].sort((a, b) => a.x - b.x || a.y - b.y);
+  const cross = (o: Pt, a: Pt, b: Pt) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const lower: Pt[] = [];
+  for (const q of p) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], q) <= 0) lower.pop();
+    lower.push(q);
+  }
+  const upper: Pt[] = [];
+  for (const q of [...p].reverse()) {
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], q) <= 0) upper.pop();
+    upper.push(q);
+  }
+  return [...lower.slice(0, -1), ...upper.slice(0, -1)];
+}
+
+/** Polygon with each corner cut back along its edges and rounded through it. */
+function rounded(poly: Pt[], r: number): string {
+  const n = poly.length;
+  const cut = (a: Pt, b: Pt) => {
+    const len = Math.hypot(b.x - a.x, b.y - a.y);
+    const k = Math.min(r, len * 0.4) / len;
+    return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k };
+  };
+  const f = (q: Pt) => `${q.x.toFixed(1)},${q.y.toFixed(1)}`;
+  let d = '';
+  for (let i = 0; i < n; i++) {
+    const v = poly[i];
+    const a = cut(v, poly[(i - 1 + n) % n]);
+    const b = cut(v, poly[(i + 1) % n]);
+    d += `${i === 0 ? 'M' : 'L'}${f(a)} Q${f(v)} ${f(b)} `;
+  }
+  return d + 'Z';
+}
+
+type FlyView = 'front' | 'side' | 'top';
+
+/**
+ * Where each view puts a body-frame point on screen.
+ *
+ * Front looks at the chest. Side looks at the left side, so forward runs left,
+ * matching every other side view. Top looks straight down with forward up the
+ * page. Hips sit at a fixed screen point per view, chosen so the head, the
+ * feet and a high pulley all fit.
+ */
+const PROJECT: Record<FlyView, (v: V3) => Pt> = {
+  front: (v) => ({ x: 120 + v[0], y: 120 + v[1] }),
+  side: (v) => ({ x: 130 - v[2], y: 120 + v[1] }),
+  top: (v) => ({ x: 120 + v[0], y: 92 - v[2] }),
+};
+const FLY_HEIGHT: Record<FlyView, number> = { front: 205, side: 205, top: 160 };
+
+/**
+ * A crossover fly as one whole body in 3D, projected into the front, side and
+ * top views.
+ *
+ * The arms sweep along a great circle between a start and a finish direction,
+ * tilted by the pulley height, with the forearm 20 degrees further along the same
+ * arc to hold the elbow bend. Headings are the ones the top view always used:
+ * upper arm from 34 at the stretch to -92.5 with the hands together in front.
+ * The arm path is defined against the torso, and the whole upper body, arms
+ * included, is then tipped forward about the hips by the lean. Legs stay upright
+ * in a staggered stance. Pulleys are fixed in the room, so the cable from each
+ * to its hand shows the angle the lean makes with it.
+ */
+function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: number): Figure {
   const d0 = dir(34, startElev);
   const d1 = dir(-92.5, endElev);
   const total = (Math.acos(dot3(d0, d1)) * 180) / Math.PI;
   const lead = 20 / total;
+  const up = (v: V3) => leanBy(v, lean);
 
-  const at = (t: number) => {
+  // Static body, in the room.
+  const torsoCorners: V3[] = [];
+  for (const [y, w, d] of [
+    [0, TORSO.waistHalf, TORSO.waistDepth],
+    [-TORSO.height, TORSO.shoulderHalf, TORSO.chestDepth],
+  ] as const)
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) torsoCorners.push(up([sx * w, y, sz * d]));
+  const head = up(HEAD.c);
+  const legs = [
+    { hip: [-HIP_HALF, 0, 0] as V3, foot: [-HIP_HALF, FLOOR, STAGGER] as V3 },
+    { hip: [HIP_HALF, 0, 0] as V3, foot: [HIP_HALF, FLOOR, -STAGGER] as V3 },
+  ].map((l) => ({ ...l, knee: knee(l.hip, l.foot) }));
+  const pulleys: V3[] = [
+    [PULLEY_OUT, pulleyY, -PULLEY_BEHIND],
+    [-PULLEY_OUT, pulleyY, -PULLEY_BEHIND],
+  ];
+
+  // Arms, right then left, the left mirrored across x in the body frame.
+  const armsAt = (t: number) => {
     const u = slerp(d0, d1, t);
     const f = slerp(d0, d1, t + lead);
-    return { u, f };
+    return [1, -1].map((side) => {
+      const m = (v: V3): V3 => [side * v[0], v[1], v[2]];
+      const sh = up(m(SHOULDER));
+      const el = add3(sh, mul3(up(m(u)), 34));
+      const ha = add3(el, mul3(up(m(f)), 32));
+      return [sh, el, ha];
+    });
   };
 
-  const project = (view: 'top' | 'front'): Track => {
-    // Top: shoulder on the torso's side at mid depth, forward is up the page.
-    // Front: shoulder at the torso's top corner, up is up.
-    const sx = 140;
-    const sy = view === 'top' ? 93 : 49;
-    const to2 = (v: V3): Pt => (view === 'top' ? { x: v[0], y: -v[2] } : { x: v[0], y: v[1] });
+  const pose = (view: FlyView): Pose => {
+    const P = PROJECT[view];
     const frames: Pt[][][] = [];
+    const cables: Pt[][][] = [];
     for (let i = 0; i < FRAMES; i++) {
-      const { u, f } = at(sweepAt(i / (FRAMES - 1)));
-      const pu = to2(u);
-      const pf = to2(f);
-      const elbow = { x: sx + 34 * pu.x, y: sy + 34 * pu.y };
-      const hand = { x: elbow.x + 32 * pf.x, y: elbow.y + 32 * pf.y };
-      const near = [{ x: sx, y: sy }, elbow, hand];
-      const far = near.map((q) => ({ x: 240 - q.x, y: q.y }));
-      frames.push([near, far]);
+      const arms = armsAt(sweepAt(i / (FRAMES - 1)));
+      frames.push(arms.map((a) => a.map(P)));
+      cables.push(arms.map((a, k) => [P(pulleys[k]), P(a[2])]));
     }
-    return { frames };
+    const lines: Pt[][] = [];
+    const dots: Pt[] = [];
+    if (view === 'top') {
+      // From above the torso hides the legs, so only the feet show, one ahead
+      // of the hips and one behind.
+      for (const l of legs) dots.push(P(l.foot));
+    } else {
+      for (const l of legs) {
+        lines.push([P(l.hip), P(l.knee), P(l.foot)]);
+        dots.push(P(l.knee), P(l.foot));
+      }
+      const fy = P([0, FLOOR, 0]).y + 2;
+      lines.push([{ x: 40, y: fy }, { x: 200, y: fy }]);
+    }
+    const hp = P(head);
+    return {
+      view,
+      height: FLY_HEIGHT[view],
+      track: { frames, cables, behind: view === 'side' ? [0] : [] },
+      scaffold: {
+        head: { x: hp.x, y: hp.y, r: HEAD.r },
+        torso: rounded(hull(torsoCorners.map(P)), 7),
+        lines,
+        dots,
+        pulleys: pulleys.map(P),
+      },
+    };
   };
 
-  return {
-    view: 'top',
-    height: 158,
-    track: project('top'),
-    alts: [{ view: 'front', height: 172, track: project('front') }],
-  };
+  return { ...pose('top'), alts: [pose('front'), pose('side')] };
 }
 
 /**
@@ -327,17 +493,15 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   },
 
   // Crossover flys. The top view shows the stretch, which is the same for all
-  // three: hands behind the line of the torso. The front view shows what the
-  // pulley height changes, which is the plane the arm sweeps in. The high fly
-  // starts 30 up and finishes 35 down at the waist. The low fly starts 30 down
-  // and its upper arm finishes 2 below level. The forearm runs 20 further along
-  // the rising arc, which lifts the hands to y 44.7, 2.7 under the chin at 42,
-  // so they finish at collarbone height. Measured with the shoulder at y 49:
-  // a finish of 2 up put the hands over the face, 13.4 from the head center
-  // against a limit of 13.5.
-  flyHigh: flyFigure(30, -35),
-  flyMid: flyFigure(0, 0),
-  flyLow: flyFigure(-30, -2),
+  // three: hands behind the line of the torso. The front view shows the plane
+  // the arm sweeps in, which the pulley height sets, and the side view shows
+  // the lean and the angle it makes with the cable. Leans are the usual
+  // coaching ranges: more for a high pulley, close to upright for a low one.
+  // Pulley heights are body-frame y: above the head, shoulder height, and just
+  // off the floor.
+  flyHigh: flyFigure(30, -35, 20, -100),
+  flyMid: flyFigure(0, 0, 12, -53),
+  flyLow: flyFigure(-30, -2, 5, 64),
 
   // Overhead extension. The long head crosses the shoulder, so it only reaches
   // length with the upper arm up. The upper arm is drawn fixed because holding
@@ -576,6 +740,7 @@ export const CUES: Record<FigureKey, Cue> = {
   flyHigh: {
     reach: 'Arms up and out at the start, with the hands behind the line of your torso.',
     points: [
+      'Stand a step in front of the pulleys with one foot forward, and lean forward about 20 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
       'The pulley is high, so the hands sweep down and in and finish low in front. That path works the lower and middle fibers of the pec, and those are longest with the arm raised and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
       'Keep the chest open. A shoulder that rolls forward at the start puts the range into the joint instead of the pec.',
@@ -584,6 +749,7 @@ export const CUES: Record<FigureKey, Cue> = {
   flyMid: {
     reach: 'Arms out at chest height at the start, with the hands behind the line of your torso.',
     points: [
+      'Stand a step in front of the pulleys with one foot forward, and lean forward about 12 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
       'The hands travel level and meet in front of the chest. That path works the middle fibers of the pec.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
       'Keep the chest open. A shoulder that rolls forward at the start puts the range into the joint instead of the pec.',
@@ -592,6 +758,7 @@ export const CUES: Record<FigureKey, Cue> = {
   flyLow: {
     reach: 'Arms down and out at the start, with the hands behind the line of your torso.',
     points: [
+      'Stand a step in front of the pulleys with one foot forward, and lean forward only slightly, about 5 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
       'The pulley is low, so the hands sweep up and in and finish high in front. That path works the upper fibers of the pec, the clavicular head, and those are longest with the arm low and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
       'Keep the chest open. A shoulder that rolls forward at the start puts the range into the joint instead of the pec.',

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CUES, FIGURES, FIGURE_FOR, VIEW_LABEL, VIEW_ORDER, mirrored, posesOf, sweeps } from '../lib/stretch';
-import type { Pose, Joint, Track, View } from '../lib/stretch';
+import type { Pose, Joint, Scaffold, Track, View } from '../lib/stretch';
 import { useBackToClose } from '../lib/useBackToClose';
 import { CloseButton } from './CloseButton';
 import { ImplementIcon } from './ImplementIcon';
@@ -112,6 +112,40 @@ function Body({ view, f }: { view: View; f: Pose }) {
   );
 }
 
+/** A 3D-modeled body, already projected. Faint like the 2D templates. */
+function ScaffoldBody({ s: sc }: { s: Scaffold }) {
+  const dim = 'currentColor';
+  return (
+    <g>
+      {/* Solid, in the surface color, so a limb drawn before this is hidden
+          where the body is in front of it. The outlines below stay faint. */}
+      <path d={sc.torso} fill="var(--surface)" />
+      <circle cx={sc.head.x} cy={sc.head.y} r={sc.head.r} fill="var(--surface)" />
+      <g opacity="0.5">
+        {sc.lines.map((l, i) => (
+          <polyline
+            key={i}
+            points={l.map((q) => `${q.x.toFixed(1)},${q.y.toFixed(1)}`).join(' ')}
+            fill="none"
+            stroke={dim}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ))}
+        {sc.dots.map((q, i) => (
+          <circle key={i} cx={q.x} cy={q.y} r="3.4" fill={dim} />
+        ))}
+        <path d={sc.torso} fill="none" stroke={dim} strokeWidth="2.5" />
+        <circle cx={sc.head.x} cy={sc.head.y} r={sc.head.r} fill="none" stroke={dim} strokeWidth="2.5" />
+      </g>
+      {sc.pulleys.map((q, i) => (
+        <circle key={i} cx={q.x} cy={q.y} r="4" fill="none" stroke={dim} strokeWidth="1.6" opacity="0.7" />
+      ))}
+    </g>
+  );
+}
+
 const rad = (d: number) => (d * Math.PI) / 180;
 
 /**
@@ -163,16 +197,36 @@ function pointsOf(chain: Joint[]): { x: number; y: number }[] {
  * prefers-reduced-motion, so that is checked here and the first frame, the
  * stretch, is drawn still.
  */
-function TrackLimbs({ track }: { track: Track }) {
+function TrackLimbs({ track, layer }: { track: Track; layer: 'behind' | 'front' }) {
   const still =
     typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const fr = track.frames;
   const vals = (li: number, pi: number, k: 'x' | 'y') => fr.map((f) => f[li][pi][k].toFixed(1)).join(';');
   const anim = (attr: string, v: string) =>
     still ? null : <animate attributeName={attr} values={v} dur="3.4s" repeatCount="indefinite" />;
+  const cb = track.cables;
+  const inLayer = (i: number) => (track.behind ?? []).includes(i) === (layer === 'behind');
+  const cvals = (ci: number, pi: number, k: 'x' | 'y') =>
+    cb!.map((f) => f[ci][pi][k].toFixed(1)).join(';');
   return (
     <>
-      {fr[0].map((p0, li) => (
+      {cb?.[0].map((c0, ci) => inLayer(ci) && (
+        // Thin and muted: the cable is equipment, the arm is what moves.
+        <line
+          key={`c${ci}`}
+          x1={c0[0].x}
+          y1={c0[0].y}
+          x2={c0[1].x}
+          y2={c0[1].y}
+          stroke="currentColor"
+          strokeWidth="1.4"
+          opacity="0.6"
+        >
+          {anim('x2', cvals(ci, 1, 'x'))}
+          {anim('y2', cvals(ci, 1, 'y'))}
+        </line>
+      ))}
+      {fr[0].map((p0, li) => inLayer(li) && (
         <g key={li}>
           {p0.slice(0, -1).map((a, si) => (
             <line
@@ -208,7 +262,8 @@ export function StretchFigure({ f }: { f: Pose }) {
 
   return (
     <svg className="stretch-svg" viewBox={`0 0 240 ${f.height}`} role="img" aria-hidden="true">
-      <Body view={f.view} f={f} />
+      {f.track && <TrackLimbs track={f.track} layer="behind" />}
+      {f.scaffold ? <ScaffoldBody s={f.scaffold} /> : <Body view={f.view} f={f} />}
       {f.fixed && (
         <line
           x1={f.fixed.x1}
@@ -224,7 +279,7 @@ export function StretchFigure({ f }: { f: Pose }) {
       {chains.map((c, k) => (
         <Limb key={k} chain={c} i={0} pts={pointsOf(c)} sw={sweeps(c)} />
       ))}
-      {f.track && <TrackLimbs track={f.track} />}
+      {f.track && <TrackLimbs track={f.track} layer="front" />}
       {f.marks?.map((m, k) => (
         <text key={k} className="stretch-mark" x={m.x} y={m.y} textAnchor={m.anchor ?? 'start'} fill="var(--accent)">
           {m.text}
