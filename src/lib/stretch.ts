@@ -47,10 +47,30 @@ export interface Joint {
   hand?: boolean;
 }
 
+export interface Pt {
+  x: number;
+  y: number;
+}
+
+/**
+ * A movement sampled frame by frame: frame, then limb, then the points along it
+ * from shoulder to hand.
+ *
+ * For a movement whose projection changes length, which a chain of rotating
+ * fixed-length segments cannot draw. A fly seen from the front is the case that
+ * needs it: as the hands come together the arms point at the camera and get
+ * shorter on screen.
+ */
+export interface Track {
+  frames: Pt[][][];
+}
+
 export interface Pose {
   view: View;
   /** Root first. A second joint hangs off the end of the first. */
-  chain: Joint[];
+  chain?: Joint[];
+  /** Used instead of chain where the limb foreshortens. Includes every limb. */
+  track?: Track;
   /** Fixed segment drawn in the limb's color, e.g. an upper arm held still. */
   fixed?: { x1: number; y1: number; x2: number; y2: number };
   /** Short words placed in the drawing, at most two. */
@@ -95,7 +115,9 @@ export interface Cue {
 export type FigureKey =
   | 'pulldown'
   | 'row'
-  | 'fly'
+  | 'flyHigh'
+  | 'flyMid'
+  | 'flyLow'
   | 'bench'
   | 'overheadExt'
   | 'pushdown'
@@ -119,6 +141,138 @@ export type FigureKey =
  * The renderer animates by rotating about each pivot, so segment lengths hold
  * exactly at every frame rather than drifting the way interpolated endpoints do.
  */
+/*
+ * Timing for sampled tracks, matched to the CSS limb-sweep keyframes so a track
+ * moves on the same beat as a rotating chain: rest at the stretch to 16%, ease
+ * to the contracted end by 54%, hold to 66%, ease back by 100%.
+ */
+const EASE = (x: number): number => {
+  // cubic-bezier(0.42, 0, 0.58, 1), which is what CSS ease-in-out means.
+  let s = x;
+  for (let i = 0; i < 8; i++) {
+    const bx = 3 * (1 - s) * (1 - s) * s * 0.42 + 3 * (1 - s) * s * s * 0.58 + s * s * s;
+    const dx = 3 * (1 - s) * (1 - s) * 0.42 + 6 * (1 - s) * s * (0.58 - 0.42) + 3 * s * s * (1 - 0.58);
+    if (Math.abs(dx) < 1e-6) break;
+    s -= (bx - x) / dx;
+  }
+  return 3 * s * s - 2 * s * s * s;
+};
+
+/** Fraction of the way to the contracted end at a point in the 3.4 s cycle. */
+export function sweepAt(phase: number): number {
+  if (phase < 0.16) return 0;
+  if (phase < 0.54) return EASE((phase - 0.16) / 0.38);
+  if (phase < 0.66) return 1;
+  return 1 - EASE((phase - 0.66) / 0.34);
+}
+
+type V3 = [number, number, number];
+const dot3 = (a: V3, b: V3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+/** Spherical interpolation; t past 1 carries on around the same great circle. */
+function slerp(a: V3, b: V3, t: number): V3 {
+  const om = Math.acos(Math.max(-1, Math.min(1, dot3(a, b))));
+  const so = Math.sin(om);
+  const ka = Math.sin((1 - t) * om) / so;
+  const kb = Math.sin(t * om) / so;
+  return [ka * a[0] + kb * b[0], ka * a[1] + kb * b[1], ka * a[2] + kb * b[2]];
+}
+
+/**
+ * Arm direction in 3D from a top-view heading and an elevation.
+ *
+ * x is right, y is down, z is toward the viewer of a front view. The heading is
+ * the angle the top view draws, where down the page is backward, so it maps to
+ * -z. Elevation is degrees above horizontal.
+ */
+function dir(heading: number, elevation: number): V3 {
+  const h = (heading * Math.PI) / 180;
+  const e = (elevation * Math.PI) / 180;
+  return [Math.cos(h) * Math.cos(e), -Math.sin(e), -Math.sin(h) * Math.cos(e)];
+}
+
+const FRAMES = 61;
+
+/**
+ * A crossover fly as one movement in 3D, projected into the top and front views.
+ *
+ * The arm sweeps in a plane tilted by the pulley height: a high pulley starts the
+ * arm raised and finishes it low in front, a low pulley the reverse. Both views
+ * are projections of the same motion, so they cannot disagree.
+ *
+ * Headings are the ones the top view already used: upper arm from 34 at the
+ * stretch to -92.5 with the hands together in front, a 126.5 degree sweep. The
+ * forearm runs 20 degrees further along the same arc, which is the fixed elbow
+ * bend. At zero elevation this reproduces the previous top view exactly, which
+ * is how the model was checked.
+ */
+function flyFigure(startElev: number, endElev: number): Figure {
+  const d0 = dir(34, startElev);
+  const d1 = dir(-92.5, endElev);
+  const total = (Math.acos(dot3(d0, d1)) * 180) / Math.PI;
+  const lead = 20 / total;
+
+  const at = (t: number) => {
+    const u = slerp(d0, d1, t);
+    const f = slerp(d0, d1, t + lead);
+    return { u, f };
+  };
+
+  const project = (view: 'top' | 'front'): Track => {
+    // Top: shoulder on the torso side at mid depth, forward is up the page.
+    // Front: shoulder on the shoulder line, up is up.
+    const sx = view === 'top' ? 144 : 140;
+    const sy = view === 'top' ? 93 : 56;
+    const to2 = (v: V3): Pt => (view === 'top' ? { x: v[0], y: -v[2] } : { x: v[0], y: v[1] });
+    const frames: Pt[][][] = [];
+    for (let i = 0; i < FRAMES; i++) {
+      const { u, f } = at(sweepAt(i / (FRAMES - 1)));
+      const pu = to2(u);
+      const pf = to2(f);
+      const elbow = { x: sx + 34 * pu.x, y: sy + 34 * pu.y };
+      const hand = { x: elbow.x + 32 * pf.x, y: elbow.y + 32 * pf.y };
+      const near = [{ x: sx, y: sy }, elbow, hand];
+      const far = near.map((q) => ({ x: 240 - q.x, y: q.y }));
+      frames.push([near, far]);
+    }
+    return { frames };
+  };
+
+  return {
+    view: 'top',
+    height: 158,
+    track: project('top'),
+    alts: [{ view: 'front', height: 172, track: project('front') }],
+  };
+}
+
+/**
+ * Every limb's points at evenly spaced moments through the cycle.
+ *
+ * One function for both kinds of pose, so the geometry checks walk exactly what
+ * the renderer draws. A chain's world angles are linear in the sweep fraction,
+ * because the nested sweeps telescope.
+ */
+export function limbFrames(pose: Pose, n = FRAMES): Pt[][][] {
+  if (pose.track) return pose.track.frames;
+  const chains = pose.chain ? (pose.mirror ? [pose.chain, mirrored(pose.chain)] : [pose.chain]) : [];
+  const out: Pt[][][] = [];
+  for (let i = 0; i < n; i++) {
+    const t = sweepAt(i / (n - 1));
+    out.push(
+      chains.map((c) => {
+        const pts: Pt[] = [{ x: c[0].x, y: c[0].y }];
+        for (const j of c) {
+          const a = ((j.stretched + t * (j.contracted - j.stretched)) * Math.PI) / 180;
+          const q = pts[pts.length - 1];
+          pts.push({ x: q.x + j.len * Math.cos(a), y: q.y + j.len * Math.sin(a) });
+        }
+        return pts;
+      }),
+    );
+  }
+  return out;
+}
+
 export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   // Lat pulldown. The lat crosses the shoulder, so its length comes from the
   // shoulder blade rising, which the arm angle alone cannot show.
@@ -172,20 +326,17 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     ],
   },
 
-  // Crossover fly. Top view is the only one that shows the pec's range, which
-  // is the arm opening across the body rather than anything vertical.
-  fly: {
-    view: 'top',
-    height: 158,
-    // Slight fixed elbow bend: the forearm sits 20 degrees forward of the upper
-    // arm and both turn by the same 126.5, so the bend never changes. Resting
-    // hand at (203, 120), contracted hands meet in front at (130, 29).
-    mirror: true,
-    chain: [
-      { x: 144, y: 93, len: 34, stretched: 34, contracted: -92.5 },
-      { x: 172.2, y: 112.0, len: 32, stretched: 14, contracted: -112.5, hand: true },
-    ],
-  },
+  // Crossover flys. The top view shows the stretch, which is the same for all
+  // three: hands behind the line of the torso. The front view shows what the
+  // pulley height changes, which is the plane the arm sweeps in. The high fly
+  // starts 30 up and finishes 35 down at the waist. The low fly starts 30 down
+  // and its upper arm finishes 5 up. The forearm runs 20 further along the
+  // rising arc, which lifts the hands to y 44.5, just under the chin at 42, so
+  // they finish at collarbone height. Measured: any finish from 10 up put the
+  // hands over the face, 13.0 to 13.2 from the head center against 13.5.
+  flyHigh: flyFigure(30, -35),
+  flyMid: flyFigure(0, 0),
+  flyLow: flyFigure(-30, 5),
 
   // Overhead extension. The long head crosses the shoulder, so it only reaches
   // length with the upper arm up. The upper arm is drawn fixed because holding
@@ -253,7 +404,9 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     alts: [
       {
         view: 'top',
-        height: 158,
+        // 165 rather than 158: partway through, the arm points straight back
+        // and the hand reaches y 153, past the old box's 152 margin.
+        height: 165,
         chain: [
           // Behind the back: the arm crosses behind the torso at the bottom.
           // 145 keeps the upper arm 13.8 from the head center, clear of its
@@ -406,12 +559,28 @@ export const CUES: Record<FigureKey, Cue> = {
       'Because these are single arm, you can also let the torso rotate slightly toward the pulley at the front and rotate back as you pull.',
     ],
   },
-  fly: {
-    reach: 'Hands behind the line of your torso at the bottom.',
+  flyHigh: {
+    reach: 'Arms up and out at the start, with the hands behind the line of your torso.',
     points: [
-      'The pec lengthens by opening the arm across the body, so stopping level with your chest ends the rep before the stretch starts.',
+      'The pulley is high, so the hands sweep down and in and finish low in front. That path works the lower and middle fibers of the pec, and those are longest with the arm raised and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
-      'Keep the chest open. A shoulder that rolls forward at the bottom puts the range into the joint instead of the pec.',
+      'Keep the chest open. A shoulder that rolls forward at the start puts the range into the joint instead of the pec.',
+    ],
+  },
+  flyMid: {
+    reach: 'Arms out at chest height at the start, with the hands behind the line of your torso.',
+    points: [
+      'The hands travel level and meet in front of the chest. That path works the middle fibers of the pec.',
+      'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
+      'Keep the chest open. A shoulder that rolls forward at the start puts the range into the joint instead of the pec.',
+    ],
+  },
+  flyLow: {
+    reach: 'Arms down and out at the start, with the hands behind the line of your torso.',
+    points: [
+      'The pulley is low, so the hands sweep up and in and finish high in front. That path works the upper fibers of the pec, the clavicular head, and those are longest with the arm low and back.',
+      'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
+      'Keep the chest open. A shoulder that rolls forward at the start puts the range into the joint instead of the pec.',
     ],
   },
   bench: {
@@ -540,9 +709,9 @@ export const FIGURE_FOR: Record<string, FigureKey> = {
   'lat-pulldown': 'pulldown',
   'wide-grip-lat-pulldown': 'pulldown',
 
-  'cable-high-crossover-fly': 'fly',
-  'cable-mid-crossover-fly': 'fly',
-  'cable-low-crossover-fly': 'fly',
+  'cable-high-crossover-fly': 'flyHigh',
+  'cable-mid-crossover-fly': 'flyMid',
+  'cable-low-crossover-fly': 'flyLow',
 
   'cable-single-arm-high-row': 'row',
   'cable-single-arm-mid-row': 'row',

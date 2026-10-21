@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CUES, FIGURES, FIGURE_FOR, VIEW_LABEL, VIEW_ORDER, mirrored, posesOf, sweeps } from '../lib/stretch';
-import type { Pose, Joint, View } from '../lib/stretch';
+import type { Pose, Joint, Track, View } from '../lib/stretch';
 import { useBackToClose } from '../lib/useBackToClose';
 import { CloseButton } from './CloseButton';
 import { ImplementIcon } from './ImplementIcon';
@@ -136,8 +136,58 @@ function pointsOf(chain: Joint[]): { x: number; y: number }[] {
   return pts;
 }
 
+/**
+ * A sampled track, animated point by point.
+ *
+ * SMIL rather than CSS because what moves here is coordinates, not a transform:
+ * a foreshortening limb changes length on screen, which no rotation about a
+ * pivot can draw. The samples already carry the hold and the easing, so linear
+ * interpolation between them keeps the beat of the CSS keyframes. SMIL ignores
+ * prefers-reduced-motion, so that is checked here and the first frame, the
+ * stretch, is drawn still.
+ */
+function TrackLimbs({ track }: { track: Track }) {
+  const still =
+    typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const fr = track.frames;
+  const vals = (li: number, pi: number, k: 'x' | 'y') => fr.map((f) => f[li][pi][k].toFixed(1)).join(';');
+  const anim = (attr: string, v: string) =>
+    still ? null : <animate attributeName={attr} values={v} dur="3.4s" repeatCount="indefinite" />;
+  return (
+    <>
+      {fr[0].map((p0, li) => (
+        <g key={li}>
+          {p0.slice(0, -1).map((a, si) => (
+            <line
+              key={si}
+              x1={a.x}
+              y1={a.y}
+              x2={p0[si + 1].x}
+              y2={p0[si + 1].y}
+              stroke="var(--accent)"
+              strokeWidth="3"
+              strokeLinecap="round"
+            >
+              {anim('x1', vals(li, si, 'x'))}
+              {anim('y1', vals(li, si, 'y'))}
+              {anim('x2', vals(li, si + 1, 'x'))}
+              {anim('y2', vals(li, si + 1, 'y'))}
+            </line>
+          ))}
+          {p0.map((pt, pi) => (
+            <circle key={pi} cx={pt.x} cy={pt.y} r={pi === p0.length - 1 ? 4.8 : 4.4} fill="var(--accent)">
+              {anim('cx', vals(li, pi, 'x'))}
+              {anim('cy', vals(li, pi, 'y'))}
+            </circle>
+          ))}
+        </g>
+      ))}
+    </>
+  );
+}
+
 export function StretchFigure({ f }: { f: Pose }) {
-  const chains = f.mirror ? [f.chain, mirrored(f.chain)] : [f.chain];
+  const chains = f.chain ? (f.mirror ? [f.chain, mirrored(f.chain)] : [f.chain]) : [];
 
   return (
     <svg className="stretch-svg" viewBox={`0 0 240 ${f.height}`} role="img" aria-hidden="true">
@@ -157,6 +207,7 @@ export function StretchFigure({ f }: { f: Pose }) {
       {chains.map((c, k) => (
         <Limb key={k} chain={c} i={0} pts={pointsOf(c)} sw={sweeps(c)} />
       ))}
+      {f.track && <TrackLimbs track={f.track} />}
       {f.marks?.map((m, k) => (
         <text key={k} className="stretch-mark" x={m.x} y={m.y} textAnchor={m.anchor ?? 'start'} fill="var(--accent)">
           {m.text}
