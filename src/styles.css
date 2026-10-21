@@ -399,17 +399,17 @@ body {
  * --sweep, so the amount is per joint while the timing stays shared and the
  * figures in a modal move together.
  *
- * Rest is the stretched pose at rotate(0), which is why the hold sits at the
- * start and end rather than in the middle: the first frame a reader sees is the
- * position the exercise is supposed to reach.
+ * The tempo is TEMPO in stretch.ts: a 5 s rep starting at the stretch. Hold
+ * there 1 s (0 to 20%), contract over 1 s (to 40%), then return into the
+ * stretch over 3 s (to 100%). Rest is the stretched pose at rotate(0), so the
+ * first frame a reader sees is the position the exercise is supposed to reach.
  */
 @keyframes limb-sweep {
   0%,
-  16% {
+  20% {
     transform: rotate(0deg);
   }
-  54%,
-  66% {
+  40% {
     transform: rotate(var(--sweep, 0deg));
   }
   100% {
@@ -418,7 +418,7 @@ body {
 }
 .limb-seg {
   transform-box: view-box;
-  animation: limb-sweep 3.4s ease-in-out infinite;
+  animation: limb-sweep 5s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .limb-seg {
@@ -443,11 +443,10 @@ body {
  */
 @keyframes blade-slide {
   0%,
-  16% {
+  20% {
     transform: translate(0, 0);
   }
-  54%,
-  66% {
+  40% {
     transform: translate(var(--dx, 0), var(--dy, 0));
   }
   100% {
@@ -456,7 +455,7 @@ body {
 }
 .blade-slide {
   transform-box: view-box;
-  animation: blade-slide 3.4s ease-in-out infinite;
+  animation: blade-slide 5s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .blade-slide {
@@ -476,6 +475,56 @@ body {
 .view-toggle {
   margin-top: 0;
   margin-bottom: 14px;
+}
+/*
+ * Seconds counter under the figure. Five labels stacked in one spot, each
+ * shown for its own second of the 5 s rep: label n starts n - 1 seconds in,
+ * which a negative delay of n - 6 seconds gives from the first frame, so the
+ * counter and the figure start together. Text, so it takes the body color.
+ */
+.tempo {
+  position: relative;
+  height: 22px;
+  margin: -2px 0 12px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.tempo span {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  animation: tempo-tick 5s step-end infinite;
+}
+@keyframes tempo-tick {
+  0% {
+    opacity: 1;
+  }
+  20%,
+  100% {
+    opacity: 0;
+  }
+}
+.tempo span:nth-child(1) { animation-delay: -5s; }
+.tempo span:nth-child(2) { animation-delay: -4s; }
+.tempo span:nth-child(3) { animation-delay: -3s; }
+.tempo span:nth-child(4) { animation-delay: -2s; }
+.tempo span:nth-child(5) { animation-delay: -1s; }
+.tempo .tempo-still {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tempo span {
+    animation: none;
+  }
+  .tempo .tempo-still {
+    display: block;
+    opacity: 1;
+    font-weight: 600;
+    font-size: 14px;
+  }
 }
 .stretch-reach {
   margin: 0 0 10px;

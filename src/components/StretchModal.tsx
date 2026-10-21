@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CUES, FIGURES, FIGURE_FOR, VIEW_LABEL, VIEW_ORDER, mirrored, posesOf, sweeps } from '../lib/stretch';
+import { CUES, CYCLE, FIGURES, FIGURE_FOR, TEMPO, VIEW_LABEL, VIEW_ORDER, mirrored, posesOf, sweeps } from '../lib/stretch';
 import type { Pose, Joint, Scaffold, Track, View } from '../lib/stretch';
 import { useBackToClose } from '../lib/useBackToClose';
 import { CloseButton } from './CloseButton';
@@ -210,7 +210,7 @@ function TrackLimbs({ track, layer }: { track: Track; layer: 'behind' | 'front' 
   const fr = track.frames;
   const vals = (li: number, pi: number, k: 'x' | 'y') => fr.map((f) => f[li][pi][k].toFixed(1)).join(';');
   const anim = (attr: string, v: string) =>
-    still ? null : <animate attributeName={attr} values={v} dur="3.4s" repeatCount="indefinite" />;
+    still ? null : <animate attributeName={attr} values={v} dur={`${CYCLE}s`} repeatCount="indefinite" />;
   const cb = track.cables;
   const inLayer = (i: number) => (track.behind ?? []).includes(i) === (layer === 'behind');
   const cvals = (ci: number, pi: number, k: 'x' | 'y') =>
@@ -252,7 +252,7 @@ function TrackLimbs({ track, layer }: { track: Track; layer: 'behind' | 'front' 
                 values={track
                   .blades!.map((f) => f[bi].map((q) => `${q.x.toFixed(1)},${q.y.toFixed(1)}`).join(' '))
                   .join(';')}
-                dur="3.4s"
+                dur={`${CYCLE}s`}
                 repeatCount="indefinite"
               />
             )}
@@ -337,6 +337,34 @@ export function StretchFigure({ f }: { f: Pose }) {
 }
 
 /**
+ * Counts the seconds of the rep under the figure, in step with it.
+ *
+ * Words name what the muscle is doing rather than which way the weight goes,
+ * because lowering the weight is arms up on a pulldown and arms down on a
+ * curl. The order follows the figure from its first frame: paused at the
+ * stretch, contracting, then the slow return into the stretch.
+ */
+function TempoCount() {
+  const steps = [
+    ...Array.from({ length: TEMPO.hold }, (_, i) => `Hold ${i + 1}`),
+    ...Array.from({ length: TEMPO.contract }, (_, i) => `Contract ${i + 1}`),
+    ...Array.from({ length: TEMPO.stretch }, (_, i) => `Stretch ${i + 1}`),
+  ];
+  return (
+    <div className="tempo" aria-label={`Tempo: ${TEMPO.stretch} seconds into the stretch, hold ${TEMPO.hold}, contract ${TEMPO.contract}`}>
+      {steps.map((t) => (
+        <span key={t} aria-hidden="true">
+          {t}
+        </span>
+      ))}
+      <div className="tempo-still">
+        Stretch {TEMPO.stretch} s, hold {TEMPO.hold} s, contract {TEMPO.contract} s
+      </div>
+    </div>
+  );
+}
+
+/**
  * The position an exercise has to reach, opened from its name.
  *
  * Every exercise in the routine has a cue. Most also have a figure; the two ab
@@ -377,7 +405,10 @@ export default function StretchModal({
           </span>
           <CloseButton onClick={onClose} label="Close" />
         </div>
-        {pose && <StretchFigure f={pose} />}
+        {/* Keyed by angle, so switching angles restarts the figure and the
+            counter together and they stay on the same second. */}
+        {pose && <StretchFigure key={viewIdx} f={pose} />}
+        {pose && <TempoCount key={`t${viewIdx}`} />}
         {poses.length > 0 && (
           <div className={poses.length > 1 ? 'metric-toggle view-toggle' : 'metric-toggle view-toggle one'}>
             {poses.map((p, i) => (

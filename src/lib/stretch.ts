@@ -177,10 +177,14 @@ export type FigureKey =
  * exactly at every frame rather than drifting the way interpolated endpoints do.
  */
 /*
- * Timing for sampled tracks, matched to the CSS limb-sweep keyframes so a track
- * moves on the same beat as a rotating chain: rest at the stretch to 16%, ease
- * to the contracted end by 54%, hold to 66%, ease back by 100%.
+ * The rep's tempo, shared by every figure: a 5 second cycle starting at the
+ * stretch. Hold there 1 second, contract over 1, then return into the stretch
+ * over 3. The slow return and the pause are where the stretch stimulus is, so
+ * they get most of the time. Tracks sample this curve; the CSS limb-sweep and
+ * blade-slide keyframes and the counter under the figure run the same one.
  */
+export const TEMPO = { hold: 1, contract: 1, stretch: 3 } as const;
+export const CYCLE = TEMPO.hold + TEMPO.contract + TEMPO.stretch;
 const EASE = (x: number): number => {
   // cubic-bezier(0.42, 0, 0.58, 1), which is what CSS ease-in-out means.
   let s = x;
@@ -193,12 +197,13 @@ const EASE = (x: number): number => {
   return 3 * s * s - 2 * s * s * s;
 };
 
-/** Fraction of the way to the contracted end at a point in the 3.4 s cycle. */
+/** Fraction of the way to the contracted end at a point in the cycle. */
 export function sweepAt(phase: number): number {
-  if (phase < 0.16) return 0;
-  if (phase < 0.54) return EASE((phase - 0.16) / 0.38);
-  if (phase < 0.66) return 1;
-  return 1 - EASE((phase - 0.66) / 0.34);
+  const a = TEMPO.hold / CYCLE;
+  const b = (TEMPO.hold + TEMPO.contract) / CYCLE;
+  if (phase < a) return 0;
+  if (phase < b) return EASE((phase - a) / (b - a));
+  return 1 - EASE((phase - b) / (1 - b));
 }
 
 type V3 = [number, number, number];
@@ -246,12 +251,23 @@ const FLOOR = 74;
 const STAGGER = 20;
 /*
  * Equipment, at the figure's scale of roughly a centimeter per unit, which the
- * 40 unit shoulder width sets. A step in front of the pulley line is about half
- * a meter. A real crossover station puts each pulley about 130 out from center,
- * which does not fit the 240 box, so they sit at 100, the most the front view
- * allows; at 85 the hands nearly reached the pulleys at the stretch.
+ * 40 unit shoulder width sets. A real crossover station puts each pulley about
+ * 130 out from center, which does not fit the 240 box, so they sit at 100, the
+ * most the front view allows.
+ *
+ * The person stands about two steps, an arm's length, in front of the pulley
+ * line. At one step the cable at the stretch ran nearly along the arm, so it
+ * loaded the shoulder joint and barely turned the arm. Measured as the share of
+ * the cable's full leverage on the arm, stretch then finish:
+ *
+ *   40 in front:  high 43 / 37, mid 20 / 45, low 54 / 71
+ *   100 in front: high 79 / 34, mid 76 / 27, low 59 / 55
+ *
+ * At 100 all three load the stretch at least as hard as the finish. A wider real
+ * station lines the cable up with the arm even more, so standing forward matters
+ * more there, not less.
  */
-const PULLEY_BEHIND = 40;
+const PULLEY_BEHIND = 100;
 const PULLEY_OUT = 100;
 
 const add3 = (a: V3, b: V3): V3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
@@ -364,10 +380,11 @@ const PROJECT: Record<FlyView, (v: V3) => Pt> = {
   front: (v) => ({ x: 120 + v[0], y: 120 + v[1] }),
   // From behind, the person's right is on the viewer's right.
   back: (v) => ({ x: 120 + v[0], y: 120 + v[1] }),
-  side: (v) => ({ x: 130 - v[2], y: 120 + v[1] }),
+  // Hips at 115 so a pulley a meter behind still fits at x 215.
+  side: (v) => ({ x: 115 - v[2], y: 120 + v[1] }),
   top: (v) => ({ x: 120 + v[0], y: 92 - v[2] }),
 };
-const FLY_HEIGHT: Record<FlyView, number> = { front: 205, back: 205, side: 205, top: 160 };
+const FLY_HEIGHT: Record<FlyView, number> = { front: 205, back: 205, side: 205, top: 205 };
 
 /**
  * A crossover fly as one whole body in 3D, projected into the front, side and
@@ -825,7 +842,8 @@ export const CUES: Record<FigureKey, Cue> = {
   flyHigh: {
     reach: 'Arms up and out at the start, with the hands behind the line of your torso.',
     points: [
-      'Stand a step in front of the pulleys with one foot forward, and lean forward about 20 degrees from the hips with your chest up. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward.',
+      'Stand about two steps in front of the pulleys, roughly an arm\'s length. At one step the cable pulls nearly along your arm at the stretch, which loads the shoulder joint more than the pec. At two it pulls across the arm, so the stretch is the hardest point of the rep.',
+      'Stagger your feet and lean forward about 20 degrees from the hips with your chest up. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward. The lean sets the angle between the cable and your chest.',
       'The pulley is high, so the hands sweep down and in and finish low in front. That path works the lower and middle fibers of the pec, and those are longest with the arm raised and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
       'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
@@ -834,7 +852,8 @@ export const CUES: Record<FigureKey, Cue> = {
   flyMid: {
     reach: 'Arms out at chest height at the start, with the hands behind the line of your torso.',
     points: [
-      'Stand a step in front of the pulleys with one foot forward, and lean forward about 12 degrees from the hips with your chest up. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward.',
+      'Stand about two steps in front of the pulleys, roughly an arm\'s length. At one step the cable pulls nearly along your arm at the stretch, which loads the shoulder joint more than the pec. At two it pulls across the arm, so the stretch is the hardest point of the rep.',
+      'Stagger your feet and lean forward about 12 degrees from the hips with your chest up. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward. The lean sets the angle between the cable and your chest.',
       'The hands travel level and meet in front of the chest. That path works the middle fibers of the pec.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
       'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
@@ -843,7 +862,8 @@ export const CUES: Record<FigureKey, Cue> = {
   flyLow: {
     reach: 'Arms down and out at the start, with the hands behind the line of your torso.',
     points: [
-      'Stand a step in front of the pulleys with one foot forward, and lean forward only slightly, about 5 degrees, from the hips with your chest up. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward.',
+      'Stand about two steps in front of the pulleys, roughly an arm\'s length. At one step the cable pulls nearly along your arm at the stretch, which loads the shoulder joint more than the pec. At two it pulls across the arm, so the stretch carries at least as much load as the finish.',
+      'Stagger your feet and lean forward only slightly, about 5 degrees, from the hips with your chest up. Chest up means the upper back stays straight while the hips hinge, so the chest faces forward. The lean sets the angle between the cable and your chest.',
       'The pulley is low, so the hands sweep up and in and finish high in front. That path works the upper fibers of the pec, the clavicular head, and those are longest with the arm low and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
       'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
