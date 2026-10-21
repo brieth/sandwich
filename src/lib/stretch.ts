@@ -73,11 +73,14 @@ export interface Track {
    */
   behind?: number[];
   /**
-   * Joints that sit on the body's surface and stay visible even when their limb
-   * is drawn behind it. From behind, a fly's shoulders are on the torso's edge;
-   * drawn with the hidden arms, the torso cut each one in half.
+   * Point indices on the limbs drawn behind the body that sit on its surface and
+   * stay visible anyway. From behind, a fly's shoulders are on the torso's edge;
+   * drawn with the hidden arms, the torso cut each one in half. Indices rather
+   * than fixed points, because the shoulders move with the blades.
    */
-  onTop?: Pt[];
+  onTop?: number[];
+  /** Shoulder blades that move, frame then blade, each an arc of points. */
+  blades?: Pt[][][];
 }
 
 /**
@@ -266,13 +269,28 @@ function leanBy(v: V3, deg: number): V3 {
 /**
  * Inner border of the right shoulder blade, as a quadratic arc on the back
  * surface: top, control, bottom. The border bows toward the spine, which is the
- * shape it has. Held retracted, so it sits 4 to 9 from the spine; mirrored for
+ * shape it has. Set retracted, so it sits 4 to 9 from the spine; mirrored for
  * the left blade.
  */
 const BLADE: [V3, V3, V3] = [
   [9, -50, -15],
   [4, -41, -15],
   [9, -31, -14],
+];
+
+/**
+ * How far the right blade, and the shoulder joint that sits on it, shifts from
+ * its set position through the rep, at about a centimeter per unit. At the
+ * stretch, opening the arms draws it 2 further toward the spine and 3 back. At
+ * the finish, reaching across lets it drift 3 out and 2 forward, which holding
+ * the blades back keeps small. The left side mirrors in x.
+ */
+const SCAP_STRETCH: V3 = [-2, 0, -3];
+const SCAP_FINISH: V3 = [3, 0, 2];
+const scapAt = (t: number, side: number): V3 => [
+  side * (SCAP_STRETCH[0] + t * (SCAP_FINISH[0] - SCAP_STRETCH[0])),
+  0,
+  SCAP_STRETCH[2] + t * (SCAP_FINISH[2] - SCAP_STRETCH[2]),
 ];
 
 /** Knee for a leg from hip to foot, bent forward, by the law of cosines. */
@@ -383,7 +401,7 @@ function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: nu
     const f = slerp(d0, d1, t + lead);
     return [1, -1].map((side) => {
       const m = (v: V3): V3 => [side * v[0], v[1], v[2]];
-      const sh = up(m(SHOULDER));
+      const sh = up(add3(m(SHOULDER), scapAt(t, side)));
       const el = add3(sh, mul3(up(m(u)), 34));
       const ha = add3(el, mul3(up(m(f)), 32));
       return [sh, el, ha];
@@ -394,27 +412,30 @@ function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: nu
     const P = PROJECT[view];
     const frames: Pt[][][] = [];
     const cables: Pt[][][] = [];
+    const blades: Pt[][][] = [];
     for (let i = 0; i < FRAMES; i++) {
-      const arms = armsAt(sweepAt(i / (FRAMES - 1)));
+      const t = sweepAt(i / (FRAMES - 1));
+      const arms = armsAt(t);
       frames.push(arms.map((a) => a.map(P)));
       cables.push(arms.map((a, k) => [P(pulleys[k]), P(a[2])]));
+      // Blades only show from behind. They move a few units with the
+      // shoulders, so they are drawn in the moving color.
+      if (view === 'back')
+        blades.push(
+          [1, -1].map((side) => {
+            const q = BLADE.map((b) => add3([side * b[0], b[1], b[2]], scapAt(t, side)));
+            const arc: Pt[] = [];
+            for (let k = 0; k <= 8; k++) {
+              const u = k / 8;
+              const v = [0, 1, 2].map((j) => (1 - u) * (1 - u) * q[0][j] + 2 * (1 - u) * u * q[1][j] + u * u * q[2][j]) as V3;
+              arc.push(P(up(v)));
+            }
+            return arc;
+          }),
+        );
     }
     const lines: Pt[][] = [];
     const dots: Pt[] = [];
-    if (view === 'back') {
-      // Blades only show from behind. They hold still through a fly, so they
-      // are drawn with the body rather than in the moving color.
-      for (const side of [1, -1]) {
-        const arc: Pt[] = [];
-        for (let k = 0; k <= 8; k++) {
-          const t = k / 8;
-          const q = BLADE.map((b) => [side * b[0], b[1], b[2]] as V3);
-          const v: V3 = [0, 1, 2].map((i) => (1 - t) * (1 - t) * q[0][i] + 2 * (1 - t) * t * q[1][i] + t * t * q[2][i]) as V3;
-          arc.push(P(up(v)));
-        }
-        lines.push(arc);
-      }
-    }
     if (view === 'top') {
       // From above the torso hides the legs, so only the feet show, one ahead
       // of the hips and one behind.
@@ -435,7 +456,8 @@ function flyFigure(startElev: number, endElev: number, lean: number, pulleyY: nu
         frames,
         cables,
         behind: view === 'side' ? [0] : view === 'back' ? [0, 1] : [],
-        onTop: view === 'back' ? frames[0].map((limb) => limb[0]) : undefined,
+        onTop: view === 'back' ? [0] : undefined,
+        blades: view === 'back' ? blades : undefined,
       },
       scaffold: {
         head: { x: hp.x, y: hp.y, r: HEAD.r },
@@ -782,7 +804,7 @@ export const CUES: Record<FigureKey, Cue> = {
       'Stand a step in front of the pulleys with one foot forward, and lean forward about 20 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
       'The pulley is high, so the hands sweep down and in and finish low in front. That path works the lower and middle fibers of the pec, and those are longest with the arm raised and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
-      'Pull your shoulder blades back and down before the first rep and hold them there through the set. If they slide forward at the start, part of the range comes from the shoulder girdle and the pec stretches less. If they roll forward as the hands meet, the front delts take over the finish.',
+      'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
     ],
   },
   flyMid: {
@@ -791,7 +813,7 @@ export const CUES: Record<FigureKey, Cue> = {
       'Stand a step in front of the pulleys with one foot forward, and lean forward about 12 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
       'The hands travel level and meet in front of the chest. That path works the middle fibers of the pec.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
-      'Pull your shoulder blades back and down before the first rep and hold them there through the set. If they slide forward at the start, part of the range comes from the shoulder girdle and the pec stretches less. If they roll forward as the hands meet, the front delts take over the finish.',
+      'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
     ],
   },
   flyLow: {
@@ -800,7 +822,7 @@ export const CUES: Record<FigureKey, Cue> = {
       'Stand a step in front of the pulleys with one foot forward, and lean forward only slightly, about 5 degrees. Standing ahead of the pulleys keeps tension on the cable when the hands are behind the torso. The lean sets the angle between the cable and your chest.',
       'The pulley is low, so the hands sweep up and in and finish high in front. That path works the upper fibers of the pec, the clavicular head, and those are longest with the arm low and back.',
       'Keep a fixed slight elbow bend. If the elbow angle opens and closes it becomes a press, which shortens the path.',
-      'Pull your shoulder blades back and down before the first rep and hold them there through the set. If they slide forward at the start, part of the range comes from the shoulder girdle and the pec stretches less. If they roll forward as the hands meet, the front delts take over the finish.',
+      'Pull your shoulder blades back and down before the first rep. That carries the shoulder joint back, so the arm opens further across the chest and the pec lengthens more. They draw slightly further together as the arms open. As the hands meet, keep them from sliding forward. Letting them go all the way turns the finish into front delt and serratus work.',
     ],
   },
   bench: {

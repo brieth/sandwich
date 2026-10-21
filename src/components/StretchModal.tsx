@@ -234,6 +234,39 @@ function TrackLimbs({ track, layer }: { track: Track; layer: 'behind' | 'front' 
           {anim('y2', cvals(ci, 1, 'y'))}
         </line>
       ))}
+      {layer === 'front' &&
+        track.blades?.[0].map((b0, bi) => (
+          // A blade that moves is a moving body part, so it is teal.
+          <polyline
+            key={`b${bi}`}
+            points={b0.map((q) => `${q.x.toFixed(1)},${q.y.toFixed(1)}`).join(' ')}
+            fill="none"
+            stroke="var(--accent)"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            {still ? null : (
+              <animate
+                attributeName="points"
+                values={track
+                  .blades!.map((f) => f[bi].map((q) => `${q.x.toFixed(1)},${q.y.toFixed(1)}`).join(' '))
+                  .join(';')}
+                dur="3.4s"
+                repeatCount="indefinite"
+              />
+            )}
+          </polyline>
+        ))}
+      {layer === 'front' &&
+        (track.behind ?? []).flatMap((li) =>
+          (track.onTop ?? []).map((pi) => (
+            <circle key={`t${li}-${pi}`} cx={fr[0][li][pi].x} cy={fr[0][li][pi].y} r="4.4" fill="var(--accent)">
+              {anim('cx', vals(li, pi, 'x'))}
+              {anim('cy', vals(li, pi, 'y'))}
+            </circle>
+          )),
+        )}
       {fr[0].map((p0, li) => inLayer(li) && (
         <g key={li}>
           {p0.slice(0, -1).map((a, si) => (
@@ -291,9 +324,7 @@ export function StretchFigure({ f }: { f: Pose }) {
         <Limb key={k} chain={c} i={0} pts={pointsOf(c)} sw={sweeps(c)} />
       ))}
       {f.track && <TrackLimbs track={f.track} layer="front" />}
-      {f.track?.onTop?.map((q, i) => (
-        <circle key={`t${i}`} cx={q.x} cy={q.y} r="4.4" fill="var(--accent)" />
-      ))}
+
       {f.marks?.map((m, k) => (
         // Text, so it takes the muted color: teal is reserved for body parts
         // that move. Full strength, unlike the faint body, so it stays legible.
