@@ -20,22 +20,30 @@ function Body({ view, f }: { view: View; f: Pose }) {
   const o = f.body;
   const dim = 'currentColor';
 
-  if (view === 'side' || view === 'front' || view === 'back') {
-    const b = view === 'side' ? SIDE : FRONT;
-    const headY = o?.headY ?? b.headY;
-    const spineTop = o?.spineTop ?? b.spineTop;
-    const hipY = o?.hipY ?? b.hipY;
+  if (view === 'front' || view === 'back') {
+    const headY = o?.headY ?? FRONT.headY;
+    const top = o?.spineTop ?? FRONT.spineTop;
+    const hipY = o?.hipY ?? FRONT.hipY;
     return (
       <g opacity="0.5">
-        <circle cx={b.headX} cy={headY} r={b.headR} fill="none" stroke={dim} strokeWidth="2.5" />
-        <line x1={b.headX} y1={spineTop} x2={b.headX} y2={hipY} stroke={dim} strokeWidth="2.5" strokeLinecap="round" />
-        <line x1={b.headX - b.hipHalf} y1={hipY} x2={b.headX + b.hipHalf} y2={hipY} stroke={dim} strokeWidth="2.5" strokeLinecap="round" />
+        <circle cx={FRONT.headX} cy={headY} r={FRONT.headR} fill="none" stroke={dim} strokeWidth="2.5" />
+        {/*
+          * Same 48 wide torso as the top view, x 96 to 144, so the shoulders
+          * sit on its sides at the same x from every angle. Top edge at the
+          * spine top, just under the chin, and the arms pivot 12 below it at
+          * the shoulder line. With a 10 corner radius the straight run of each
+          * side starts 10 down, so the joint lands on the flat side rather
+          * than the corner curve.
+          */}
+        <rect x="96" y={top} width="48" height={hipY - top} rx="10" fill="none" stroke={dim} strokeWidth="2.5" />
         {view === 'back' && (
           /*
            * Two blades either side of the spine, which slide between the poses.
            * Drawn here rather than in the limb chain because they translate
            * instead of rotating, and because they are the only reason this
-           * angle exists.
+           * angle exists. 14 wide at x 128 and 98, inside the torso's 96 to
+           * 144, and 16 apart at rest, so a retraction of 8 each brings them
+           * together at the spine without overlapping.
            */
           <g
             className={f.blades ? 'blade-slide' : undefined}
@@ -45,21 +53,23 @@ function Body({ view, f }: { view: View; f: Pose }) {
                 : undefined
             }
           >
-            <rect x={b.headX + 8} y={spineTop + 16} width="17" height="27" rx="5" fill="none" stroke={dim} strokeWidth="2" />
-            <rect x={b.headX - 25} y={spineTop + 16} width="17" height="27" rx="5" fill="none" stroke={dim} strokeWidth="2" />
+            <rect x="128" y={top + 16} width="14" height="27" rx="5" fill="none" stroke={dim} strokeWidth="2" />
+            <rect x="98" y={top + 16} width="14" height="27" rx="5" fill="none" stroke={dim} strokeWidth="2" />
           </g>
         )}
-        {(view === 'front' || view === 'back') && (
-          <line
-            x1={b.headX - 40}
-            y1={spineTop + 12}
-            x2={b.headX + 40}
-            y2={spineTop + 12}
-            stroke={dim}
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-        )}
+      </g>
+    );
+  }
+
+  if (view === 'side') {
+    const headY = o?.headY ?? SIDE.headY;
+    const spineTop = o?.spineTop ?? SIDE.spineTop;
+    const hipY = o?.hipY ?? SIDE.hipY;
+    return (
+      <g opacity="0.5">
+        <circle cx={SIDE.headX} cy={headY} r={SIDE.headR} fill="none" stroke={dim} strokeWidth="2.5" />
+        <line x1={SIDE.headX} y1={spineTop} x2={SIDE.headX} y2={hipY} stroke={dim} strokeWidth="2.5" strokeLinecap="round" />
+        <line x1={SIDE.headX - SIDE.hipHalf} y1={hipY} x2={SIDE.headX + SIDE.hipHalf} y2={hipY} stroke={dim} strokeWidth="2.5" strokeLinecap="round" />
       </g>
     );
   }
