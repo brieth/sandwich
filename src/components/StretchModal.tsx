@@ -67,6 +67,12 @@ function Body({ view, f }: { view: View; f: Pose }) {
   if (view === 'top') {
     return (
       <g opacity="0.5">
+        {/*
+          * Shoulders pivot at y 93, the torso's mid depth, which is also the
+          * middle of the only straight run of each side (y 90 to 96, inside
+          * the 14 corner radius). Any further forward and the joint lands on
+          * the corner curve and reads as the front of the body.
+          */}
         <rect x="96" y="76" width="48" height="34" rx="14" fill="none" stroke={dim} strokeWidth="2.5" />
         {/*
           * Looking straight down, the head is above the torso rather than in

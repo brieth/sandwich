@@ -143,8 +143,8 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     view: 'top',
     height: 158,
     chain: [
-      { x: 144, y: 86, len: 30, stretched: -90, contracted: 78 },
-      { x: 144, y: 56, len: 28, stretched: -90, contracted: -86, hand: true },
+      { x: 144, y: 93, len: 30, stretched: -90, contracted: 78 },
+      { x: 144, y: 63, len: 28, stretched: -90, contracted: -86, hand: true },
     ],
     alts: [
       {
@@ -164,7 +164,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   fly: {
     view: 'top',
     height: 158,
-    chain: [{ x: 144, y: 86, len: 64, stretched: 27, contracted: -99.5, hand: true }],
+    chain: [{ x: 144, y: 93, len: 64, stretched: 27, contracted: -99.5, hand: true }],
   },
 
   // Overhead extension. The long head crosses the shoulder, so it only reaches
@@ -230,7 +230,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       {
         view: 'top',
         height: 158,
-        chain: [{ x: 144, y: 86, len: 60, stretched: 195, contracted: 0, hand: true }],
+        chain: [{ x: 144, y: 93, len: 60, stretched: 195, contracted: 0, hand: true }],
       },
     ],
   },
@@ -238,7 +238,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   rearDelt: {
     view: 'top',
     height: 158,
-    chain: [{ x: 144, y: 86, len: 60, stretched: 190, contracted: 15, hand: true }],
+    chain: [{ x: 144, y: 93, len: 60, stretched: 190, contracted: 15, hand: true }],
     alts: [
       {
         view: 'back',
@@ -254,8 +254,8 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     view: 'top',
     height: 158,
     chain: [
-      { x: 144, y: 86, len: 30, stretched: -90, contracted: -10 },
-      { x: 144, y: 56, len: 28, stretched: -90, contracted: 150, hand: true },
+      { x: 144, y: 93, len: 30, stretched: -90, contracted: -10 },
+      { x: 144, y: 63, len: 28, stretched: -90, contracted: 150, hand: true },
     ],
     alts: [
       {
