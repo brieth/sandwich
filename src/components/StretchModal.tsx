@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CUES, FIGURES, FIGURE_FOR, VIEW_LABEL, VIEW_ORDER, posesOf, sweeps } from '../lib/stretch';
+import { CUES, FIGURES, FIGURE_FOR, VIEW_LABEL, VIEW_ORDER, mirrored, posesOf, sweeps } from '../lib/stretch';
 import type { Pose, Joint, View } from '../lib/stretch';
 import { useBackToClose } from '../lib/useBackToClose';
 import { CloseButton } from './CloseButton';
@@ -125,15 +125,19 @@ function Limb({ chain, i, pts, sw }: { chain: Joint[]; i: number; pts: { x: numb
   );
 }
 
-export function StretchFigure({ f }: { f: Pose }) {
-  // Walked from the root rather than read off each joint, so a nested pivot can
-  // never disagree with the end of the segment it hangs from.
-  const pts: { x: number; y: number }[] = [{ x: f.chain[0].x, y: f.chain[0].y }];
-  f.chain.forEach((j) => {
+// Walked from the root rather than read off each joint, so a nested pivot can
+// never disagree with the end of the segment it hangs from.
+function pointsOf(chain: Joint[]): { x: number; y: number }[] {
+  const pts = [{ x: chain[0].x, y: chain[0].y }];
+  chain.forEach((j) => {
     const p = pts[pts.length - 1];
     pts.push({ x: p.x + j.len * Math.cos(rad(j.stretched)), y: p.y + j.len * Math.sin(rad(j.stretched)) });
   });
-  const sw = sweeps(f.chain);
+  return pts;
+}
+
+export function StretchFigure({ f }: { f: Pose }) {
+  const chains = f.mirror ? [f.chain, mirrored(f.chain)] : [f.chain];
 
   return (
     <svg className="stretch-svg" viewBox={`0 0 240 ${f.height}`} role="img" aria-hidden="true">
@@ -150,7 +154,9 @@ export function StretchFigure({ f }: { f: Pose }) {
           opacity="0.85"
         />
       )}
-      <Limb chain={f.chain} i={0} pts={pts} sw={sw} />
+      {chains.map((c, k) => (
+        <Limb key={k} chain={c} i={0} pts={pointsOf(c)} sw={sweeps(c)} />
+      ))}
       {f.marks?.map((m, k) => (
         <text key={k} className="stretch-mark" x={m.x} y={m.y} textAnchor={m.anchor ?? 'start'} fill="var(--accent)">
           {m.text}

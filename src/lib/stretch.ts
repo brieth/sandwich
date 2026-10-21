@@ -64,6 +64,14 @@ export interface Pose {
    * other angle shows it: from the front or the side it is behind the ribcage.
    */
   blades?: { dx: number; dy: number };
+  /**
+   * Draw the other limb as well, mirrored about the body's center line.
+   *
+   * Set only where both limbs move together and the view is front, back or top.
+   * In a side view the far limb would sit exactly behind the near one, and the
+   * single-arm exercises draw one arm because that is what they are.
+   */
+  mirror?: boolean;
   height: number;
 }
 
@@ -123,6 +131,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       { x: 149.4, y: 69.3, len: 32, stretched: -74, contracted: 198, hand: true },
     ],
     marks: [{ x: 14, y: 30, text: 'blade rises' }],
+    mirror: true,
     alts: [
       {
         view: 'back',
@@ -134,6 +143,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
         ],
         blades: { dx: 0, dy: 9 },
         marks: [{ x: 14, y: 30, text: 'blades ride up' }],
+        mirror: true,
       },
     ],
   },
@@ -167,6 +177,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     // Slight fixed elbow bend: the forearm sits 20 degrees forward of the upper
     // arm and both turn by the same 126.5, so the bend never changes. Resting
     // hand at (203, 120), contracted hands meet in front at (130, 29).
+    mirror: true,
     chain: [
       { x: 144, y: 93, len: 34, stretched: 34, contracted: -92.5 },
       { x: 172.2, y: 112.0, len: 32, stretched: 14, contracted: -112.5, hand: true },
@@ -192,7 +203,8 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
           { x: 150, y: 93, len: 42, stretched: -80, contracted: -80 },
           { x: 157.3, y: 51.6, len: 28, stretched: 140, contracted: -80, hand: true },
         ],
-        marks: [{ x: 14, y: 30, text: 'elbows stay in' }],
+        marks: [{ x: 14, y: 176, text: 'elbows stay in' }],
+        mirror: true,
       },
     ],
   },
@@ -212,7 +224,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     height: 180,
     fixed: { x1: 128, y1: 62, x2: 128, y2: 106 },
     chain: [{ x: 128, y: 106, len: 44, stretched: 90, contracted: 230, hand: true }],
-    marks: [{ x: 14, y: 160, text: 'finish straight' }],
+    marks: [{ x: 232, y: 172, text: 'finish straight', anchor: 'end' }],
   },
 
   // Behind the back curl. The elbow sits behind the torso, which lengthens the
@@ -222,7 +234,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     height: 180,
     fixed: { x1: 128, y1: 62, x2: 138, y2: 106 },
     chain: [{ x: 138, y: 106, len: 44, stretched: 94, contracted: 232, hand: true }],
-    marks: [{ x: 14, y: 160, text: 'elbow stays behind you' }],
+    marks: [{ x: 232, y: 172, text: 'elbow stays behind you', anchor: 'end' }],
   },
 
   // Behind the back lateral raise. The cable comes from the far side, so the
@@ -258,6 +270,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
 
   facePull: {
     view: 'top',
+    mirror: true,
     height: 158,
     chain: [
       { x: 144, y: 93, len: 30, stretched: -90, contracted: -10 },
@@ -270,6 +283,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
         chain: [{ x: 140, y: 56, len: 30, stretched: -25, contracted: -55, hand: true }],
         blades: { dx: -8, dy: 0 },
         marks: [{ x: 14, y: 150, text: 'elbows finish high' }],
+        mirror: true,
       },
     ],
   },
@@ -282,6 +296,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       { x: 140, y: 90, len: 32, stretched: 90, contracted: 160, hand: true },
     ],
     marks: [{ x: 18, y: 150, text: 'arms fully down' }],
+    mirror: true,
     alts: [
       {
         view: 'side',
@@ -310,7 +325,7 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     view: 'seated',
     height: 190,
     chain: [{ x: 76, y: 112, len: 64, stretched: -8, contracted: 62, hand: true }],
-    marks: [{ x: 26, y: 140, text: 'knee fully straight at the top' }],
+    marks: [{ x: 14, y: 24, text: 'knee fully straight at the top' }],
   },
 
   // Rectus femoris crosses the hip and the knee, so reclining the seat puts the
@@ -319,21 +334,23 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
     view: 'seated',
     height: 190,
     chain: [{ x: 76, y: 112, len: 64, stretched: 74, contracted: -6, hand: true }],
-    marks: [{ x: 26, y: 140, text: 'recline the seat' }],
+    marks: [{ x: 14, y: 24, text: 'recline the seat' }],
   },
 
   hipAbduction: {
     view: 'front',
-    height: 185,
+    height: 200,
     chain: [{ x: 128, y: 120, len: 52, stretched: 80, contracted: 42, hand: true }],
-    marks: [{ x: 18, y: 150, text: 'let the knees come together' }],
+    marks: [{ x: 14, y: 194, text: 'let the knees come together' }],
+    mirror: true,
   },
 
   hipAdduction: {
     view: 'front',
-    height: 185,
+    height: 200,
     chain: [{ x: 128, y: 120, len: 52, stretched: 44, contracted: 86, hand: true }],
-    marks: [{ x: 18, y: 150, text: 'open wide before you close' }],
+    marks: [{ x: 14, y: 194, text: 'open wide before you close' }],
+    mirror: true,
   },
 
 };
@@ -536,6 +553,23 @@ export function stretchFor(exerciseId: string | undefined): Stretch | null {
   const key = FIGURE_FOR[exerciseId];
   if (!key) return null;
   return { key, figure: FIGURES[key], cue: CUES[key] };
+}
+
+/**
+ * The other limb, reflected about the body's center line at x 120.
+ *
+ * Reflecting x to 240 - x turns an angle a into 180 - a, for both poses, which
+ * also reverses the direction of each sweep. Done on the data rather than with
+ * a scale(-1, 1) wrapper, because the joints rotate with transform-box: view-box
+ * and a mirrored ancestor would put their pivots in the wrong place.
+ */
+export function mirrored(chain: Joint[]): Joint[] {
+  return chain.map((j) => ({
+    ...j,
+    x: 240 - j.x,
+    stretched: 180 - j.stretched,
+    contracted: 180 - j.contracted,
+  }));
 }
 
 /** Where a joint's segment ends when the figure is at rest. */
