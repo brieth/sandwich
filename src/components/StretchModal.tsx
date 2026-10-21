@@ -75,11 +75,12 @@ function Body({ view, f }: { view: View; f: Pose }) {
           */}
         <rect x="96" y="76" width="48" height="34" rx="14" fill="none" stroke={dim} strokeWidth="2.5" />
         {/*
-          * Looking straight down, the head is above the torso rather than in
-          * front of it, so it overlaps the front edge instead of sitting clear
-          * of it. Drawn after the torso so it reads as the nearer shape.
+          * Looking straight down, the head sits on the torso. Centered on the
+          * same mid depth as the shoulder pivots, so head and shoulders read as
+          * one line across the body. At r 11 it spans y 82 to 104, inside the
+          * torso's 76 to 110, so no outline crosses it.
           */}
-        <circle cx="120" cy="84" r="11" fill="var(--surface)" stroke={dim} strokeWidth="2.5" opacity="0.75" />
+        <circle cx="120" cy="93" r="11" fill="none" stroke={dim} strokeWidth="2.5" opacity="0.75" />
       </g>
     );
   }
