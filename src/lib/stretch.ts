@@ -160,9 +160,12 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       {
         view: 'back',
         height: 172,
-        // The arm points away from the camera here, so it foreshortens and the
-        // forearm is left off. The blades are the whole reason for this angle.
-        chain: [{ x: 140, y: 56, len: 30, stretched: -20, contracted: 35, hand: true }],
+        // The forearm points mostly away from the camera here, so it is drawn
+        // short. The blades are the whole reason for this angle.
+        chain: [
+          { x: 140, y: 56, len: 30, stretched: -20, contracted: 35 },
+          { x: 168.2, y: 45.7, len: 10, stretched: -20, contracted: 35, hand: true },
+        ],
         blades: { dx: -8, dy: 0 },
         marks: [{ x: 14, y: 150, text: 'blades spread at the front' }],
       },
@@ -242,13 +245,22 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   lateralRaise: {
     view: 'front',
     height: 172,
-    chain: [{ x: 140, y: 56, len: 62, stretched: 108, contracted: 0, hand: true }],
+    chain: [
+      { x: 140, y: 56, len: 32, stretched: 108, contracted: 0 },
+      { x: 130.1, y: 86.4, len: 30, stretched: 108, contracted: 0, hand: true },
+    ],
     marks: [{ x: 18, y: 150, text: 'past the midline' }],
     alts: [
       {
         view: 'top',
         height: 158,
-        chain: [{ x: 144, y: 93, len: 60, stretched: 195, contracted: 0, hand: true }],
+        chain: [
+          // Behind the back: the arm crosses behind the torso at the bottom.
+          // 145 keeps the upper arm 13.8 from the head center, clear of its
+          // radius of 11 plus the stroke.
+          { x: 144, y: 93, len: 31, stretched: 145, contracted: 0 },
+          { x: 118.6, y: 110.8, len: 29, stretched: 145, contracted: 0, hand: true },
+        ],
       },
     ],
   },
@@ -256,12 +268,23 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   rearDelt: {
     view: 'top',
     height: 158,
-    chain: [{ x: 144, y: 93, len: 60, stretched: 190, contracted: 15, hand: true }],
+    chain: [
+      // Across the front of the body, so forward of the shoulder line. 220
+      // keeps the upper arm 15.4 from the head center. Ends at 375 rather than
+      // 15, the same direction, so the sweep runs +155 forward through
+      // straight ahead; 15 made it run -205 backward around the shoulder and
+      // through the head.
+      { x: 144, y: 93, len: 31, stretched: 220, contracted: 375 },
+      { x: 120.3, y: 73.1, len: 29, stretched: 220, contracted: 375, hand: true },
+    ],
     alts: [
       {
         view: 'back',
         height: 172,
-        chain: [{ x: 150, y: 56, len: 56, stretched: 170, contracted: 0, hand: true }],
+        chain: [
+          { x: 150, y: 56, len: 29, stretched: 170, contracted: 0 },
+          { x: 121.4, y: 61.0, len: 27, stretched: 170, contracted: 0, hand: true },
+        ],
         blades: { dx: -8, dy: 0 },
         marks: [{ x: 14, y: 150, text: 'blades squeeze at the end' }],
       },
@@ -280,7 +303,10 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
       {
         view: 'back',
         height: 172,
-        chain: [{ x: 140, y: 56, len: 30, stretched: -25, contracted: -55, hand: true }],
+        chain: [
+          { x: 140, y: 56, len: 30, stretched: -25, contracted: -55 },
+          { x: 167.2, y: 43.3, len: 16, stretched: -25, contracted: -95, hand: true },
+        ],
         blades: { dx: -8, dy: 0 },
         marks: [{ x: 14, y: 150, text: 'elbows finish high' }],
         mirror: true,
@@ -324,7 +350,9 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   legCurl: {
     view: 'seated',
     height: 190,
-    chain: [{ x: 76, y: 112, len: 64, stretched: -8, contracted: 62, hand: true }],
+    // Thigh fixed on the pad, shin turning at the knee.
+    fixed: { x1: 76, y1: 112, x2: 122, y2: 112 },
+    chain: [{ x: 122, y: 112, len: 44, stretched: -4, contracted: 110, hand: true }],
     marks: [{ x: 14, y: 24, text: 'knee fully straight at the top' }],
   },
 
@@ -333,14 +361,19 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   legExtension: {
     view: 'seated',
     height: 190,
-    chain: [{ x: 76, y: 112, len: 64, stretched: 74, contracted: -6, hand: true }],
+    // Thigh fixed on the pad, shin turning at the knee.
+    fixed: { x1: 76, y1: 112, x2: 122, y2: 112 },
+    chain: [{ x: 122, y: 112, len: 44, stretched: 100, contracted: -4, hand: true }],
     marks: [{ x: 14, y: 24, text: 'recline the seat' }],
   },
 
   hipAbduction: {
     view: 'front',
     height: 200,
-    chain: [{ x: 128, y: 120, len: 52, stretched: 80, contracted: 42, hand: true }],
+    chain: [
+      { x: 128, y: 120, len: 27, stretched: 80, contracted: 42 },
+      { x: 132.7, y: 146.6, len: 25, stretched: 80, contracted: 42, hand: true },
+    ],
     marks: [{ x: 14, y: 194, text: 'let the knees come together' }],
     mirror: true,
   },
@@ -348,7 +381,10 @@ export const FIGURES: Partial<Record<FigureKey, Figure>> = {
   hipAdduction: {
     view: 'front',
     height: 200,
-    chain: [{ x: 128, y: 120, len: 52, stretched: 44, contracted: 86, hand: true }],
+    chain: [
+      { x: 128, y: 120, len: 27, stretched: 44, contracted: 86 },
+      { x: 147.4, y: 138.8, len: 25, stretched: 44, contracted: 86, hand: true },
+    ],
     marks: [{ x: 14, y: 194, text: 'open wide before you close' }],
     mirror: true,
   },
