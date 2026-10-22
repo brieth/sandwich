@@ -1612,13 +1612,6 @@ body {
   border-top-color: #fff;
   border-top-style: dashed;
 }
-/* Upright to match the line it names on the chart. */
-.chart-legend .lg-form::before {
-  width: 0;
-  height: 12px;
-  border-top: none;
-  border-left: 2px dotted var(--muted);
-}
 
 .pr-list {
   display: flex;
@@ -1954,38 +1947,6 @@ body {
   --accent: var(--muted);
 }
 
-/* Form change control, top of an exercise's history. */
-.form-change {
-  margin-bottom: 12px;
-}
-.form-change-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 14px;
-}
-.form-change-select {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 8px;
-  color: var(--text);
-  font-size: 14px;
-  font-family: inherit;
-}
-.form-change p {
-  margin: 6px 0 0;
-}
-.form-divider {
-  border-top: 1px dotted var(--muted);
-  padding-top: 8px;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--muted);
-}
-
 /* Phase verdict, top of the Body tab. Label and verdict at the same size and
    tracking, so the pair reads as one caption rather than a banner. The hue is
    the only thing carrying the direction: warm to take weight off, accent to
@@ -2051,8 +2012,4 @@ body {
 /* Why a segmental change column is missing. */
 .seg-note {
   margin: -2px 0 10px;
-}
-.form-divider + .modal-row {
-  border-top: none;
-  padding-top: 0;
 }

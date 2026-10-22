@@ -42,49 +42,6 @@ export function exerciseHistory(sessions: Session[], exerciseId: ID): ExercisePo
   return points;
 }
 
-/** A session's calendar day in local time, YYYY-MM-DD, the form a form change is stored in. */
-export function localDay(iso: string): string {
-  const d = new Date(iso);
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
-
-/**
- * Sessions on or after an exercise's form change, for its targets. All of them
- * when there's no change. Sessions before it were a shorter or different
- * movement, so their weights would point the targets at the old form.
- */
-export function fromFormChange(sessions: Session[], day: string | undefined): Session[] {
-  return day ? sessions.filter((s) => localDay(s.date) >= day) : sessions;
-}
-
-/** Index of the first point on or after the form change, or -1 if none is. */
-export function formChangeIndex(history: ExercisePoint[], day: string | undefined): number {
-  return day ? history.findIndex((p) => localDay(p.date) >= day) : -1;
-}
-
-/**
- * Chain-links an exercise's history across its form change, for the indexes.
- * Points from the change on are scaled by last old value / first new value, so
- * the first new session reads at the old level and later ones move it by the
- * same proportion the new form improves. Without this, marking a dozen
- * exercises at once would read in the index as a large loss of strength.
- */
-function linkAtFormChange(history: ExercisePoint[], day: string | undefined): ExercisePoint[] {
-  const cut = formChangeIndex(history, day);
-  // Nothing after the change yet, or nothing before it to link to.
-  if (cut <= 0) return history;
-  const before = history[cut - 1];
-  const start = history[cut];
-  const ratio = (a: number, b: number) => (b > 0 ? a / b : 1);
-  const kS = ratio(before.best1RM, start.best1RM);
-  const kV = ratio(before.volume, start.volume);
-  const kT = ratio(before.topSet, start.topSet);
-  return history.map((p, i) =>
-    i < cut ? p : { ...p, best1RM: p.best1RM * kS, volume: p.volume * kV, topSet: p.topSet * kT },
-  );
-}
-
 /** Most recent session's best estimated 1RM for an exercise, or null. */
 export function recentEstimated1RM(sessions: Session[], exerciseId: ID): number | null {
   const history = exerciseHistory(sessions, exerciseId);
@@ -228,18 +185,13 @@ export function bestEstimated1RM(
  * using that first value. This keeps the basket constant over time, so adding
  * an exercise shifts the whole line up by a constant rather than creating a
  * step. The only thing that moves the line is a real change in some exercise's
- * most-recent number, i.e. actual progress. A form change is linked the same
- * way (see linkAtFormChange).
+ * most-recent number, i.e. actual progress.
  */
-export function overallSeries(
-  sessions: Session[],
-  exerciseIds: ID[],
-  formChanges: Record<ID, string> = {},
-): ExercisePoint[] {
+export function overallSeries(sessions: Session[], exerciseIds: ID[]): ExercisePoint[] {
   const perEx = exerciseIds
     .map((id) => ({
       factor: limbFactor(id), // per-limb movements count double in the aggregate
-      history: linkAtFormChange(exerciseHistory(sessions, id), formChanges[id]),
+      history: exerciseHistory(sessions, id),
     }))
     .filter((e) => e.history.length > 0);
 

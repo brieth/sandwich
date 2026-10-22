@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../store';
-import { exerciseHistory, formChangeIndex, overallSeries, rollingMean } from '../lib/stats';
+import { exerciseHistory, overallSeries, rollingMean } from '../lib/stats';
 import { CURRENT_EXERCISE_IDS, isCurrentExercise, UPPER_BODY_EXERCISE_IDS } from '../seed';
 import { exercisesForMuscle, MUSCLE_GROUPS, type MuscleGroup } from '../lib/muscles';
 import { LineChart } from './LineChart';
@@ -92,31 +92,19 @@ export function ProgressView({
   // continuous series no matter which machine it was performed on. See
   // UPPER_BODY_EXERCISE_IDS for why legs and abs sit out of the aggregate.
   const group = groupOf(current);
-  const changes = data.formChanges ?? {};
   const history =
     current === FULL_BODY
-      ? overallSeries(forceSessions, [...CURRENT_EXERCISE_IDS], changes)
+      ? overallSeries(forceSessions, [...CURRENT_EXERCISE_IDS])
       : current === UPPER_BODY
-        ? overallSeries(forceSessions, [...UPPER_BODY_EXERCISE_IDS], changes)
+        ? overallSeries(forceSessions, [...UPPER_BODY_EXERCISE_IDS])
         : group
-          ? overallSeries(forceSessions, exercisesForMuscle(group), changes)
+          ? overallSeries(forceSessions, exercisesForMuscle(group))
           : exerciseHistory(forceSessions, current);
   const values = history.map((p) => p[metric]);
   const labels = history.map((p) => new Date(p.date).toLocaleDateString());
-  // The indexes are linked across form changes already, so only a single
-  // exercise's chart shows one. Below 1 means nothing before it to divide from.
-  const cut = group || current === FULL_BODY || current === UPPER_BODY
-    ? -1
-    : formChangeIndex(history, changes[current]);
-  const marked = cut > 0;
   // Rolling mean over the trailing window: a gettable "floor" reference that
-  // sits below Best, so it stays a beatable target on off days. It restarts at
-  // a form change, the same as the workout's Mean column.
-  const meanValues = marked
-    ? [...rollingMean(values.slice(0, cut)), ...rollingMean(values.slice(cut))]
-    : rollingMean(values);
-  // Last and Best describe the current form.
-  const ownValues = marked ? values.slice(cut) : values;
+  // sits below Best, so it stays a beatable target on off days.
+  const meanValues = rollingMean(values);
   // Goal line is strength-only, and only for lifts with a defensible threshold.
   const goal = metric === 'best1RM' ? STRENGTH_GOALS[current] : undefined;
 
@@ -152,14 +140,12 @@ export function ProgressView({
               reference={meanValues}
               labels={labels}
               goal={showGoal ? goal : undefined}
-              marker={marked ? cut : undefined}
             />
             {values.length > 0 && (
               <>
                 <div className="chart-legend">
                   <span className="lg lg-data">{METRIC_LABELS[metric]}</span>
                   <span className="lg lg-mean">Mean</span>
-                  {marked && <span className="lg lg-form">Form change</span>}
                   {goal != null && (
                     <button
                       className={showGoal ? 'goal-toggle active' : 'goal-toggle'}
@@ -175,8 +161,6 @@ export function ProgressView({
                  * the workout targets use (see bestExercisePoint): a number
                  * lower than a visible peak would read as a bug. Once the chart
                  * can be narrowed to a range, this follows that range for free.
-                 * After a form change, both read from the change on, and the
-                 * dotted line shows where that starts.
                  */}
                 <div className="chart-stats">
                   <span>
@@ -185,13 +169,9 @@ export function ProgressView({
                   </span>
                   <span>
                     <span className="cs-k">Best</span>{' '}
-                    <strong>{Math.max(...ownValues).toLocaleString()}</strong>
+                    <strong>{Math.max(...values).toLocaleString()}</strong>
                   </span>
-                  <span className="cs-n">
-                    {marked
-                      ? `${ownValues.length} of ${history.length} sessions in the new form`
-                      : `${history.length} sessions`}
-                  </span>
+                  <span className="cs-n">{history.length} sessions</span>
                 </div>
               </>
             )}

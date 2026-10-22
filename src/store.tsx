@@ -91,17 +91,6 @@ function mergeExercises(stored: Exercise[] | undefined, logged: Set<string>): Ex
   return out;
 }
 
-/** Keeps only well-formed entries, so a hand-edited import can't break a filter. */
-function readFormChanges(raw: unknown): Record<string, string> {
-  const out: Record<string, string> = {};
-  if (raw && typeof raw === 'object') {
-    for (const [id, day] of Object.entries(raw)) {
-      if (typeof day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(day)) out[id] = day;
-    }
-  }
-  return out;
-}
-
 function load(): AppData {
   const fresh: AppData = {
     exercises: SEED.exercises,
@@ -153,7 +142,6 @@ function load(): AppData {
       activeSession,
       stations: (stored.stations ?? []).map(migrateStation),
       oneRMFormula: isFormulaId(stored.oneRMFormula) ? stored.oneRMFormula : DEFAULT_FORMULA,
-      formChanges: readFormChanges(stored.formChanges),
     };
   } catch {
     return fresh;
@@ -198,8 +186,6 @@ interface Store {
   saveCalibration: (stationId: string, cal: Omit<Calibration, 'id'> & { id?: string }) => void;
   deleteCalibration: (stationId: string, calibrationId: string) => void;
   setOneRMFormula: (id: OneRMFormulaId) => void;
-  /** Sets the day an exercise's new form starts (YYYY-MM-DD), or clears it with null. */
-  setFormChange: (exerciseId: string, day: string | null) => void;
   resetAll: () => void;
   exportData: () => string;
   importData: (json: string) => boolean;
@@ -508,15 +494,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setData((d) => ({ ...d, oneRMFormula: id }));
       },
 
-      setFormChange(exerciseId, day) {
-        setData((d) => {
-          const formChanges = { ...d.formChanges };
-          if (day) formChanges[exerciseId] = day;
-          else delete formChanges[exerciseId];
-          return { ...d, formChanges };
-        });
-      },
-
       resetAll() {
         setData({
           exercises: SEED.exercises,
@@ -525,7 +502,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           activeSession: null,
           stations: [],
           oneRMFormula: DEFAULT_FORMULA,
-          formChanges: {},
         });
       },
 
@@ -552,7 +528,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             oneRMFormula: isFormulaId(incoming.oneRMFormula)
               ? incoming.oneRMFormula
               : DEFAULT_FORMULA,
-            formChanges: readFormChanges(incoming.formChanges),
           });
           return true;
         } catch {
