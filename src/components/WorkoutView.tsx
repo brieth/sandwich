@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useStore } from '../store';
 import type { Emphasis, LoggedExercise, SetEntry, Station, WeightUnit } from '../types';
 import type { Conversion } from '../lib/stations';
@@ -7,6 +7,8 @@ import {
   ROLL_WINDOW,
   bestExercisePoint,
   estimated1RM,
+  fromFormChange,
+  localDay,
   meanExercisePoint,
   recentEstimated1RM,
   weightForReps,
@@ -240,9 +242,12 @@ function ActiveSession() {
           // which is the latest calibration on record.
           const conv = conversionFor(station);
           // History is normalized to real force, so every past session counts
-          // regardless of which machine it was performed on.
+          // regardless of which machine it was performed on. After a form
+          // change only the new form's sessions count, and before the first of
+          // them the suggestion starts from the default, as for a new exercise.
+          const own = fromFormChange(forceSessions, data.formChanges?.[ex.exerciseId]);
           const base1RM =
-            recentEstimated1RM(forceSessions, ex.exerciseId) ?? defaultOneRMFor(ex.exerciseId);
+            recentEstimated1RM(own, ex.exerciseId) ?? defaultOneRMFor(ex.exerciseId);
           // Inverse-Epley gives the force for the target reps; converting back
           // through this station's calibration gives the number to set on it.
           const unit = station?.unit ?? 'lb';
@@ -263,8 +268,8 @@ function ActiveSession() {
               name={exerciseName(ex.exerciseId)}
               targetReps={targetReps}
               suggestedWeight={suggestedWeight}
-              mean={meanExercisePoint(forceSessions, ex.exerciseId)}
-              best={bestExercisePoint(forceSessions, ex.exerciseId)}
+              mean={meanExercisePoint(own, ex.exerciseId)}
+              best={bestExercisePoint(own, ex.exerciseId)}
               options={options}
               menuLabel={menuLabel}
               unit={unit}
@@ -300,6 +305,16 @@ function ActiveSession() {
   );
 }
 
+/** A stored YYYY-MM-DD as a date, read in local time like the session dates beside it. */
+function fmtDay(day: string): string {
+  const [y, m, d] = day.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 function ExerciseHistoryModal({
   exerciseId,
   name,
@@ -310,7 +325,9 @@ function ExerciseHistoryModal({
   onClose: () => void;
 }) {
   // Normalized to real force so sessions from different machines line up.
-  const { forceSessions } = useStore();
+  const { data, forceSessions, setFormChange } = useStore();
+  const today = localDay(useToday().toISOString());
+  const change = data.formChanges?.[exerciseId];
   const rows = forceSessions
     .map((s) => {
       const logged = s.exercises.find((e) => e.exerciseId === exerciseId);
@@ -320,10 +337,16 @@ function ExerciseHistoryModal({
       const best1RM = Math.round(
         Math.max(...sets.map((st) => estimated1RM(st.weight, st.reps))),
       );
-      return { date: s.date, sets, volume, best1RM };
+      return { date: s.date, day: localDay(s.date), sets, volume, best1RM };
     })
     .filter((r): r is NonNullable<typeof r> => r !== null)
     .sort((a, b) => b.date.localeCompare(a.date));
+  const isNew = (day: string) => !change || day >= change;
+  // Today for a change starting with this workout, each logged day for one that
+  // already started, and the stored day in case it matches neither.
+  const choices = [...new Set([today, ...rows.map((r) => r.day), ...(change ? [change] : [])])].sort(
+    (a, b) => b.localeCompare(a),
+  );
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -338,40 +361,70 @@ function ExerciseHistoryModal({
         {rows.length === 0 ? (
           <p className="muted small">No history yet for this exercise.</p>
         ) : (
-          <div className="modal-list">
-            {/* Rows are newest first, so the leading ROLL_WINDOW of them are
-                exactly the sessions the Mean column is currently averaging. */}
-            {rows.map((r, i) => (
-              <div key={i} className={i < ROLL_WINDOW ? 'modal-row in-mean' : 'modal-row'}>
-                <div className="modal-row-head">
-                  <span className="modal-date">
-                    {new Date(r.date).toLocaleDateString(undefined, {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
-                  <span className="modal-row-stats">
-                    <span className="kv">
-                      <SvBadge letter="S" />
-                      {r.best1RM.toLocaleString()}
-                    </span>
-                    <span className="kv">
-                      <SvBadge letter="V" />
-                      {r.volume.toLocaleString()}
-                    </span>
-                  </span>
-                </div>
-                <div className="history-sets">
-                  {r.sets.map((st, j) => (
-                    <span key={j} className="history-set">
-                      {st.weight}×{st.reps}
-                    </span>
+          <>
+            <div className="form-change">
+              <label className="form-change-row">
+                <span>New form from</span>
+                <select
+                  className="form-change-select"
+                  value={change ?? ''}
+                  onChange={(e) => setFormChange(exerciseId, e.target.value || null)}
+                >
+                  <option value="">No form change</option>
+                  {choices.map((d) => (
+                    <option key={d} value={d}>
+                      {d === today ? 'Today' : fmtDay(d)}
+                    </option>
                   ))}
-                </div>
-              </div>
-            ))}
-          </div>
+                </select>
+              </label>
+              <p className="muted small">
+                Pick the date of the first session with the changed form. The suggested weight,
+                Mean and Best count only sessions from that date on. Progress keeps every session
+                and marks the date.
+              </p>
+            </div>
+            <div className="modal-list">
+              {/* Rows are newest first, so the leading ROLL_WINDOW of the new
+                  form's rows are exactly the sessions the Mean column is
+                  currently averaging. */}
+              {rows.map((r, i) => (
+                <Fragment key={i}>
+                  {change && !isNew(r.day) && (i === 0 || isNew(rows[i - 1].day)) && (
+                    <div className="form-divider">Old form, before {fmtDay(change)}</div>
+                  )}
+                  <div className={i < ROLL_WINDOW && isNew(r.day) ? 'modal-row in-mean' : 'modal-row'}>
+                    <div className="modal-row-head">
+                      <span className="modal-date">
+                        {new Date(r.date).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
+                      <span className="modal-row-stats">
+                        <span className="kv">
+                          <SvBadge letter="S" />
+                          {r.best1RM.toLocaleString()}
+                        </span>
+                        <span className="kv">
+                          <SvBadge letter="V" />
+                          {r.volume.toLocaleString()}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="history-sets">
+                      {r.sets.map((st, j) => (
+                        <span key={j} className="history-set">
+                          {st.weight}×{st.reps}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </Fragment>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

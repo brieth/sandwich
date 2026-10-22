@@ -12,6 +12,11 @@ interface Props {
    * compresses the data to show the gap; switching it off restores detail.
    */
   goal?: number;
+  /**
+   * Index of the first point after a form change. A vertical line is drawn
+   * halfway between it and the point before, so neither dot sits on the line.
+   */
+  marker?: number;
   color?: string;
 }
 
@@ -26,9 +31,10 @@ const fmtNum = (n: number, span = Infinity) =>
     : Math.round(n).toLocaleString();
 const REFERENCE_COLOR = '#ffffff';
 const GOAL_COLOR = '#f4b942';
+const MARKER_COLOR = '#8a93a3';
 
 /** Lightweight dependency-free SVG line chart with axis gridlines and labels. */
-export function LineChart({ values, reference, labels, goal, color = '#2dd4bf' }: Props) {
+export function LineChart({ values, reference, labels, goal, marker, color = '#2dd4bf' }: Props) {
   if (values.length === 0) {
     return <div className="chart-empty">No data yet</div>;
   }
@@ -63,12 +69,17 @@ export function LineChart({ values, reference, labels, goal, color = '#2dd4bf' }
 
   const points = values.map((v, i) => `${x(i)},${y(v)}`).join(' ');
   const areaPoints = `${x(0)},${padT + innerH} ${points} ${x(values.length - 1)},${padT + innerH}`;
-  const refPoints = reference
-    ? reference
-        .map((v, i) => (v == null ? null : `${x(i)},${y(v)}`))
-        .filter((p): p is string => p != null)
-        .join(' ')
-    : '';
+  // The reference restarts at a form change, so it's drawn as two lines there
+  // and the drop between the forms isn't drawn as part of the mean.
+  const refRun = (from: number, to: number) =>
+    (reference ?? [])
+      .slice(from, to)
+      .map((v, i) => (v == null ? null : `${x(from + i)},${y(v)}`))
+      .filter((p): p is string => p != null)
+      .join(' ');
+  const refRuns = (
+    marker != null && marker > 0 ? [refRun(0, marker), refRun(marker, count)] : [refRun(0, count)]
+  ).filter(Boolean);
 
   // horizontal gridline values (max / middle / min), relative to the data
   const ticks = max === min ? [max] : [max, (max + min) / 2, min];
@@ -105,9 +116,22 @@ export function LineChart({ values, reference, labels, goal, color = '#2dd4bf' }
         />
       )}
 
-      {refPoints && (
+      {marker != null && marker > 0 && marker < values.length && (
+        <line
+          x1={(x(marker - 1) + x(marker)) / 2}
+          y1={padT}
+          x2={(x(marker - 1) + x(marker)) / 2}
+          y2={padT + innerH}
+          stroke={MARKER_COLOR}
+          strokeWidth={1.5}
+          strokeDasharray="2 3"
+        />
+      )}
+
+      {refRuns.map((pts, k) => (
         <polyline
-          points={refPoints}
+          key={k}
+          points={pts}
           fill="none"
           stroke={REFERENCE_COLOR}
           strokeWidth={1.5}
@@ -116,7 +140,7 @@ export function LineChart({ values, reference, labels, goal, color = '#2dd4bf' }
           strokeLinecap="round"
           opacity={0.85}
         />
-      )}
+      ))}
 
       <polyline
         points={points}

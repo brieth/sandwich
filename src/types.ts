@@ -109,4 +109,11 @@ export interface AppData {
   stations: Station[];
   /** Estimated-1RM formula every strength number is derived with. */
   oneRMFormula?: OneRMFormulaId;
+  /**
+   * Exercise id -> YYYY-MM-DD (local) of the first session done with a changed
+   * form, such as a deeper stretch. A longer range makes each rep harder, so
+   * the weights before and after measure different movements. History keeps
+   * every session; targets count only sessions from this day on.
+   */
+  formChanges?: Record<ID, string>;
 }
