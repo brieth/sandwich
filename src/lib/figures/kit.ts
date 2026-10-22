@@ -13,8 +13,12 @@ export { DIM } from '../figure3d/body';
 export interface Cue {
   /** The position to reach, in one line. */
   reach: string;
-  /** Setup, why that is the long position, and what shortens it. */
-  points: string[];
+  /**
+   * Each point as [label, text]: a word or two naming the step (Setup,
+   * Stretch, the movement, Avoid) and what to do there. The label lets a
+   * reader find the step at a glance, and every point says which way to go.
+   */
+  points: [string, string][];
 }
 
 /**

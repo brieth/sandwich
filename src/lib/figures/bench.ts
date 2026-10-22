@@ -466,44 +466,35 @@ const incline = bench({ incline: 30, touchY: -47, muscle: 'pecClavicular', legs:
  */
 const decline = bench({ incline: -15, touchY: -30, muscle: 'pecSternal', legs: 'rollers', lowerFibers: true });
 
-const CONTROL =
-  'Lower under control and let the bar touch your chest without bouncing. Pec tears from weight training are reported most often on the bench press.';
-
-const PRESS = (where: string) =>
-  `At the bottom the bar is over ${where}, toward your feet from your shoulder joints. Press it up and toward your head so it finishes over your shoulder joints.`;
-
-const STERNAL =
-  'The middle and lower fibers of the pec, the sternal head, run from your breastbone and ribs to the front of your upper arm. They are longest at the bottom, with your upper arms out to the sides and your elbows below your shoulders, and shortest at the finish, with your arms extended over your shoulders.';
-
 const cues: Record<string, Cue> = {
   benchIncline: {
-    reach: "Bar touching your upper chest about a hand's width below your collarbones, with your elbows below your shoulders and about 55 degrees out from your sides.",
+    reach: 'Bar touching your upper chest about a hand\'s width below your collarbones, with your elbows below your shoulders and about 55 degrees out from your sides.',
     points: [
-      'Set the bench to about 30 degrees. Sit with your hips in the corner of the seat and backrest and your feet flat on the floor, wider than your hips. Pull your shoulder blades back and down and keep them there for the set, with your upper back on the backrest, your hips on the seat, and a moderate arch between them.',
-      "Grip the bar so your forearms are close to vertical at the bottom, seen from your feet. Lower it to your upper chest, about a hand's width below your collarbones, with your forearms close to vertical seen from the side. With that grip, touching there puts your elbows about 55 degrees out from your sides. Touching higher, toward your collarbones, takes them farther out.",
-      'The upper fibers of the pec, the clavicular head, run from your collarbone to the front of your upper arm. They are longest at the bottom, with your upper arms out to the sides and your elbows below your shoulders, and shortest at the finish, with your arms extended over your shoulders. Studies that measure muscle activity have mostly found the upper pec more active on a bench inclined about 30 degrees than on a flat bench.',
-      PRESS('your upper chest'),
-      CONTROL,
+      ['Setup', 'Set the bench to about 30 degrees. Sit with your hips in the corner of the seat and backrest and your feet flat on the floor, wider than your hips. Pull your shoulder blades back and down and keep them there, with a moderate arch between your upper back and hips.'],
+      ['Grip', 'Grip the bar so your forearms are close to vertical at the bottom, seen from your feet.'],
+      ['Stretch', 'Lower the bar to your upper chest, about a hand\'s width below your collarbones, with your forearms close to vertical seen from the side. Your elbows end up about 55 degrees out from your sides. The upper pec is longest here.'],
+      ['Press', 'Press up and slightly toward your head, so the bar finishes over your shoulders.'],
+      ['Avoid', 'Bouncing the bar off your chest. Lower it under control and touch lightly. Pec tears in the gym are reported most often on the bench press.'],
     ],
   },
   benchFlat: {
     reach: 'Bar touching your lower chest, with your elbows below your shoulders and about 60 degrees out from your sides.',
     points: [
-      'Lie on the flat bench with your feet flat on the floor, wider than your hips. Pull your shoulder blades back and down and keep them there for the set, with your upper back and hips on the pad and a moderate arch between them.',
-      'Grip the bar so your forearms are close to vertical at the bottom, seen from your feet. Lower it to your lower chest, just above the bottom of your breastbone, with your forearms close to vertical seen from the side. With that grip, touching there puts your elbows about 60 degrees out from your sides. Touching higher, toward your collarbones, takes them farther out.',
-      `${STERNAL} Between about 45 and 70 degrees out from your sides, elbows farther out make the pec a little longer at the bottom.`,
-      PRESS('your lower chest'),
-      CONTROL,
+      ['Setup', 'Lie on the bench with your feet flat on the floor, wider than your hips. Pull your shoulder blades back and down and keep them there, with a moderate arch between your upper back and hips.'],
+      ['Grip', 'Grip the bar so your forearms are close to vertical at the bottom, seen from your feet.'],
+      ['Stretch', 'Lower the bar to your lower chest, just above the bottom of your breastbone, with your forearms close to vertical seen from the side. Your elbows end up about 60 degrees out from your sides. The pec is longest here.'],
+      ['Press', 'Press up and slightly toward your head, so the bar finishes over your shoulders.'],
+      ['Avoid', 'Bouncing the bar off your chest. Lower it under control and touch lightly. Pec tears in the gym are reported most often on the bench press. Also avoid tucking your elbows close to your sides at the bottom, which makes the pec a little shorter.'],
     ],
   },
   benchDecline: {
     reach: 'Bar touching the bottom of your breastbone, with your elbows below your shoulders and about 65 degrees out from your sides.',
     points: [
-      'Set the bench to about 15 degrees of decline, head down. Bend your knees over the knee roller, with the foot roller against the front of your lower shins, so your legs hold you on the decline. Pull your shoulder blades back and down and keep them there for the set, with your upper back and hips on the pad and a moderate arch between them.',
-      'Grip the bar so your forearms are close to vertical at the bottom, seen from your feet. Lower it to the bottom of your breastbone, with your forearms close to vertical seen from the side. With that grip, touching there puts your elbows about 65 degrees out from your sides. Touching higher, toward your collarbones, takes them farther out.',
-      `${STERNAL} With your head low, your arms finish closer to your sides than on a flat bench, so the lower fibers of the pec, which run from the bottom of your breastbone and your lower ribs to your upper arm, shorten more.`,
-      PRESS('the bottom of your breastbone'),
-      CONTROL,
+      ['Setup', 'Set the bench to about 15 degrees of decline, head down. Hook your knees over the knee roller with the foot roller against the front of your lower shins. Pull your shoulder blades back and down and keep them there, with a moderate arch between your upper back and hips.'],
+      ['Grip', 'Grip the bar so your forearms are close to vertical at the bottom, seen from your feet.'],
+      ['Stretch', 'Lower the bar to the bottom of your breastbone, with your forearms close to vertical seen from the side. Your elbows end up about 65 degrees out from your sides. The pec is longest here.'],
+      ['Press', 'Press up and slightly toward your head, so the bar finishes over your shoulders. With your head low, your arms finish closer to your sides, so the lower pec shortens more than on a flat bench.'],
+      ['Avoid', 'Bouncing the bar off your chest. Lower it under control and touch lightly. Pec tears in the gym are reported most often on the bench press.'],
     ],
   },
 };

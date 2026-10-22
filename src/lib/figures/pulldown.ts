@@ -323,39 +323,35 @@ function pulldown(g: Grip): FigureDef {
 /* Grip widths are against a 40 shoulder width, joint to joint: hands 36, 60
  * and 78 apart. The lat bar is straight for 76 and bends past that, so the
  * regular grip is 8 inside each bend and the wide grip is at the bends. */
-const SEAT =
-  'Sit facing the machine under the overhead pulley, with your feet flat and the knee pad set snug on your thighs. The pad holds you on the seat while the weight pulls your arms and shoulders up. When you sit upright, the cable hangs about over your forehead.';
-const LEAN_POINT =
-  'Lean back about 10 degrees from the hips, enough for the bar to pass your face, and hold that lean through the rep. If you rock back as you pull, your hips take part of the work. Leaning back farther puts your shoulders farther behind the cable, which makes the stretch heavier. It also lowers your arms from overhead, which leaves the lat shorter at the stretch.';
-const STRETCH =
-  'The lat runs from your middle and lower back and the top of your pelvis, past the bottom of the shoulder blade, to the front of your upper arm just below the shoulder. Raising the arm overhead and letting the shoulder rise both move those two ends apart. At the stretch, keep your arms straight and let the bar draw your shoulders up toward your ears, with the shoulder blades rotating up. Holding your shoulders back and down there takes away a large part of the lat\'s lengthening.';
-
 const cues: Record<'pulldownClose' | 'pulldown' | 'pulldownWide', Cue> = {
   pulldownClose: {
     reach: 'Arms straight, reaching up and forward to the bar, with your shoulders drawn up toward your ears.',
     points: [
-      `${SEAT} Take the lat bar overhand with your hands about shoulder width apart or a little closer.`,
-      LEAN_POINT,
-      STRETCH,
-      'Pull the bar to the top of your chest. The elbows travel down in front of you and finish pointing down and out, a little in front of your sides, with the shoulder blades back and down. That is where the lat is shortest.',
+      ['Setup', 'Sit facing the machine with your feet flat and the knee pad snug on your thighs. Take the lat bar overhand with your hands about shoulder width apart or a little closer.'],
+      ['Lean', 'Lean back about 10 degrees from the hips, enough for the bar to clear your face, and hold that lean for the whole set.'],
+      ['Stretch', 'At the top, keep your arms straight and let the bar pull your shoulders up toward your ears. The lat is longest with the arm overhead and the shoulder raised.'],
+      ['Pull', 'Pull the bar to the top of your chest. Your elbows travel down in front of you and finish pointing down, a little in front of your sides, with your shoulder blades back and down.'],
+      ['Avoid', 'Holding your shoulders down at the top, which takes away a large part of the lat\'s stretch. Rocking back as you pull, which lets your hips do part of the work. Leaning back much more than 10 degrees, which lowers your arms from overhead and shortens the stretch.'],
     ],
   },
   pulldown: {
     reach: 'Arms straight, reaching up and forward to the bar, with your shoulders drawn up toward your ears.',
     points: [
-      `${SEAT} Take the lat bar overhand with your hands about one and a half shoulder widths apart, about a hand's width inside each bend.`,
-      LEAN_POINT,
-      STRETCH,
-      'Pull the bar to the top of your chest. The elbows travel down and out and finish pointing down and out, in line with your sides, with the shoulder blades back and down. That is where the lat is shortest.',
+      ['Setup', 'Sit facing the machine with your feet flat and the knee pad snug on your thighs. Take the lat bar overhand with your hands about one and a half shoulder widths apart, about a hand\'s width inside each bend.'],
+      ['Lean', 'Lean back about 10 degrees from the hips, enough for the bar to clear your face, and hold that lean for the whole set.'],
+      ['Stretch', 'At the top, keep your arms straight and let the bar pull your shoulders up toward your ears. The lat is longest with the arm overhead and the shoulder raised.'],
+      ['Pull', 'Pull the bar to the top of your chest. Your elbows travel down and out and finish pointing down, in line with your sides, with your shoulder blades back and down.'],
+      ['Avoid', 'Holding your shoulders down at the top, which takes away a large part of the lat\'s stretch. Rocking back as you pull, which lets your hips do part of the work. Leaning back much more than 10 degrees, which lowers your arms from overhead and shortens the stretch.'],
     ],
   },
   pulldownWide: {
     reach: 'Arms straight, reaching up and out to the bends of the bar, with your shoulders drawn up toward your ears.',
     points: [
-      `${SEAT} Take the lat bar overhand with your hands where it starts to bend.`,
-      LEAN_POINT,
-      STRETCH,
-      'Pull the bar to the top of your chest. The elbows travel out to the sides and finish pointing down and out, in line with your sides, with the shoulder blades back and down. That is where the lat is shortest.',
+      ['Setup', 'Sit facing the machine with your feet flat and the knee pad snug on your thighs. Take the lat bar overhand with your hands where the bar starts to bend.'],
+      ['Lean', 'Lean back about 10 degrees from the hips, enough for the bar to clear your face, and hold that lean for the whole set.'],
+      ['Stretch', 'At the top, keep your arms straight and let the bar pull your shoulders up toward your ears. The lat is longest with the arm overhead and the shoulder raised.'],
+      ['Pull', 'Pull the bar to the top of your chest. Your elbows travel out to the sides and finish pointing down, in line with your sides, with your shoulder blades back and down.'],
+      ['Avoid', 'Holding your shoulders down at the top, which takes away a large part of the lat\'s stretch. Rocking back as you pull, which lets your hips do part of the work. Leaning back much more than 10 degrees, which lowers your arms from overhead and shortens the stretch.'],
     ],
   },
 };

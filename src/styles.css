@@ -572,6 +572,10 @@ body {
 .stretch-point:last-child {
   margin-bottom: 4px;
 }
+.stretch-label {
+  font-weight: 600;
+  color: var(--text);
+}
 /*
  * The name is the tap target for the position, so it reads as one. Dotted
  * rather than solid, because a solid underline on a 15px bold name looks like

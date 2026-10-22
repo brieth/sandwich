@@ -131,9 +131,9 @@ export default function StretchModal({
             </div>
           )}
           <p className="stretch-reach">{cue.reach}</p>
-          {cue.points.map((p, i) => (
+          {cue.points.map(([label, text], i) => (
             <p key={i} className="muted small stretch-point">
-              {p}
+              <span className="stretch-label">{label}.</span> {text}
             </p>
           ))}
         </div>

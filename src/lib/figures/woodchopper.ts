@@ -451,15 +451,6 @@ const LOW: ChopDef = {
  * 46.0 at t = 0.4, 17.6 at the finish, so 0.47 and 0.38. With the heels in
  * line with the pulley the high chop reads 47/22 and the low 17/21.
  */
-const place = (where: string) =>
-  `Set the pulley at the ${where} and clip a D handle to it. Hold the handle in both hands, one hand wrapped over the other. Stand side-on to the pulley with your hips about one and a half steps from it, your feet about shoulder width apart and pointing forward, and the pulley a little behind the line of your heels. The drawing has the pulley on your right. With it on your left, do everything mirrored.`;
-const MUSCLES =
-  'The external oblique on the pulley side and the internal oblique on the far side turn your chest away from the pulley. With the pulley on your right, those are the right external and left internal obliques. Together they run diagonally from the lower ribs on the pulley side, across the front of your abdomen, to the far side of your pelvis. Turning your ribcage toward the pulley moves those ribs back and away from your far hip, so both muscles are longest with your ribcage turned fully toward the pulley. Let the cable turn your chest fully toward it at the start of each rep.';
-const split = (finish: string) =>
-  `Keep both feet flat. At the stretch your hips turn about 15 degrees toward the pulley and your ribcage turns about 40 degrees more on top of them, so your chest is turned about 55 degrees from facing forward. ${finish} Most of the ribcage's turn comes from your upper and middle back. The obliques lengthen and shorten only as your ribcage turns on your hips. Turning your hips moves the handle farther and leaves the obliques the same length.`;
-const arms = (move: string) =>
-  `Keep the elbows bent about 20 degrees and hold that angle through the rep. Keep your hands lined up with the middle of your chest as it turns. Your arms ${move} the handle, and the turn of your chest moves it across.`;
-
 export const group: Group = {
   figures: {
     woodchopperHigh: chop(HIGH),
@@ -469,25 +460,21 @@ export const group: Group = {
     woodchopperHigh: {
       reach: 'Chest turned fully toward the high pulley, arms long, hands a little above head height and outside the shoulder on that side.',
       points: [
-        place('top'),
-        MUSCLES,
-        split(
-          'At the finish your hips face forward again and your ribcage is turned about 30 degrees the other way. Turning farther than that presses the cable into your chest.',
-        ),
-        `Chop down and across until your hands are at hip height, outside and in front of your far hip. ${arms('lower')} Bend your knees a little more, from about 20 to about 35 degrees, and lean forward about 15 degrees from the hips as the hands come down, with your back flat.`,
-        'The cable resists the movement most about a fifth of the way through the rep, while the obliques are still near their longest. At the stretch it resists about nine tenths as much, and at the finish about a third as much. Standing with your heels in line with the pulley makes the stretch lighter and the finish heavier.',
+        ['Setup', 'Set the pulley at the top and hold a D handle in both hands, one over the other. Stand side-on with your hips about one and a half steps from the pulley, feet about shoulder width apart and pointing forward, and the pulley a little behind your heels. The drawing has the pulley on your right. With it on your left, do everything mirrored.'],
+        ['Stretch', 'Let the cable turn your chest fully toward the pulley, about 55 degrees, with your hips turning about 15 degrees of that. The obliques that turn you away from the pulley are longest here.'],
+        ['Chop', 'Chop down and across until your hands are at hip height, outside your far hip. Bend your knees a little more and lean forward about 15 degrees as your hands come down, with your back flat. Keep your elbows bent about 20 degrees.'],
+        ['Turn', 'Keep your feet flat and your hands in line with the middle of your chest. Most of the turn should come from your upper and middle back.'],
+        ['Avoid', 'Turning mostly with your hips. The handle travels farther, but the obliques stay the same length. Turning more than about 30 degrees past forward at the finish, which presses the cable into your chest.'],
       ],
     },
     woodchopperLow: {
       reach: 'Chest turned fully toward the low pulley, arms long, hands down outside the near thigh, just above the knee.',
       points: [
-        place('bottom'),
-        MUSCLES,
-        split(
-          'At the finish your hips turn about 5 degrees the other way and your ribcage about 40 degrees more, so your chest is turned about 45 degrees away.',
-        ),
-        `Start in a half squat with your hips back, your knees bent about 75 degrees and your torso leaning forward about 35 degrees, and your hands outside your near thigh, just above the knee. Get down to it by bending your hips and knees with your back flat. Stand up as you lift the handle up and across until your hands are at about head height, outside and in front of your far shoulder. ${arms('raise')}`,
-        'The cable resists the movement most a little before halfway through the rep. At the stretch it resists about half as much, and at the finish about two fifths as much. Standing with your heels in line with the pulley makes the stretch lighter and the finish heavier.',
+        ['Setup', 'Set the pulley at the bottom and hold a D handle in both hands, one over the other. Stand side-on with your hips about one and a half steps from the pulley, feet about shoulder width apart and pointing forward, and the pulley a little behind your heels. The drawing has the pulley on your right. With it on your left, do everything mirrored.'],
+        ['Stretch', 'Start in a half squat with your hips back, your knees bent about 75 degrees and your back flat, hands outside your near thigh just above the knee. Let the cable turn your chest fully toward the pulley, about 55 degrees, with your hips turning about 15 degrees of that. The obliques that turn you away from the pulley are longest here.'],
+        ['Lift', 'Stand up as you lift the handle up and across until your hands are at about head height, outside your far shoulder. Keep your elbows bent about 20 degrees.'],
+        ['Turn', 'Keep your feet flat and your hands in line with the middle of your chest. Most of the turn should come from your upper and middle back.'],
+        ['Avoid', 'Turning mostly with your hips. The handle travels farther, but the obliques stay the same length.'],
       ],
     },
   },
