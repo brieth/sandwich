@@ -67,7 +67,7 @@ for (const key of keys) {
   if (cue) {
     const p = document.createElement('div');
     p.className = 'cue';
-    p.innerHTML = `<b>${cue.reach}</b>` + cue.points.map(([l, x]) => `<p><b>${l}.</b> ${x}</p>`).join('');
+    p.innerHTML = `<b>${cue.reach}</b>` + cue.points.map(([l, x]) => `<p><b>${l}:</b> ${x}</p>`).join('');
     block.appendChild(p);
   }
   root.appendChild(block);
