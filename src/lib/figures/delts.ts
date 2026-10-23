@@ -13,9 +13,8 @@ import type { Body, BodySpec, Limb } from '../figure3d/body';
 import { solveBody } from '../figure3d/body';
 import type { FigureDef, ViewDef } from '../figure3d/figure';
 import type { V3 } from '../figure3d/math';
-import { add, angleBetween, dot, lerpN, mul, norm, sub } from '../figure3d/math';
+import { add, angleBetween, lerpN, mul, norm, sub } from '../figure3d/math';
 import { cable, floor, handle, pulley } from '../figure3d/equipment';
-import type { Camera, Prim } from '../figure3d/scene';
 import type { Group } from './kit';
 import { DIM, VIEW, dirHE, key, keyDir } from './kit';
 
@@ -54,57 +53,12 @@ const feetDown = (b: Body) => [
   { name: 'toeL on floor', gap: Math.abs(b.j.toeL[1] - FLOOR) },
 ];
 
-/*
- * The cable as one camera should see it where it passes behind the head:
- * the stretch that crosses the head's circle on screen is left out, and that
- * view hides 'eq.cable' and draws this 'eq.viewcable' in its place. The
- * engine hides a 1.5 long piece of line only where the ray from its midpoint
- * runs more than 1 through the head shrunk by 1.5. In the rear delt fly's
- * Back view the cable passes 20 to 60 in front of the head's center. Drawn
- * whole and sampled every 0.005 in t, from t = 0.15 to the finish 2 to 4.5
- * of it shows inside the head's outline at most frames, and up to 10.5 where
- * it grazes the head's edge at t = 0.15 to 0.18. It reaches up to 2.2 inside
- * the outline. The cut is the head's radius and 0.75 more, about half the
- * cable's 1.4 wide stroke at the scale of 1.192, so no part of the stroke
- * reaches inside the outline.
- */
-const BEHIND_HEAD = 0.75;
-
-function cableBehindHead(b: Body, from: V3, to: V3, cam: Camera): Prim[] {
-  const c = b.head.c;
-  const R = b.head.r + BEHIND_HEAD;
-  // Across the camera's line of sight only: p(u) = from + u * d, and the
-  // stretch where its distance from the head's center on screen is under R.
-  const flat = (v: V3) => sub(v, mul(cam.dir, dot(v, cam.dir)));
-  const o = flat(sub(from, c));
-  const d = flat(sub(to, from));
-  const qa = dot(d, d);
-  const qb = 2 * dot(o, d);
-  const disc = qb * qb - 4 * qa * (dot(o, o) - R * R);
-  const whole = [cable(from, to, { part: 'eq.viewcable' })];
-  if (qa < 1e-9 || disc <= 0) return whole;
-  const u0 = Math.max(0, (-qb - Math.sqrt(disc)) / (2 * qa));
-  const u1 = Math.min(1, (-qb + Math.sqrt(disc)) / (2 * qa));
-  if (u0 >= u1) return whole;
-  const at = (u: number): V3 => add(from, mul(sub(to, from), u));
-  // Only where the cable is farther from the camera than the head's center.
-  if (dot(sub(at((u0 + u1) / 2), c), cam.dir) > 0) return whole;
-  const out: Prim[] = [];
-  if (u0 > 0) out.push(cable(from, at(u0), { part: 'eq.viewcable' }));
-  if (u1 < 1) out.push(cable(at(u1), to, { part: 'eq.viewcable' }));
-  return out;
-}
-
-/**
- * Pulley, cable and D handle in the right hand, and the cable's pull on the
- * hand. With behind, a copy of the cable for that camera; see cableBehindHead.
- */
-function oneArmCable(P: V3, behind?: Camera) {
+/** Pulley, cable and D handle in the right hand, and the cable's pull on the hand. */
+function oneArmCable(P: V3) {
   return {
     equipment: (b: Body) => {
       const hd = handle(b.j.handR, P, sub(b.j.handR, b.j.elbowR));
-      const view = behind ? cableBehindHead(b, P, hd.attach, behind) : [];
-      return [floor(FLOOR), pulley(P), cable(P, hd.attach), ...view, ...hd.prims];
+      return [floor(FLOOR), pulley(P), cable(P, hd.attach), ...hd.prims];
     },
     load: (b: Body) => [{ at: b.j.handR, dir: sub(P, b.j.handR) }],
   };
@@ -116,14 +70,14 @@ function oneArmCable(P: V3, behind?: Camera) {
  * with the blades set apart it sat 5 behind the teal one in the rear delt fly
  * and as a grey edge above it at the bottom of the lateral raise.
  */
-const SIDE: ViewDef = { ...VIEW.sideRight, hide: ['armL.shoulder', 'eq.viewcable'] };
+const SIDE: ViewDef = { ...VIEW.sideRight, hide: ['armL.shoulder'] };
 
 /*
  * From above, the toes showed as two short ticks past the front of the torso,
  * as in the other standing figures, and the hanging left arm drew as three
  * grey dots beside the torso's left edge. Both are left out.
  */
-const TOP: ViewDef = { ...VIEW.top, hide: ['leg', 'armL', 'eq.viewcable'] };
+const TOP: ViewDef = { ...VIEW.top, hide: ['leg', 'armL'] };
 
 /**
  * Upper arm direction against a direction in the upper torso frame, turned
@@ -251,26 +205,29 @@ function lateralRaise(): FigureDef {
 /* ---------- single arm rear delt fly ---------- */
 
 /*
- * Pulley 193 off the floor, 13 above the top of the head, 45 to the person's
- * left and 50 in front of the hips: 67 from the hips, a little under one step,
- * and 73 up and forward of the left shoulder, about an arm's length. Share of
- * full leverage at the start / at its most / at the finish, and the cable's
- * closest pass to the head, in the room and in the Side view's drawing:
+ * Pulley at shoulder height, 145 off the floor, the cross body extension's
+ * height, so the two can share a pulley. 45 to the person's left and 50 in
+ * front of the hips: 67 from the hips, a little under one step. Share of full
+ * leverage at the start / at its most / at the finish, and the cable's
+ * closest pass to the torso box and to the head over the rep:
  *
- *   45 out, 50 forward, 193 up:  66 / 91 / 24,  9, 6
- *   30 out:                      49 / 84 / 29, 13, 6
- *   60 out:                      73 / 95 / 19,  7, 6
- *   35 forward:                  81 / 89 / 16,  1, across the face
- *   65 forward:                  42 / 93 / 31, 16, 10
- *   205 up:                      58 / 86 / 24,  8, 2
- *   185 up:                      72 / 94 / 23, 11, 8
+ *   45 out, 50 forward, 145 up:  65 / 94 / 20,  0.4, 27.0
+ *   30 out:                      49 / 92 / 25,  3.0, 28.5
+ *   60 out:                      69 / 96 / 15,  through the torso at the finish
+ *   45 forward:                  74 / 93 / 17,  through the torso at the finish
+ *   55 forward:                  55 / 96 / 22,  1.9, 28.5
+ *   65 forward:                  31 / 96 / 28,  4.6, 31.6
+ *   160 up:                      83 / 98 / 21,  touching, 19.8
+ *   193 up, the old setting:     66 / 91 / 24,  3.3, 9.1
  *
- * The cable passes in front of the face at the finish, so the pulley sits
- * forward. Farther forward of the person lightens the start; farther out to
- * the side or farther back brings the cable toward the face. 185 up loads the
- * start more, but it is 5 above the head, about head height.
+ * The closest pass is at the finish, at the box's front outer corner 12 below
+ * the right shoulder, where a real chest is rounded, so the cable clears it by
+ * more than the box shows. Standing closer or with the pulley farther out to
+ * the side runs the cable into the chest. Farther forward clears it more but
+ * lightens the start, and at 193 up the start was the same load with the
+ * cable passing 9 in front of the face.
  */
-const RD_PULLEY: V3 = [-45, FLOOR - 193, 50];
+const RD_PULLEY: V3 = [-45, FLOOR - 145, 50];
 const RD_ELBOW = 20;
 
 /*
@@ -324,11 +281,11 @@ const rearDeltWrapped = (b: Body) => 8 + 4.5 * armFrom(b, REAR_SHORT);
 
 function rearDeltFly(): FigureDef {
   const R = reach(RD_ELBOW);
-  const { equipment, load } = oneArmCable(RD_PULLEY, VIEW.back.cam);
+  const { equipment, load } = oneArmCable(RD_PULLEY);
   return {
     // No Front view: the person's right is on screen right in Front and Back
     // alike, so the two drew the same outline, and Back also shows the blade.
-    views: [{ ...VIEW.back, hide: ['eq.cable'] }, SIDE, TOP],
+    views: [VIEW.back, SIDE, TOP],
     pose: (t) => {
       const base: Omit<BodySpec, 'armR'> = {
         pos: [0, 0, 0],
@@ -382,10 +339,10 @@ export const group: Group = {
     rearDelt: {
       reach: 'Hand across in front of your left shoulder at the start, at about chin height.',
       points: [
-        ['Setup', 'Set the pulley a little above head height and hold a D handle in your right hand. Stand upright with the pulley in front of you and to your left, your hips a little under one step from it. Let your left arm hang. For the left arm, do everything mirrored.'],
+        ['Setup', 'Set the pulley at about shoulder height and hold a D handle in your right hand. Stand upright with the pulley in front of you and to your left, your hips a little under one step from it. Let your left arm hang. For the left arm, do everything mirrored.'],
         ['Stretch', 'Reach across your body toward the pulley, with your hand in front of your left shoulder at about chin height, and let your shoulder blade slide forward. The rear delt is longest with the arm across the front of the body.'],
         ['Sweep', 'Sweep your arm out, back and down until it is out to the side, a little behind your shoulders, with the elbow a little below shoulder height. Let your shoulder blade move back toward your spine. Keep the elbow bent about 20 degrees the whole way.'],
-        ['Distance', 'Stay a little under one step from the pulley. Farther back makes the stretch lighter, and farther forward or out to the side brings the cable close to your face.'],
+        ['Distance', 'Stay a little under one step from the pulley. Farther back makes the stretch lighter. Closer in, or with the pulley farther out to your side, the cable presses into your chest at the finish.'],
         ['Avoid', 'Bending and straightening your elbow during the rep. The movement should stay at the shoulder. Moving your torso.'],
       ],
     },
